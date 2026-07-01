@@ -551,6 +551,88 @@
       .stat-item:nth-child(odd):not(:last-child)::after { display: block; }
       .stat-item:nth-child(even)::after { display: none; }
     }
+
+    /* ============================================
+       FEATURE GRID
+    ============================================ */
+    #experience {
+      background: var(--bg-primary);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .feature-card {
+      background: var(--bg-primary);
+      padding: 2.5rem 2rem;
+      transition: background var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--accent-gold), transparent);
+      transform: scaleX(0);
+      transition: transform var(--transition);
+    }
+
+    .feature-card:hover {
+      background: var(--bg-surface);
+    }
+
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1.25rem;
+      display: block;
+    }
+
+    .feature-title-vi {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      line-height: 1.3;
+    }
+
+    .feature-title-en {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      margin-bottom: 0.875rem;
+    }
+
+    .feature-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -630,6 +712,71 @@
         <div class="stat-number">∞</div>
         <div class="stat-label-vi">View Hồ Panorama</div>
         <div class="stat-label-en">Lake Panorama Views</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="experience">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="label">Trải Nghiệm · Experience</span>
+        <h2>Mọi Khoảnh Khắc Đều Đáng Nhớ</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <span class="feature-icon">🏔️</span>
+          <div class="feature-title-vi">View Hồ Panorama</div>
+          <div class="feature-title-en">Lake Panorama View</div>
+          <p class="feature-desc">Tầm nhìn rộng mở ra hồ nước xanh mát, cảnh quan thiên nhiên hùng vĩ chỉ cách thành phố vài phút.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">🏠</span>
+          <div class="feature-title-vi">Triangle House</div>
+          <div class="feature-title-en">Iconic A-Frame Cabins</div>
+          <p class="feature-desc">Kiến trúc mái tam giác độc đáo, không gian ấm cúng với gỗ tự nhiên, hoà mình vào cảnh quan xanh.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">⭕</span>
+          <div class="feature-title-vi">Circle House</div>
+          <div class="feature-title-en">Artistic Barrel Rooms</div>
+          <p class="feature-desc">Phòng hình tròn nghệ thuật độc đáo — điểm check-in ấn tượng, nội thất hiện đại trong không gian thiên nhiên.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">🌸</span>
+          <div class="feature-title-vi">Vườn Hoa Cỏ May</div>
+          <div class="feature-title-en">Wildflower Garden</div>
+          <p class="feature-desc">Cánh đồng hoa cỏ may rực rỡ theo mùa — khung cảnh nên thơ lý tưởng cho ảnh cưới và check-in.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">🔥</span>
+          <div class="feature-title-vi">Campfire & Glamping</div>
+          <div class="feature-title-en">Campfire & Overnight Camping</div>
+          <p class="feature-desc">Đốt lửa trại dưới bầu trời đêm, cắm trại qua đêm giữa thiên nhiên — trải nghiệm không thể quên.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">☕</span>
+          <div class="feature-title-vi">Cà Phê Giữa Vườn</div>
+          <div class="feature-title-en">Garden Café</div>
+          <p class="feature-desc">Thưởng thức cà phê Ban Mê giữa không gian xanh mát, ngắm hồ — khoảnh khắc bình yên giữa lòng thành phố.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">👥</span>
+          <div class="feature-title-vi">Team Building</div>
+          <div class="feature-title-en">Corporate Events & Team Building</div>
+          <p class="feature-desc">Không gian rộng rãi cho sự kiện doanh nghiệp 20–100 người, thiết kế theo yêu cầu riêng.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">📸</span>
+          <div class="feature-title-vi">Check-in Sống Ảo</div>
+          <div class="feature-title-en">Photo & Check-in Spots</div>
+          <p class="feature-desc">Hàng chục góc chụp ảnh đẹp — từ cổng làng đến bờ hồ, vườn hoa đến các căn phòng nghệ thuật.</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">🌱</span>
+          <div class="feature-title-vi">Nông Nghiệm Trải Nghiệm</div>
+          <div class="feature-title-en">Agri-Experience</div>
+          <p class="feature-desc">Trồng rau, hái quả, học chăm sóc cây trái — trải nghiệm nông nghiệp thực thụ cho mọi lứa tuổi.</p>
+        </div>
       </div>
     </div>
   </section>
