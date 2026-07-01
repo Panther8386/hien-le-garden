@@ -1005,6 +1005,185 @@
     @media (max-width: 480px) {
       .gallery-grid { columns: 1; }
     }
+
+    /* ============================================
+       FINAL CTA
+    ============================================ */
+    #contact {
+      position: relative;
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    .cta-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1200&q=60');
+      /* REPLACE: cosmos flower field photo */
+      background-size: cover;
+      background-position: center;
+      opacity: 0.12;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .cta-content .label {
+      margin-bottom: var(--spacing-sm);
+      display: block;
+    }
+
+    .cta-content h2 {
+      font-family: var(--font-serif);
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text-primary);
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    .cta-content h2 em {
+      color: var(--accent-gold);
+      font-style: italic;
+    }
+
+    .cta-sub {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-style: italic;
+      font-family: var(--font-serif);
+    }
+
+    .cta-hotline {
+      font-family: var(--font-serif);
+      font-size: 2.5rem;
+      font-style: italic;
+      color: var(--accent-gold);
+      margin-bottom: 2rem;
+      display: block;
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+
+    .cta-hotline:hover { color: var(--accent-gold-lt); }
+
+    .cta-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ============================================
+       FOOTER
+    ============================================ */
+    footer {
+      background: #070F09;
+      border-top: 1px solid var(--border-gold);
+      padding: 4rem var(--spacing-md) 2rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr;
+      gap: var(--spacing-lg);
+      max-width: 1280px;
+      margin: 0 auto;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .footer-brand-name {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.6rem;
+      color: var(--accent-gold);
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-tagline {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      margin-bottom: 1.25rem;
+    }
+
+    .footer-contact p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .footer-contact a {
+      color: var(--accent-gold);
+      transition: color var(--transition);
+    }
+    .footer-contact a:hover { color: var(--accent-gold-lt); }
+
+    .footer-heading {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      margin-bottom: 1.25rem;
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .footer-links li a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: color var(--transition);
+    }
+
+    .footer-links li a:hover { color: var(--text-primary); }
+
+    .footer-bottom {
+      max-width: 1280px;
+      margin: 2rem auto 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-bottom p {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+    }
+
+    .footer-social a {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color var(--transition);
+    }
+
+    .footer-social a:hover { color: var(--accent-gold); }
+
+    @media (max-width: 768px) {
+      .footer-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      .footer-bottom { flex-direction: column; text-align: center; }
+      .cta-hotline { font-size: 1.8rem; }
+    }
   </style>
 </head>
 <body>
@@ -1532,7 +1711,66 @@
     <img id="lightboxImg" src="" alt="">
   </div>
 
-  <!-- SECTIONS WILL BE ADDED HERE IN SUBSEQUENT TASKS -->
+  <section class="section" id="contact">
+    <div class="cta-bg"></div>
+    <div class="container">
+      <div class="cta-content fade-in">
+        <span class="label">Đặt Phòng · Book Now</span>
+        <h2>Bắt Đầu <em>Hành Trình</em><br>Của Bạn</h2>
+        <p class="cta-sub">Begin Your Journey · Trải nghiệm trọn vẹn — Kỷ niệm đáng nhớ tại Hiền Lê Garden</p>
+        <a href="tel:0968987311" class="cta-hotline">0968 987 311</a>
+        <div class="cta-actions">
+          <a href="tel:0968987311" class="btn btn-gold">📞 Gọi Đặt Phòng</a>
+          <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" class="btn btn-outline">Facebook Fanpage</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">Hiền Lê Garden</div>
+        <div class="footer-tagline">Farmstay · Buôn Ma Thuột · Đắk Lắk</div>
+        <div class="footer-contact">
+          <p>📞 <a href="tel:0968987311">0968 987 311</a></p>
+          <p>📘 <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank">Facebook Fanpage</a></p>
+          <p>📍 Buôn Ma Thuột, Đắk Lắk, Việt Nam</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="footer-heading">Dịch Vụ</div>
+        <ul class="footer-links">
+          <li><a href="#rooms">Phòng Lưu Trú</a></li>
+          <li><a href="#pricing">Thuê Theo Giờ</a></li>
+          <li><a href="#pricing">F&B & Café</a></li>
+          <li><a href="#pricing">Campfire & Glamping</a></li>
+          <li><a href="#pricing">Team Building</a></li>
+          <li><a href="#pricing">Sự Kiện & Tiệc</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="footer-heading">Trải Nghiệm</div>
+        <ul class="footer-links">
+          <li><a href="#experience">View Hồ Panorama</a></li>
+          <li><a href="#experience">Vườn Hoa Cỏ May</a></li>
+          <li><a href="#experience">Chụp Ảnh Check-in</a></li>
+          <li><a href="#experience">Hái Trái Cây</a></li>
+          <li><a href="#experience">Nông Nghiệm Trải Nghiệm</a></li>
+          <li><a href="#experience">Khu Vui Chơi Trẻ Em</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Hiền Lê Garden. All rights reserved.</p>
+      <div class="footer-social">
+        <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank">Facebook</a>
+      </div>
+    </div>
+  </footer>
 
   <script>
     // Nav scroll effect
