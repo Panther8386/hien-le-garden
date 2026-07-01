@@ -485,6 +485,72 @@
       0%, 100% { opacity: 0.3; transform: scaleY(1); }
       50% { opacity: 1; transform: scaleY(1.2); }
     }
+
+    /* ============================================
+       STATS BAR
+    ============================================ */
+    #overview {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-gold);
+      border-bottom: 1px solid var(--border-gold);
+      padding: 3.5rem var(--spacing-md);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 1rem 2rem;
+      position: relative;
+    }
+
+    .stat-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 20%;
+      height: 60%;
+      width: 1px;
+      background: var(--border-gold);
+    }
+
+    .stat-number {
+      font-family: var(--font-serif);
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 300;
+      color: var(--accent-gold);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label-vi {
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--text-primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .stat-label-en {
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .stat-item:nth-child(2)::after { display: none; }
+      .stat-item:nth-child(odd):not(:last-child)::after { display: block; }
+      .stat-item:nth-child(even)::after { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -543,6 +609,31 @@
     </div>
   </section>
 
+  <section id="overview">
+    <div class="stats-grid">
+      <div class="stat-item fade-in">
+        <div class="stat-number" data-count="5">0</div>
+        <div class="stat-label-vi">Kiểu Phòng Độc Đáo</div>
+        <div class="stat-label-en">Unique Room Styles</div>
+      </div>
+      <div class="stat-item fade-in">
+        <div class="stat-number" data-count="10">0</div>
+        <div class="stat-label-vi">Ha Khuôn Viên</div>
+        <div class="stat-label-en">Hectares of Nature</div>
+      </div>
+      <div class="stat-item fade-in">
+        <div class="stat-number" data-count="100">0</div>
+        <div class="stat-label-vi">Khách Sự Kiện</div>
+        <div class="stat-label-en">Event Capacity</div>
+      </div>
+      <div class="stat-item fade-in">
+        <div class="stat-number">∞</div>
+        <div class="stat-label-vi">View Hồ Panorama</div>
+        <div class="stat-label-en">Lake Panorama Views</div>
+      </div>
+    </div>
+  </section>
+
   <!-- SECTIONS WILL BE ADDED HERE IN SUBSEQUENT TASKS -->
 
   <script>
@@ -567,6 +658,45 @@
     window.addEventListener('load', () => {
       document.getElementById('heroBg').classList.add('loaded');
     });
+
+    // IntersectionObserver for all .fade-in elements
+    const fadeObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+          fadeObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.fade-in').forEach(el => fadeObserver.observe(el));
+
+    // Counter animation
+    function animateCounter(el) {
+      const target = parseInt(el.dataset.count);
+      if (!target) return;
+      const duration = 1400;
+      const start = performance.now();
+      const update = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(ease * target) + (target === 100 ? '+' : target === 5 ? '+' : 'ha');
+        if (progress < 1) requestAnimationFrame(update);
+        else el.textContent = target + (target === 100 ? '+' : target === 5 ? '+' : 'ha');
+      };
+      requestAnimationFrame(update);
+    }
+
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.querySelectorAll('[data-count]').forEach(animateCounter);
+          counterObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('#overview').forEach(el => counterObserver.observe(el));
   </script>
 </body>
 </html>
