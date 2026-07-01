@@ -347,6 +347,7 @@
       .nav-links { display: none; }
       .nav-cta-desktop { display: none; }
       .nav-hamburger { display: flex; }
+      .hero-bg { background-attachment: scroll; }
     }
 
     /* ============================================
@@ -1306,9 +1307,9 @@
         <div class="stat-label-en">Event Capacity</div>
       </div>
       <div class="stat-item fade-in">
-        <div class="stat-number">∞</div>
-        <div class="stat-label-vi">View Hồ Panorama</div>
-        <div class="stat-label-en">Lake Panorama Views</div>
+        <div class="stat-number">2km</div>
+        <div class="stat-label-vi">Từ Trung Tâm TP</div>
+        <div class="stat-label-en">From City Center</div>
       </div>
     </div>
   </section>
@@ -1500,9 +1501,9 @@
       </div>
 
       <div class="pricing-tabs" role="tablist">
-        <button class="pricing-tab active" data-tab="overnight" role="tab">Lưu Trú</button>
-        <button class="pricing-tab" data-tab="activities" role="tab">F&B & Hoạt Động</button>
-        <button class="pricing-tab" data-tab="events" role="tab">Sự Kiện</button>
+        <button class="pricing-tab active" data-tab="overnight" role="tab" aria-selected="true">Lưu Trú</button>
+        <button class="pricing-tab" data-tab="activities" role="tab" aria-selected="false">F&B & Hoạt Động</button>
+        <button class="pricing-tab" data-tab="events" role="tab" aria-selected="false">Sự Kiện &amp; Team Building</button>
       </div>
 
       <!-- TAB 1: Overnight -->
@@ -1702,7 +1703,7 @@
         <a href="tel:0968987311" class="hotline">0968 987 311</a>
         <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
           <a href="tel:0968987311" class="btn btn-gold">📞 Gọi Ngay</a>
-          <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" class="btn btn-outline">Facebook</a>
+          <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Facebook</a>
         </div>
       </div>
     </div>
@@ -1767,7 +1768,7 @@
         <a href="tel:0968987311" class="cta-hotline">0968 987 311</a>
         <div class="cta-actions">
           <a href="tel:0968987311" class="btn btn-gold">📞 Gọi Đặt Phòng</a>
-          <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" class="btn btn-outline">Facebook Fanpage</a>
+          <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Facebook Fanpage</a>
         </div>
       </div>
     </div>
@@ -1780,7 +1781,7 @@
         <div class="footer-tagline">Farmstay · Buôn Ma Thuột · Đắk Lắk</div>
         <div class="footer-contact">
           <p>📞 <a href="tel:0968987311">0968 987 311</a></p>
-          <p>📘 <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank">Facebook Fanpage</a></p>
+          <p>📘 <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" rel="noopener noreferrer">Facebook Fanpage</a></p>
           <p>📍 Buôn Ma Thuột, Đắk Lắk, Việt Nam</p>
         </div>
       </div>
@@ -1813,7 +1814,7 @@
     <div class="footer-bottom">
       <p>© 2026 Hiền Lê Garden. All rights reserved.</p>
       <div class="footer-social">
-        <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank">Facebook</a>
+        <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" rel="noopener noreferrer">Facebook</a>
       </div>
     </div>
   </footer>
@@ -1830,10 +1831,19 @@
     const mobileOverlay = document.getElementById('mobileOverlay');
     const mobileClose = document.getElementById('mobileClose');
 
-    hamburger.addEventListener('click', () => mobileOverlay.classList.add('open'));
-    mobileClose.addEventListener('click', () => mobileOverlay.classList.remove('open'));
+    hamburger.addEventListener('click', () => {
+      mobileOverlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+    mobileClose.addEventListener('click', () => {
+      mobileOverlay.classList.remove('open');
+      document.body.style.overflow = '';
+    });
     document.querySelectorAll('.mobile-nav-link').forEach(link => {
-      link.addEventListener('click', () => mobileOverlay.classList.remove('open'));
+      link.addEventListener('click', () => {
+        mobileOverlay.classList.remove('open');
+        document.body.style.overflow = '';
+      });
     });
 
     // Hero bg scale on load
@@ -1884,9 +1894,13 @@
     document.querySelectorAll('.pricing-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const target = tab.dataset.tab;
-        document.querySelectorAll('.pricing-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.pricing-tab').forEach(t => {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
         document.querySelectorAll('.pricing-panel').forEach(p => p.classList.remove('active'));
         tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
         document.getElementById('tab-' + target).classList.add('active');
       });
     });
