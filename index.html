@@ -1184,6 +1184,52 @@
       .footer-bottom { flex-direction: column; text-align: center; }
       .cta-hotline { font-size: 1.8rem; }
     }
+
+    /* ============================================
+       SCROLL INDICATOR ACTIVE NAV LINK
+    ============================================ */
+    .nav-links a.active {
+      color: var(--accent-gold);
+    }
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    /* ============================================
+       SMOOTH STAGGER DELAYS FOR GRIDS
+    ============================================ */
+    .features-grid .feature-card:nth-child(1) { transition-delay: 0s; }
+    .features-grid .feature-card:nth-child(2) { transition-delay: 0.08s; }
+    .features-grid .feature-card:nth-child(3) { transition-delay: 0.16s; }
+    .features-grid .feature-card:nth-child(4) { transition-delay: 0.24s; }
+    .features-grid .feature-card:nth-child(5) { transition-delay: 0.32s; }
+    .features-grid .feature-card:nth-child(6) { transition-delay: 0.40s; }
+    .features-grid .feature-card:nth-child(7) { transition-delay: 0.48s; }
+    .features-grid .feature-card:nth-child(8) { transition-delay: 0.56s; }
+    .features-grid .feature-card:nth-child(9) { transition-delay: 0.64s; }
+
+    .rooms-grid .room-card:nth-child(1) { transition-delay: 0s; }
+    .rooms-grid .room-card:nth-child(2) { transition-delay: 0.1s; }
+    .rooms-grid .room-card:nth-child(3) { transition-delay: 0.2s; }
+    .rooms-grid .room-card:nth-child(4) { transition-delay: 0s; }
+    .rooms-grid .room-card:nth-child(5) { transition-delay: 0.1s; }
+    .rooms-grid .room-card:nth-child(6) { transition-delay: 0.2s; }
+
+    /* ============================================
+       SELECTION COLOR
+    ============================================ */
+    ::selection {
+      background: rgba(201,168,76,0.3);
+      color: var(--text-primary);
+    }
+
+    /* ============================================
+       SCROLLBAR
+    ============================================ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-gold); }
   </style>
 </head>
 <body>
@@ -1868,6 +1914,22 @@
         document.body.style.overflow = '';
       }
     });
+
+    // Active nav link on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinksAll = document.querySelectorAll('.nav-links a');
+
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinksAll.forEach(a => a.classList.remove('active'));
+          const active = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { threshold: 0.4 });
+
+    sections.forEach(s => sectionObserver.observe(s));
   </script>
 </body>
 </html>
