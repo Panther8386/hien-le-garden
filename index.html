@@ -633,6 +633,131 @@
     @media (max-width: 600px) {
       .features-grid { grid-template-columns: 1fr; }
     }
+
+    /* ============================================
+       ROOM SHOWCASE
+    ============================================ */
+    #rooms {
+      background: var(--bg-secondary);
+    }
+
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .room-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      cursor: pointer;
+    }
+
+    .room-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+      border-color: var(--border-gold);
+    }
+
+    .room-img {
+      position: relative;
+      height: 220px;
+      overflow: hidden;
+    }
+
+    .room-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--transition-slow);
+    }
+
+    .room-card:hover .room-img img {
+      transform: scale(1.08);
+    }
+
+    .room-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: rgba(13,31,19,0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border-gold);
+      color: var(--accent-gold);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.35rem 0.75rem;
+      border-radius: 2px;
+    }
+
+    .room-price-badge {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: var(--accent-gold);
+      color: var(--bg-primary);
+      font-family: var(--font-serif);
+      font-size: 1.1rem;
+      font-weight: 600;
+      padding: 0.4rem 0.875rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .room-price-badge small {
+      font-size: 0.6rem;
+      font-family: var(--font-sans);
+      font-weight: 400;
+      display: block;
+      text-align: right;
+      margin-top: -2px;
+      opacity: 0.7;
+    }
+
+    .room-info {
+      padding: 1.5rem;
+    }
+
+    .room-name {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .room-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.875rem;
+    }
+
+    .room-meta span {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .room-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1024px) {
+      .rooms-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .rooms-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -777,6 +902,120 @@
           <div class="feature-title-en">Agri-Experience</div>
           <p class="feature-desc">Trồng rau, hái quả, học chăm sóc cây trái — trải nghiệm nông nghiệp thực thụ cho mọi lứa tuổi.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="rooms">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="label">Lưu Trú · Accommodation</span>
+        <h2>Chọn Không Gian Của Bạn</h2>
+      </div>
+      <div class="rooms-grid">
+
+        <div class="room-card fade-in">
+          <div class="room-img">
+            <img src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=600&q=80" alt="Triangle House" loading="lazy">
+            <!-- REPLACE: Triangle House exterior photo -->
+            <span class="room-badge">Triangle House</span>
+            <div class="room-price-badge">300K<small>đ / đêm</small></div>
+          </div>
+          <div class="room-info">
+            <div class="room-name">Triangle House</div>
+            <div class="room-meta">
+              <span>👥 2–3 người</span>
+              <span>🌿 View vườn</span>
+            </div>
+            <p class="room-desc">Cabin mái tam giác độc đáo, giường đôi, không gian gỗ ấm cúng giữa thiên nhiên.</p>
+          </div>
+        </div>
+
+        <div class="room-card fade-in">
+          <div class="room-img">
+            <img src="https://images.unsplash.com/photo-1540541338537-71cf2c455900?w=600&q=80" alt="Circle House" loading="lazy">
+            <!-- REPLACE: Circle House exterior photo -->
+            <span class="room-badge">Circle House</span>
+            <div class="room-price-badge">600K<small>đ / đêm</small></div>
+          </div>
+          <div class="room-info">
+            <div class="room-name">Circle House — Superior</div>
+            <div class="room-meta">
+              <span>👥 2–4 người</span>
+              <span>🏔️ View hồ</span>
+            </div>
+            <p class="room-desc">Phòng hình tròn nghệ thuật, view hồ, tiện nghi cao cấp hơn. Điểm check-in ấn tượng.</p>
+          </div>
+        </div>
+
+        <div class="room-card fade-in">
+          <div class="room-img">
+            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80" alt="E De Cozy House" loading="lazy">
+            <!-- REPLACE: E Đê Cozy House photo -->
+            <span class="room-badge">E Đê Cozy</span>
+            <div class="room-price-badge">700K<small>đ / đêm</small></div>
+          </div>
+          <div class="room-info">
+            <div class="room-name">E Đê Cozy House — Deluxe</div>
+            <div class="room-meta">
+              <span>👥 2–4 người</span>
+              <span>🍳 Bao gồm sáng</span>
+            </div>
+            <p class="room-desc">Kiến trúc độc đáo phong cách Tây Nguyên, bao gồm bữa sáng, nội thất đầy đủ tiện nghi.</p>
+          </div>
+        </div>
+
+        <div class="room-card fade-in">
+          <div class="room-img">
+            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80" alt="VIP House" loading="lazy">
+            <!-- REPLACE: VIP House / Premium Garden View photo -->
+            <span class="room-badge">VIP House</span>
+            <div class="room-price-badge">900K<small>đ / đêm</small></div>
+          </div>
+          <div class="room-info">
+            <div class="room-name">VIP House — Premium</div>
+            <div class="room-meta">
+              <span>👥 3–5 người</span>
+              <span>🌅 Sân hiên riêng</span>
+            </div>
+            <p class="room-desc">View đẹp nhất khu, sân hiên riêng nhìn ra hồ và vườn hoa, tiện nghi cao cấp đầy đủ.</p>
+          </div>
+        </div>
+
+        <div class="room-card fade-in">
+          <div class="room-img">
+            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="Bungalow Gia Dinh" loading="lazy">
+            <!-- REPLACE: Bungalow / Family room photo -->
+            <span class="room-badge">Bungalow</span>
+            <div class="room-price-badge">1.2M<small>đ / đêm</small></div>
+          </div>
+          <div class="room-info">
+            <div class="room-name">Bungalow Gia Đình</div>
+            <div class="room-meta">
+              <span>👥 4–6 người</span>
+              <span>🏠 Full amenities</span>
+            </div>
+            <p class="room-desc">Không gian rộng rãi nhất, đầy đủ tiện nghi cao cấp, phù hợp gia đình hoặc nhóm bạn.</p>
+          </div>
+        </div>
+
+        <div class="room-card fade-in">
+          <div class="room-img">
+            <img src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=600&q=80" alt="Phong Tap The" loading="lazy">
+            <!-- REPLACE: Dormitory / camping photo -->
+            <span class="room-badge">Tập Thể</span>
+            <div class="room-price-badge">150K<small>đ / người</small></div>
+          </div>
+          <div class="room-info">
+            <div class="room-name">Phòng Tập Thể</div>
+            <div class="room-meta">
+              <span>👥 10–20 người</span>
+              <span>🛏️ Giường tầng</span>
+            </div>
+            <p class="room-desc">Giường tầng, giá hợp lý theo đầu người. Lý tưởng cho nhóm bạn trẻ, lớp học, đoàn tham quan.</p>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
