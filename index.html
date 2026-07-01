@@ -758,6 +758,165 @@
     @media (max-width: 600px) {
       .rooms-grid { grid-template-columns: 1fr; }
     }
+
+    /* ============================================
+       PRICING TABLE
+    ============================================ */
+    #pricing {
+      background: var(--bg-primary);
+    }
+
+    .pricing-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 2.5rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .pricing-tab {
+      flex: 1;
+      padding: 0.875rem 1rem;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--text-muted);
+      background: transparent;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: none;
+      border-right: 1px solid var(--border-gold);
+      font-family: var(--font-sans);
+    }
+
+    .pricing-tab:last-child { border-right: none; }
+
+    .pricing-tab.active {
+      background: var(--accent-gold);
+      color: var(--bg-primary);
+      font-weight: 600;
+    }
+
+    .pricing-tab:not(.active):hover {
+      background: rgba(201,168,76,0.1);
+      color: var(--accent-gold);
+    }
+
+    .pricing-panel {
+      display: none;
+    }
+    .pricing-panel.active {
+      display: block;
+      animation: fadePanel 0.3s ease;
+    }
+
+    @keyframes fadePanel {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .pricing-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .pricing-table th {
+      text-align: left;
+      padding: 0.875rem 1rem;
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      border-bottom: 1px solid var(--border-gold);
+      background: var(--bg-surface);
+    }
+
+    .pricing-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      vertical-align: top;
+    }
+
+    .pricing-table tr:last-child td { border-bottom: none; }
+
+    .pricing-table tr:hover td {
+      background: var(--bg-surface);
+    }
+
+    .pricing-table .price {
+      color: var(--accent-gold);
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .pricing-table .note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .pricing-table .capacity {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .pricing-divider {
+      margin: 2rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .pricing-divider span {
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      white-space: nowrap;
+    }
+
+    .pricing-divider::before,
+    .pricing-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-gold);
+    }
+
+    .pricing-cta {
+      margin-top: 3rem;
+      text-align: center;
+      padding: 2rem;
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+    }
+
+    .pricing-cta p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .pricing-cta .hotline {
+      font-family: var(--font-serif);
+      font-size: 1.8rem;
+      font-style: italic;
+      color: var(--accent-gold);
+      display: block;
+      margin-bottom: 1.25rem;
+    }
   </style>
 </head>
 <body>
@@ -1020,6 +1179,222 @@
     </div>
   </section>
 
+  <section class="section" id="pricing">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="label">Bảng Giá · Pricing</span>
+        <h2>Minh Bạch, Hợp Lý</h2>
+      </div>
+
+      <div class="pricing-tabs" role="tablist">
+        <button class="pricing-tab active" data-tab="overnight" role="tab">Lưu Trú</button>
+        <button class="pricing-tab" data-tab="activities" role="tab">F&B & Hoạt Động</button>
+        <button class="pricing-tab" data-tab="events" role="tab">Sự Kiện</button>
+      </div>
+
+      <!-- TAB 1: Overnight -->
+      <div class="pricing-panel active" id="tab-overnight">
+        <div class="pricing-divider"><span>Lưu Trú Theo Đêm · Overnight Stay</span></div>
+        <table class="pricing-table">
+          <thead>
+            <tr>
+              <th>Loại Phòng</th>
+              <th>Đơn Giá</th>
+              <th>Sức Chứa</th>
+              <th>Ghi Chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Triangle House (Tiêu Chuẩn)</td>
+              <td><span class="price">300.000 đ</span></td>
+              <td class="capacity">2–3 người</td>
+              <td class="note">View vườn, giường đôi</td>
+            </tr>
+            <tr>
+              <td>Circle House — Superior</td>
+              <td><span class="price">600.000 đ</span></td>
+              <td class="capacity">2–4 người</td>
+              <td class="note">View hồ, tiện nghi cao cấp hơn</td>
+            </tr>
+            <tr>
+              <td>E Đê Cozy — Deluxe</td>
+              <td><span class="price">700.000 đ</span></td>
+              <td class="capacity">2–4 người</td>
+              <td class="note">Bao gồm bữa sáng</td>
+            </tr>
+            <tr>
+              <td>VIP House — Premium Garden View</td>
+              <td><span class="price">900.000 đ</span></td>
+              <td class="capacity">3–5 người</td>
+              <td class="note">Sân hiên riêng, view tốt nhất</td>
+            </tr>
+            <tr>
+              <td>Bungalow Gia Đình</td>
+              <td><span class="price">1.200.000 đ</span></td>
+              <td class="capacity">4–6 người</td>
+              <td class="note">Phòng rộng, full amenities</td>
+            </tr>
+            <tr>
+              <td>Phòng Tập Thể</td>
+              <td><span class="price">150.000 đ</span></td>
+              <td class="capacity">10–20 người</td>
+              <td class="note">Tính theo đầu người, giường tầng</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="pricing-divider"><span>Thuê Theo Giờ · Hourly Rental</span></div>
+        <table class="pricing-table">
+          <thead>
+            <tr>
+              <th>Gói</th>
+              <th>Đơn Giá</th>
+              <th>Thời Gian</th>
+              <th>Ghi Chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Giờ Đầu Tiên</td>
+              <td><span class="price">120.000 đ</span></td>
+              <td class="capacity">1 giờ</td>
+              <td class="note">Áp dụng toàn bộ loại phòng</td>
+            </tr>
+            <tr>
+              <td>Combo 2 Giờ</td>
+              <td><span class="price">200.000 đ</span></td>
+              <td class="capacity">2 giờ</td>
+              <td class="note">Tiết kiệm hơn giờ lẻ</td>
+            </tr>
+            <tr>
+              <td>Giờ Phát Sinh Thêm</td>
+              <td><span class="price">50.000 đ</span></td>
+              <td class="capacity">/ giờ thêm</td>
+              <td class="note">Sau combo 2H</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB 2: Activities -->
+      <div class="pricing-panel" id="tab-activities">
+        <div class="pricing-divider"><span>F&B & Hoạt Động Trải Nghiệm</span></div>
+        <table class="pricing-table">
+          <thead>
+            <tr>
+              <th>Dịch Vụ</th>
+              <th>Đơn Giá</th>
+              <th>Đơn Vị</th>
+              <th>Ghi Chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Cà phê & Nước uống</td>
+              <td><span class="price">30.000–80.000 đ</span></td>
+              <td class="capacity">/ phần</td>
+              <td class="note">Quán cà phê tại chỗ</td>
+            </tr>
+            <tr>
+              <td>Ăn uống theo yêu cầu</td>
+              <td><span class="price">120.000–300.000 đ</span></td>
+              <td class="capacity">/ người / bữa</td>
+              <td class="note">Đặt trước 24h</td>
+            </tr>
+            <tr>
+              <td>Đốt lửa trại (Campfire)</td>
+              <td><span class="price">500.000–1.000.000 đ</span></td>
+              <td class="capacity">/ buổi nhóm</td>
+              <td class="note">Bao gồm củi, setup, 10–50 người</td>
+            </tr>
+            <tr>
+              <td>Hái trái cây tại vườn</td>
+              <td><span class="price">50.000–100.000 đ</span></td>
+              <td class="capacity">/ người</td>
+              <td class="note">Theo mùa</td>
+            </tr>
+            <tr>
+              <td>Chụp ảnh / Check-in</td>
+              <td><span class="price">200.000–500.000 đ</span></td>
+              <td class="capacity">/ buổi</td>
+              <td class="note">Sử dụng cảnh quan nông trại</td>
+            </tr>
+            <tr>
+              <td>Cắm trại qua đêm</td>
+              <td><span class="price">200.000–400.000 đ</span></td>
+              <td class="capacity">/ đêm / người</td>
+              <td class="note">Lều tự mang hoặc thuê</td>
+            </tr>
+            <tr>
+              <td>Nông nghiệp trải nghiệm</td>
+              <td><span class="price">100.000–200.000 đ</span></td>
+              <td class="capacity">/ người</td>
+              <td class="note">Trồng rau, chăm sóc cây</td>
+            </tr>
+            <tr>
+              <td>Khu vui chơi trẻ em</td>
+              <td><span class="price">Miễn phí</span></td>
+              <td class="capacity">—</td>
+              <td class="note">Tiện ích kèm theo</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- TAB 3: Events -->
+      <div class="pricing-panel" id="tab-events">
+        <div class="pricing-divider"><span>Team Building & Sự Kiện Doanh Nghiệp</span></div>
+        <table class="pricing-table">
+          <thead>
+            <tr>
+              <th>Gói Sự Kiện</th>
+              <th>Đơn Giá</th>
+              <th>Số Người</th>
+              <th>Ghi Chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Team Building / Sự kiện nhỏ</td>
+              <td><span class="price">3.000.000–5.000.000 đ</span></td>
+              <td class="capacity">20–50 người</td>
+              <td class="note">Cần đặt trước, tùy chỉnh theo yêu cầu</td>
+            </tr>
+            <tr>
+              <td>Sự kiện doanh nghiệp lớn</td>
+              <td><span class="price">5.000.000–10.000.000 đ</span></td>
+              <td class="capacity">50–100 người</td>
+              <td class="note">Setup đầy đủ, tùy chỉnh theo công ty</td>
+            </tr>
+            <tr>
+              <td>Bán nông sản & sản phẩm</td>
+              <td><span class="price">Theo giá thị trường</span></td>
+              <td class="capacity">—</td>
+              <td class="note">Cà phê, rau củ, trái cây tươi</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:1.5rem; padding:1.25rem; background:var(--bg-surface); border-radius:var(--radius-md); border-left:3px solid var(--accent-gold);">
+          <p style="font-size:0.82rem; color:var(--text-muted); line-height:1.7;">
+            ✦ Giá sự kiện chưa bao gồm ăn uống và trang trí. Vui lòng liên hệ để được tư vấn gói phù hợp nhất cho đoàn của bạn.<br>
+            ✦ Event pricing excludes catering and decoration. Contact us for a custom quote.
+          </p>
+        </div>
+      </div>
+
+      <!-- Hotline CTA -->
+      <div class="pricing-cta fade-in">
+        <p>Đặt phòng, hỏi giá, và nhận ưu đãi — Book now or inquire about packages</p>
+        <a href="tel:0968987311" class="hotline">0968 987 311</a>
+        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+          <a href="tel:0968987311" class="btn btn-gold">📞 Gọi Ngay</a>
+          <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" class="btn btn-outline">Facebook</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- SECTIONS WILL BE ADDED HERE IN SUBSEQUENT TASKS -->
 
   <script>
@@ -1083,6 +1458,17 @@
     }, { threshold: 0.5 });
 
     document.querySelectorAll('#overview').forEach(el => counterObserver.observe(el));
+
+    // Pricing tabs
+    document.querySelectorAll('.pricing-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        document.querySelectorAll('.pricing-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.pricing-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + target).classList.add('active');
+      });
+    });
   </script>
 </body>
 </html>
