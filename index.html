@@ -348,6 +348,143 @@
       .nav-cta-desktop { display: none; }
       .nav-hamburger { display: flex; }
     }
+
+    /* ============================================
+       HERO SECTION
+    ============================================ */
+    #home {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&q=80');
+      /* REPLACE: aerial lake view photo from Facebook */
+      background-size: cover;
+      background-position: center 40%;
+      background-attachment: fixed;
+      transform: scale(1.05);
+      transition: transform 8s ease;
+    }
+
+    .hero-bg.loaded { transform: scale(1); }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(13,31,19,0.3) 0%,
+        rgba(13,31,19,0.5) 50%,
+        rgba(13,31,19,0.85) 100%
+      );
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 var(--spacing-md);
+      max-width: 900px;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: heroFadeUp 0.8s ease 0.3s forwards;
+    }
+
+    .hero-title {
+      font-family: var(--font-serif);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title-line {
+      display: block;
+      font-size: clamp(3.5rem, 10vw, 7rem);
+      color: var(--text-primary);
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    .hero-title-line:nth-child(1) { animation: heroFadeUp 0.9s ease 0.5s forwards; }
+    .hero-title-line:nth-child(2) { animation: heroFadeUp 0.9s ease 0.7s forwards; }
+    .hero-title-line:nth-child(3) { animation: heroFadeUp 0.9s ease 0.9s forwards; }
+
+    .hero-title-line.gold-line { color: var(--accent-gold); }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: rgba(245,245,239,0.75);
+      font-style: italic;
+      font-family: var(--font-serif);
+      letter-spacing: 0.03em;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: heroFadeUp 0.9s ease 1.1s forwards;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: heroFadeUp 0.9s ease 1.3s forwards;
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: heroFadeUp 1s ease 1.6s forwards;
+    }
+
+    .hero-scroll span {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--accent-gold), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes heroFadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1.2); }
+    }
   </style>
 </head>
 <body>
@@ -384,6 +521,28 @@
     <a href="tel:0968987311" class="btn btn-emerald">📞 0968 987 311</a>
   </div>
 
+  <section id="home">
+    <div class="hero-bg" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <span class="hero-eyebrow">Farmstay · Buôn Ma Thuột · Đắk Lắk</span>
+      <h1 class="hero-title">
+        <span class="hero-title-line">Bình Yên</span>
+        <span class="hero-title-line gold-line">Giữa Lòng</span>
+        <span class="hero-title-line">Thành Phố</span>
+      </h1>
+      <p class="hero-sub">Check-in thiên nhiên — View hồ cực chill · Nature Check-in — Stunning Lake Views</p>
+      <div class="hero-actions">
+        <a href="#rooms" class="btn btn-gold">Khám Phá Phòng</a>
+        <a href="#pricing" class="btn btn-outline">Xem Bảng Giá</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <div class="scroll-line"></div>
+      <span>Khám phá</span>
+    </div>
+  </section>
+
   <!-- SECTIONS WILL BE ADDED HERE IN SUBSEQUENT TASKS -->
 
   <script>
@@ -402,6 +561,11 @@
     mobileClose.addEventListener('click', () => mobileOverlay.classList.remove('open'));
     document.querySelectorAll('.mobile-nav-link').forEach(link => {
       link.addEventListener('click', () => mobileOverlay.classList.remove('open'));
+    });
+
+    // Hero bg scale on load
+    window.addEventListener('load', () => {
+      document.getElementById('heroBg').classList.add('loaded');
     });
   </script>
 </body>
