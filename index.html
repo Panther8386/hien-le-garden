@@ -193,14 +193,216 @@
       color: var(--bg-primary);
       transform: translateY(-2px);
     }
+
+    /* ============================================
+       NAVIGATION
+    ============================================ */
+    #navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 1.25rem var(--spacing-md);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background var(--transition), backdrop-filter var(--transition), padding var(--transition);
+    }
+
+    #navbar.scrolled {
+      background: rgba(13,31,19,0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 0.875rem var(--spacing-md);
+      border-bottom: 1px solid var(--border-gold);
+    }
+
+    .nav-logo {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--accent-gold);
+      letter-spacing: 0.04em;
+      line-height: 1;
+    }
+
+    .nav-logo span {
+      display: block;
+      font-size: 0.55rem;
+      font-style: normal;
+      font-family: var(--font-sans);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color var(--transition);
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent-gold);
+      transition: width var(--transition);
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-gold);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-emerald);
+      border: 1px solid var(--accent-emerald);
+      padding: 0.6rem 1.4rem;
+      border-radius: var(--radius-sm);
+      transition: all var(--transition);
+    }
+
+    .nav-cta:hover {
+      background: var(--accent-emerald);
+      color: var(--bg-primary);
+    }
+
+    /* Hamburger - mobile */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 24px;
+      height: 1.5px;
+      background: var(--text-primary);
+      transition: all var(--transition);
+    }
+
+    /* Mobile overlay menu */
+    .nav-mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(13,31,19,0.97);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+    }
+    .nav-mobile-overlay.open {
+      display: flex;
+    }
+    .nav-mobile-overlay a {
+      font-family: var(--font-serif);
+      font-size: 2rem;
+      font-style: italic;
+      color: var(--text-primary);
+      transition: color var(--transition);
+    }
+    .nav-mobile-overlay a:hover { color: var(--accent-gold); }
+    .nav-mobile-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-cta-desktop { display: none; }
+      .nav-hamburger { display: flex; }
+    }
   </style>
 </head>
 <body>
 
+  <nav id="navbar">
+    <a href="#home" class="nav-logo">
+      Hiền Lê Garden
+      <span>Farmstay · Buôn Ma Thuột</span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#overview">Tổng Quan</a></li>
+      <li><a href="#rooms">Phòng</a></li>
+      <li><a href="#experience">Trải Nghiệm</a></li>
+      <li><a href="#pricing">Bảng Giá</a></li>
+      <li><a href="#contact">Liên Hệ</a></li>
+    </ul>
+
+    <a href="tel:0968987311" class="nav-cta nav-cta-desktop">Đặt Phòng Ngay</a>
+
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- Mobile Overlay -->
+  <div class="nav-mobile-overlay" id="mobileOverlay">
+    <button class="nav-mobile-close" id="mobileClose">✕</button>
+    <a href="#overview" class="mobile-nav-link">Tổng Quan</a>
+    <a href="#rooms" class="mobile-nav-link">Phòng</a>
+    <a href="#experience" class="mobile-nav-link">Trải Nghiệm</a>
+    <a href="#pricing" class="mobile-nav-link">Bảng Giá</a>
+    <a href="#contact" class="mobile-nav-link">Liên Hệ</a>
+    <a href="tel:0968987311" class="btn btn-emerald">📞 0968 987 311</a>
+  </div>
+
   <!-- SECTIONS WILL BE ADDED HERE IN SUBSEQUENT TASKS -->
 
   <script>
-    // JS WILL BE ADDED HERE IN SUBSEQUENT TASKS
+    // Nav scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 80);
+    });
+
+    // Mobile menu
+    const hamburger = document.getElementById('navHamburger');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobileClose = document.getElementById('mobileClose');
+
+    hamburger.addEventListener('click', () => mobileOverlay.classList.add('open'));
+    mobileClose.addEventListener('click', () => mobileOverlay.classList.remove('open'));
+    document.querySelectorAll('.mobile-nav-link').forEach(link => {
+      link.addEventListener('click', () => mobileOverlay.classList.remove('open'));
+    });
   </script>
 </body>
 </html>
