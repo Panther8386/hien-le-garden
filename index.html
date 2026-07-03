@@ -13,20 +13,20 @@
        DESIGN SYSTEM — CSS CUSTOM PROPERTIES
     ============================================ */
     :root {
-      --bg-primary: #0D1F13;
-      --bg-secondary: #111D15;
-      --bg-surface: #172A1C;
-      --bg-card: #1A2E1F;
+      --bg-primary: #F4F9F4;
+      --bg-secondary: #E8F2E8;
+      --bg-surface: #FFFFFF;
+      --bg-card: #FFFFFF;
       --accent-gold: #C9A84C;
       --accent-gold-lt: #E8C96A;
       --accent-emerald: #10B981;
       --accent-emerald-dk: #059669;
-      --text-primary: #F5F5EF;
-      --text-muted: #9CA3AF;
-      --text-dim: #6B7280;
-      --border-gold: rgba(201,168,76,0.3);
-      --border-subtle: rgba(255,255,255,0.07);
-      --overlay: rgba(13,31,19,0.55);
+      --text-primary: #1A3326;
+      --text-muted: #5A7A68;
+      --text-dim: #8AA898;
+      --border-gold: rgba(201,168,76,0.4);
+      --border-subtle: rgba(26,83,58,0.1);
+      --overlay: rgba(0,0,0,0.45);
 
       --font-serif: 'Cormorant Garamond', Georgia, serif;
       --font-sans: 'Inter', system-ui, sans-serif;
@@ -175,7 +175,7 @@
     .btn-outline {
       background: transparent;
       color: var(--text-primary);
-      border: 1px solid rgba(255,255,255,0.3);
+      border: 1px solid var(--border-gold);
     }
     .btn-outline:hover {
       border-color: var(--accent-gold);
@@ -211,11 +211,12 @@
     }
 
     #navbar.scrolled {
-      background: rgba(13,31,19,0.85);
+      background: rgba(244, 249, 244, 0.95);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       padding: 0.875rem var(--spacing-md);
       border-bottom: 1px solid var(--border-gold);
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
     }
 
     .nav-logo {
@@ -223,7 +224,7 @@
       font-style: italic;
       font-size: 1.3rem;
       font-weight: 400;
-      color: var(--accent-gold);
+      color: #FFFFFF;
       letter-spacing: 0.04em;
       line-height: 1;
     }
@@ -235,8 +236,12 @@
       font-family: var(--font-sans);
       letter-spacing: 0.22em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: rgba(255,255,255,0.7);
       margin-top: 2px;
+    }
+
+    #navbar.scrolled .nav-logo span {
+      color: var(--text-muted);
     }
 
     .nav-links {
@@ -251,9 +256,21 @@
       font-weight: 400;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: #FFFFFF;
       transition: color var(--transition);
       position: relative;
+    }
+
+    #navbar.scrolled .nav-links a {
+      color: var(--text-primary);
+    }
+
+    #navbar.scrolled .nav-logo {
+      color: var(--accent-gold);
+    }
+
+    #navbar.scrolled .nav-cta {
+      color: var(--accent-emerald);
     }
 
     .nav-links a::after {
@@ -280,7 +297,7 @@
       font-weight: 500;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--accent-emerald);
+      color: #FFFFFF;
       border: 1px solid var(--accent-emerald);
       padding: 0.6rem 1.4rem;
       border-radius: var(--radius-sm);
@@ -289,7 +306,7 @@
 
     .nav-cta:hover {
       background: var(--accent-emerald);
-      color: var(--bg-primary);
+      color: #FFFFFF;
     }
 
     /* Hamburger - mobile */
@@ -304,8 +321,12 @@
       display: block;
       width: 24px;
       height: 1.5px;
-      background: var(--text-primary);
+      background: #FFFFFF;
       transition: all var(--transition);
+    }
+
+    #navbar.scrolled .nav-hamburger span {
+      background: var(--text-primary);
     }
 
     /* Mobile overlay menu */
@@ -313,7 +334,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(13,31,19,0.97);
+      background: rgba(26, 51, 38, 0.98);
       z-index: 999;
       flex-direction: column;
       align-items: center;
@@ -327,7 +348,7 @@
       font-family: var(--font-serif);
       font-size: 2rem;
       font-style: italic;
-      color: var(--text-primary);
+      color: #FFFFFF;
       transition: color var(--transition);
     }
     .nav-mobile-overlay a:hover { color: var(--accent-gold); }
@@ -336,11 +357,10 @@
       top: 1.5rem;
       right: 1.5rem;
       font-size: 1.5rem;
-      color: var(--text-muted);
       cursor: pointer;
       background: none;
       border: none;
-      color: var(--text-primary);
+      color: rgba(255,255,255,0.7);
     }
 
     @media (max-width: 768px) {
@@ -348,6 +368,16 @@
       .nav-cta-desktop { display: none; }
       .nav-hamburger { display: flex; }
       .hero-bg { background-attachment: scroll; }
+    }
+
+    /* Hero outline button — white text on dark overlay */
+    #home .btn-outline {
+      color: #FFFFFF;
+      border-color: rgba(255,255,255,0.5);
+    }
+    #home .btn-outline:hover {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
     }
 
     /* ============================================
@@ -419,7 +449,7 @@
     .hero-title-line {
       display: block;
       font-size: clamp(3.5rem, 10vw, 7rem);
-      color: var(--text-primary);
+      color: #FFFFFF;
       opacity: 0;
       transform: translateY(30px);
     }
@@ -468,7 +498,7 @@
       font-size: 0.6rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: var(--text-muted);
+      color: rgba(255,255,255,0.6);
     }
 
     .scroll-line {
@@ -573,9 +603,10 @@
     .feature-card {
       background: var(--bg-primary);
       padding: 2.5rem 2rem;
-      transition: background var(--transition);
+      transition: background var(--transition), box-shadow var(--transition);
       position: relative;
       overflow: hidden;
+      box-shadow: 0 2px 12px rgba(26, 83, 58, 0.08);
     }
 
     .feature-card::before {
@@ -684,7 +715,7 @@
       position: absolute;
       top: 1rem;
       left: 1rem;
-      background: rgba(13,31,19,0.85);
+      background: rgba(13,43,26,0.85);
       backdrop-filter: blur(8px);
       border: 1px solid var(--border-gold);
       color: var(--accent-gold);
@@ -850,7 +881,7 @@
     .pricing-table tr:last-child td { border-bottom: none; }
 
     .pricing-table tr:hover td {
-      background: var(--bg-surface);
+      background: var(--bg-secondary);
     }
 
     .pricing-table .price {
@@ -950,7 +981,7 @@
       content: '⊕ Xem ảnh';
       position: absolute;
       inset: 0;
-      background: rgba(13,31,19,0.6);
+      background: rgba(13,43,26,0.6);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1086,7 +1117,7 @@
        FOOTER
     ============================================ */
     footer {
-      background: #070F09;
+      background: #0D2B1A;
       border-top: 1px solid var(--border-gold);
       padding: 4rem var(--spacing-md) 2rem;
     }
@@ -1097,8 +1128,9 @@
       gap: var(--spacing-lg);
       max-width: 1280px;
       margin: 0 auto;
+      color: rgba(255,255,255,0.8);
       padding-bottom: 3rem;
-      border-bottom: 1px solid var(--border-subtle);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     .footer-brand-name {
@@ -1111,14 +1143,14 @@
 
     .footer-tagline {
       font-size: 0.75rem;
-      color: var(--text-dim);
+      color: rgba(255,255,255,0.5);
       letter-spacing: 0.1em;
       margin-bottom: 1.25rem;
     }
 
     .footer-contact p {
       font-size: 0.85rem;
-      color: var(--text-muted);
+      color: rgba(255,255,255,0.65);
       margin-bottom: 0.4rem;
       display: flex;
       align-items: center;
@@ -1149,11 +1181,11 @@
 
     .footer-links li a {
       font-size: 0.85rem;
-      color: var(--text-muted);
+      color: rgba(255,255,255,0.6);
       transition: color var(--transition);
     }
 
-    .footer-links li a:hover { color: var(--text-primary); }
+    .footer-links li a:hover { color: #FFFFFF; }
 
     .footer-bottom {
       max-width: 1280px;
@@ -1167,12 +1199,12 @@
 
     .footer-bottom p {
       font-size: 0.72rem;
-      color: var(--text-dim);
+      color: rgba(255,255,255,0.4);
     }
 
     .footer-social a {
       font-size: 0.72rem;
-      color: var(--text-dim);
+      color: rgba(255,255,255,0.4);
       letter-spacing: 0.08em;
       text-transform: uppercase;
       transition: color var(--transition);
@@ -1389,8 +1421,8 @@
 
         <div class="room-card fade-in">
           <div class="room-img">
-            <img src="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=600&q=80" alt="Triangle House" loading="lazy">
-            <!-- REPLACE: Triangle House exterior photo -->
+            <img src="./images/room-triangle-house.jpg" alt="Triangle House" loading="lazy">
+            <!-- LOCAL: Triangle House exterior photo -->
             <span class="room-badge">Triangle House</span>
             <div class="room-price-badge">300K<small>đ / đêm</small></div>
           </div>
@@ -1406,8 +1438,8 @@
 
         <div class="room-card fade-in">
           <div class="room-img">
-            <img src="https://images.unsplash.com/photo-1540541338537-71cf2c455900?w=600&q=80" alt="Circle House" loading="lazy">
-            <!-- REPLACE: Circle House exterior photo -->
+            <img src="./images/room-circle-house.jpg" alt="Circle House" loading="lazy">
+            <!-- LOCAL: Circle House exterior photo -->
             <span class="room-badge">Circle House</span>
             <div class="room-price-badge">600K<small>đ / đêm</small></div>
           </div>
@@ -1423,8 +1455,8 @@
 
         <div class="room-card fade-in">
           <div class="room-img">
-            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80" alt="E De Cozy House" loading="lazy">
-            <!-- REPLACE: E Đê Cozy House photo -->
+            <img src="./images/room-ede-cozy.jpg" alt="E De Cozy House" loading="lazy">
+            <!-- LOCAL: E Đê Cozy House photo -->
             <span class="room-badge">E Đê Cozy</span>
             <div class="room-price-badge">700K<small>đ / đêm</small></div>
           </div>
@@ -1440,8 +1472,8 @@
 
         <div class="room-card fade-in">
           <div class="room-img">
-            <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&q=80" alt="VIP House" loading="lazy">
-            <!-- REPLACE: VIP House / Premium Garden View photo -->
+            <img src="./images/room-vip-house.jpg" alt="VIP House" loading="lazy">
+            <!-- LOCAL: VIP House / Premium Garden View photo -->
             <span class="room-badge">VIP House</span>
             <div class="room-price-badge">900K<small>đ / đêm</small></div>
           </div>
@@ -1457,8 +1489,8 @@
 
         <div class="room-card fade-in">
           <div class="room-img">
-            <img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80" alt="Bungalow Gia Dinh" loading="lazy">
-            <!-- REPLACE: Bungalow / Family room photo -->
+            <img src="./images/room-bungalow.jpg" alt="Bungalow Gia Dinh" loading="lazy">
+            <!-- LOCAL: Bungalow / Family room photo -->
             <span class="room-badge">Bungalow</span>
             <div class="room-price-badge">1.2M<small>đ / đêm</small></div>
           </div>
@@ -1474,8 +1506,8 @@
 
         <div class="room-card fade-in">
           <div class="room-img">
-            <img src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=600&q=80" alt="Phong Tap The" loading="lazy">
-            <!-- REPLACE: Dormitory / camping photo -->
+            <img src="./images/room-dormitory.jpg" alt="Phong Tap The" loading="lazy">
+            <!-- LOCAL: Dormitory / camping photo -->
             <span class="room-badge">Tập Thể</span>
             <div class="room-price-badge">150K<small>đ / người</small></div>
           </div>
