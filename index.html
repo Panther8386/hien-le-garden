@@ -211,10 +211,10 @@
     }
 
     #navbar.scrolled {
-      background: rgba(244, 249, 244, 0.95);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      padding: 0.875rem var(--spacing-md);
+      background: rgba(244, 249, 244, 0.97);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      padding: 0.55rem var(--spacing-md);
       border-bottom: 1px solid var(--border-gold);
       box-shadow: 0 2px 20px rgba(0,0,0,0.08);
     }
@@ -269,10 +269,6 @@
       color: var(--accent-gold);
     }
 
-    #navbar.scrolled .nav-cta {
-      color: var(--accent-emerald);
-    }
-
     .nav-links a::after {
       content: '';
       position: absolute;
@@ -292,22 +288,44 @@
       width: 100%;
     }
 
-    .nav-cta {
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
+    /* CTA group — ẩn trước scroll, hiện khi scrolled */
+    .nav-cta-group {
+      display: flex;
+      gap: 0.45rem;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(-6px);
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #navbar.scrolled .nav-cta-group {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .nav-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.42rem 0.95rem;
+      border-radius: 50px;
+      font-family: var(--font-sans);
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: #FFFFFF;
-      border: 1px solid var(--accent-emerald);
-      padding: 0.6rem 1.4rem;
-      border-radius: var(--radius-sm);
-      transition: all var(--transition);
+      white-space: nowrap;
+      transition: all 0.22s ease;
+      border: none;
+      cursor: pointer;
+      line-height: 1;
     }
-
-    .nav-cta:hover {
-      background: var(--accent-emerald);
-      color: #FFFFFF;
-    }
+    .nav-btn-book { background: var(--accent-gold); color: #1A3326; }
+    .nav-btn-book:hover { background: var(--accent-gold-lt); color: #1A3326; }
+    .nav-btn-call { background: #10B981; color: #fff; }
+    .nav-btn-call:hover { background: #059669; color: #fff; }
+    .nav-btn-zalo { background: #0068FF; color: #fff; }
+    .nav-btn-zalo:hover { background: #0052CC; color: #fff; }
 
     /* Hamburger - mobile */
     .nav-hamburger {
@@ -365,9 +383,11 @@
 
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .nav-cta-desktop { display: none; }
       .nav-hamburger { display: flex; }
       .hero-bg { background-attachment: scroll; }
+      .nav-cta-group { gap: 0.3rem; }
+      .nav-cta-btn { padding: 0.42rem 0.55rem; border-radius: 50%; width: 34px; height: 34px; justify-content: center; }
+      .nav-btn-label { display: none; }
     }
 
     /* Hero outline button — white text on dark overlay */
@@ -1504,7 +1524,17 @@
       <li><a href="#contact">Liên Hệ</a></li>
     </ul>
 
-    <a href="tel:0968987311" class="nav-cta nav-cta-desktop">Đặt Phòng Ngay</a>
+    <div class="nav-cta-group">
+      <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" class="nav-cta-btn nav-btn-book" target="_blank" rel="noopener noreferrer">
+        <span>📅</span><span class="nav-btn-label">Đặt phòng</span>
+      </a>
+      <a href="tel:0968987311" class="nav-cta-btn nav-btn-call">
+        <span>📞</span><span class="nav-btn-label">Gọi ngay</span>
+      </a>
+      <a href="https://zalo.me/0968987311" class="nav-cta-btn nav-btn-zalo" target="_blank" rel="noopener noreferrer">
+        <span>💬</span><span class="nav-btn-label">Zalo</span>
+      </a>
+    </div>
 
     <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
       <span></span><span></span><span></span>
