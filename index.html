@@ -384,7 +384,7 @@
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-hamburger { display: flex; }
-      .hero-bg { background-attachment: scroll; }
+      .hero-bg { top: 0; bottom: 0; }
       .nav-cta-group { gap: 0.3rem; }
       .nav-cta-btn { padding: 0.42rem 0.55rem; border-radius: 50%; width: 34px; height: 34px; justify-content: center; }
       .nav-btn-label { display: none; }
@@ -414,17 +414,18 @@
 
     .hero-bg {
       position: absolute;
-      inset: 0;
+      top: -18%;
+      bottom: -18%;
+      left: 0;
+      right: 0;
       background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&q=80');
       /* REPLACE: aerial lake view photo from Facebook */
       background-size: cover;
       background-position: center 40%;
-      background-attachment: fixed;
-      transform: scale(1.05);
-      transition: transform 8s ease;
+      will-change: transform;
     }
 
-    .hero-bg.loaded { transform: scale(1); }
+    .hero-bg.loaded { opacity: 1; }
 
     .hero-overlay {
       position: absolute;
@@ -1125,12 +1126,16 @@
 
     .cta-bg {
       position: absolute;
-      inset: 0;
+      top: -20%;
+      bottom: -20%;
+      left: 0;
+      right: 0;
       background-image: url('https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=1200&q=60');
       /* REPLACE: cosmos flower field photo */
       background-size: cover;
       background-position: center;
       opacity: 0.12;
+      will-change: transform;
     }
 
     .cta-content {
@@ -1633,6 +1638,112 @@
       .cd-unit { padding: 0.5rem 0.7rem; min-width: 60px; }
       .cd-num { font-size: 1.75rem; }
       .cd-cta-btn { width: 100%; text-align: center; display: block; }
+    }
+
+    /* ============================================
+       GOOGLE MAP — Upgraded
+    ============================================ */
+    #map { background: var(--bg-secondary); padding: var(--spacing-lg) 0 0; }
+    .map-distances {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .map-dist-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.75rem 1.25rem 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.28s ease, box-shadow 0.28s ease;
+    }
+    .map-dist-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent-gold);
+      transform: scaleX(0);
+      transition: transform 0.32s ease;
+      transform-origin: left;
+    }
+    .map-dist-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+    .map-dist-card:hover::after { transform: scaleX(1); }
+    .map-dist-icon { font-size: 2rem; display: block; margin-bottom: 0.85rem; }
+    .map-dist-from {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .map-dist-time {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 2.25rem;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .map-dist-note { font-size: 0.72rem; color: var(--text-dim); }
+    .map-frame-row {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      height: 440px;
+    }
+    .map-frame-row iframe { width: 100%; height: 100%; border: none; display: block; }
+    .map-sidebar {
+      background: #0A2018;
+      padding: 2rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .map-sidebar-brand {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.35rem;
+      color: var(--accent-gold);
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .map-sidebar-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 0.9rem;
+      line-height: 1.5;
+    }
+    .map-sidebar-row a { color: var(--accent-gold); }
+    .map-sidebar-cta { margin-top: auto; padding-top: 1.5rem; }
+    .map-sidebar-btn {
+      display: block;
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--accent-gold);
+      color: #1A3326;
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: background 0.22s ease;
+    }
+    .map-sidebar-btn:hover { background: var(--accent-gold-lt); }
+    @media (max-width: 900px) {
+      .map-frame-row { grid-template-columns: 1fr; height: auto; }
+      .map-frame-row iframe { height: 300px; }
+      .map-sidebar { padding: 1.5rem; }
+    }
+    @media (max-width: 600px) {
+      .map-distances { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -2216,6 +2327,59 @@
     <button class="lightbox-next" id="lightboxNext" aria-label="Ảnh tiếp">&#8250;</button>
   </div>
 
+  <!-- ============================================
+       GOOGLE MAP
+  ============================================ -->
+  <section id="map">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="label">Vị Trí · Location</span>
+        <h2>Tìm Đường Đến Hiền Lê Garden</h2>
+      </div>
+      <div class="map-distances fade-in">
+        <div class="map-dist-card">
+          <span class="map-dist-icon">🏙️</span>
+          <div class="map-dist-from">Từ TP. Gia Nghĩa</div>
+          <div class="map-dist-time">5–10</div>
+          <div class="map-dist-note">phút di chuyển</div>
+        </div>
+        <div class="map-dist-card">
+          <span class="map-dist-icon">🚗</span>
+          <div class="map-dist-from">Từ Buôn Ma Thuột</div>
+          <div class="map-dist-time">2</div>
+          <div class="map-dist-note">giờ di chuyển</div>
+        </div>
+        <div class="map-dist-card">
+          <span class="map-dist-icon">🛣️</span>
+          <div class="map-dist-from">Từ TP. Hồ Chí Minh</div>
+          <div class="map-dist-time">5</div>
+          <div class="map-dist-note">giờ di chuyển</div>
+        </div>
+      </div>
+    </div>
+    <div class="map-frame-row fade-in">
+      <!--
+        REPLACE: Vào Google Maps → tìm "Hiền Lê Garden" → Share → Embed a map → copy iframe src
+      -->
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.0!2d108.0!3d12.7!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sHi%E1%BB%81n+L%C3%AA+Garden!5e0!3m2!1svi!2svn!4v1625000000000!5m2!1svi!2svn"
+        allowfullscreen=""
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+      <div class="map-sidebar">
+        <div class="map-sidebar-brand">Hiền Lê Garden</div>
+        <div class="map-sidebar-row">📍 <span>Lâm Đồng, Việt Nam</span></div>
+        <div class="map-sidebar-row">📞 <a href="tel:0968987311">0968 987 311</a></div>
+        <div class="map-sidebar-row">🕐 <span>Mở cửa: 7:00 – 22:00 hàng ngày</span></div>
+        <div class="map-sidebar-row">🌿 <span>Khuôn viên 10ha — giữa thiên nhiên</span></div>
+        <div class="map-sidebar-cta">
+          <a href="https://www.google.com/maps/search/Hiền+Lê+Garden+Lâm+Đồng" target="_blank" rel="noopener noreferrer" class="map-sidebar-btn">Chỉ Đường →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="contact">
     <div class="cta-bg"></div>
     <div class="container">
@@ -2498,6 +2662,42 @@
     }, { threshold: 0.4 });
 
     sections.forEach(s => sectionObserver.observe(s));
+
+    // === PARALLAX ===
+    (function initParallax() {
+      const heroBg  = document.getElementById('heroBg');
+      const ctaBg   = document.querySelector('.cta-bg');
+      const isMob   = () => window.innerWidth <= 768;
+      let ticking   = false;
+
+      function update() {
+        ticking = false;
+        if (isMob()) {
+          if (heroBg) heroBg.style.transform = '';
+          if (ctaBg)  ctaBg.style.transform  = '';
+          return;
+        }
+        const sy = window.pageYOffset;
+
+        if (heroBg) {
+          heroBg.style.transform = `translateY(${sy * 0.35}px)`;
+        }
+
+        if (ctaBg) {
+          const parent = ctaBg.parentElement;
+          const pTop   = parent.getBoundingClientRect().top + sy;
+          const delta  = (sy - pTop + window.innerHeight) * 0.15;
+          ctaBg.style.transform = `translateY(${delta}px)`;
+        }
+      }
+
+      window.addEventListener('scroll', () => {
+        if (!ticking) { requestAnimationFrame(update); ticking = true; }
+      }, { passive: true });
+
+      window.addEventListener('resize', update, { passive: true });
+      update();
+    })();
   </script>
 
   <!-- WEATHER WIDGET -->
