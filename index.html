@@ -1506,6 +1506,49 @@
       .fab-label { display: none; }
       .fab-icon  { font-size: 1.3rem; }
     }
+
+    /* ============================================
+       WEATHER WIDGET
+    ============================================ */
+    .weather-widget {
+      position: fixed;
+      bottom: 32px;
+      left: 20px;
+      z-index: 490;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-gold);
+      border-radius: 16px;
+      padding: 0.7rem 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: default;
+      min-width: 148px;
+    }
+    .weather-widget:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.14); }
+    .weather-icon-wrap { font-size: 2rem; line-height: 1; flex-shrink: 0; }
+    .weather-info { display: flex; flex-direction: column; gap: 1px; }
+    .weather-temp {
+      font-family: var(--font-serif);
+      font-size: 1.55rem;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+    .weather-desc { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
+    .weather-meta { font-size: 0.62rem; color: var(--text-dim); letter-spacing: 0.05em; margin-top: 0.1rem; }
+    .weather-loc { font-size: 0.6rem; color: var(--accent-gold); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 500; }
+    @media (max-width: 768px) {
+      .weather-widget { left: 12px; bottom: 20px; padding: 0.55rem 0.8rem; min-width: 0; border-radius: 12px; gap: 0.5rem; }
+      .weather-icon-wrap { font-size: 1.5rem; }
+      .weather-temp { font-size: 1.2rem; }
+      .weather-desc { display: none; }
+      .weather-meta { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -2200,6 +2243,43 @@
       });
     });
 
+    // WEATHER WIDGET — Open-Meteo (free, no API key)
+    (async function loadWeather() {
+      const WMO = {
+        0:  ['☀️','Quang đãng'],
+        1:  ['🌤️','Chủ yếu nắng'],
+        2:  ['⛅','Có mây một phần'],
+        3:  ['☁️','Nhiều mây'],
+        45: ['🌫️','Sương mù'],
+        48: ['🌫️','Sương giá'],
+        51: ['🌦️','Mưa phùn nhẹ'],
+        53: ['🌦️','Mưa phùn vừa'],
+        55: ['🌧️','Mưa phùn dày'],
+        61: ['🌧️','Mưa nhẹ'],
+        63: ['🌧️','Mưa vừa'],
+        65: ['🌧️','Mưa to'],
+        71: ['🌨️','Tuyết nhẹ'],
+        80: ['🌦️','Mưa rào nhẹ'],
+        81: ['🌧️','Mưa rào vừa'],
+        82: ['⛈️','Mưa rào to'],
+        95: ['⛈️','Giông bão'],
+        96: ['⛈️','Giông + mưa đá'],
+        99: ['⛈️','Giông + mưa đá to'],
+      };
+      try {
+        const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=11.9465&longitude=108.4419&current=temperature_2m,weathercode,relative_humidity_2m,windspeed_10m&timezone=Asia%2FHo_Chi_Minh');
+        const d = await r.json();
+        const { temperature_2m: temp, weathercode: code, relative_humidity_2m: hum, windspeed_10m: wind } = d.current;
+        const [icon, desc] = WMO[code] || ['🌤️','Hôm nay'];
+        document.getElementById('weatherIcon').textContent = icon;
+        document.getElementById('weatherTemp').textContent = Math.round(temp) + '°C';
+        document.getElementById('weatherDesc').textContent = desc;
+        document.getElementById('weatherMeta').textContent = '💧 ' + hum + '%  🌬️ ' + Math.round(wind) + ' km/h';
+      } catch {
+        document.getElementById('weatherDesc').textContent = 'Không thể tải';
+      }
+    })();
+
     // Gallery lightbox — prev/next, counter, caption, keyboard, swipe
     const lightbox      = document.getElementById('lightbox');
     const lightboxImg   = document.getElementById('lightboxImg');
@@ -2275,6 +2355,17 @@
 
     sections.forEach(s => sectionObserver.observe(s));
   </script>
+
+  <!-- WEATHER WIDGET -->
+  <div class="weather-widget" id="weatherWidget">
+    <div class="weather-icon-wrap" id="weatherIcon">🌤️</div>
+    <div class="weather-info">
+      <div class="weather-temp" id="weatherTemp">--°</div>
+      <div class="weather-desc" id="weatherDesc">Đang tải...</div>
+      <div class="weather-meta" id="weatherMeta"></div>
+      <div class="weather-loc">📍 Lâm Đồng</div>
+    </div>
+  </div>
 
   <!-- FLOATING ACTION BUTTONS -->
   <div class="fab-group">
