@@ -1549,6 +1549,91 @@
       .weather-desc { display: none; }
       .weather-meta { display: none; }
     }
+
+    /* ============================================
+       COUNTDOWN — ƯU ĐÃI CUỐI TUẦN
+    ============================================ */
+    #countdown-offer {
+      background: linear-gradient(135deg, #0D2B1A 0%, #163322 100%);
+      border-top: 1.5px solid var(--accent-gold);
+      border-bottom: 1.5px solid var(--accent-gold);
+      padding: 1.5rem var(--spacing-md);
+    }
+    .countdown-bar {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .cd-label-block { display: flex; align-items: center; gap: 1rem; }
+    .cd-fire { font-size: 2rem; animation: cdFlicker 1.6s ease-in-out infinite alternate; display: block; }
+    @keyframes cdFlicker {
+      from { transform: scale(1) rotate(-4deg); }
+      to   { transform: scale(1.12) rotate(4deg); }
+    }
+    .cd-title {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-style: italic;
+      color: var(--accent-gold);
+      line-height: 1.2;
+    }
+    .cd-sub { font-size: 0.62rem; color: rgba(255,255,255,0.45); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 0.25rem; }
+    .countdown-timer { display: flex; align-items: center; gap: 0.4rem; }
+    .cd-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(201,168,76,0.35);
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      min-width: 72px;
+    }
+    .cd-num {
+      font-family: var(--font-serif);
+      font-size: 2.25rem;
+      font-weight: 300;
+      color: #fff;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .cd-unit-label {
+      font-size: 0.56rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+      margin-top: 0.3rem;
+    }
+    .cd-sep { font-size: 2rem; color: rgba(201,168,76,0.5); font-weight: 300; line-height: 1; align-self: flex-start; padding-top: 0.45rem; }
+    .cd-cta-btn {
+      background: var(--accent-gold);
+      color: #1A3326;
+      padding: 0.8rem 2rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: background 0.22s ease, transform 0.22s ease;
+      white-space: nowrap;
+    }
+    .cd-cta-btn:hover { background: var(--accent-gold-lt); transform: translateY(-2px); }
+    @media (max-width: 900px) {
+      .countdown-bar { justify-content: center; text-align: center; }
+      .cd-label-block { flex-direction: column; gap: 0.5rem; }
+    }
+    @media (max-width: 480px) {
+      #countdown-offer { padding: 1.25rem 1rem; }
+      .cd-unit { padding: 0.5rem 0.7rem; min-width: 60px; }
+      .cd-num { font-size: 1.75rem; }
+      .cd-cta-btn { width: 100%; text-align: center; display: block; }
+    }
   </style>
 </head>
 <body>
@@ -1614,6 +1699,41 @@
     <div class="hero-scroll">
       <div class="scroll-line"></div>
       <span>Khám phá</span>
+    </div>
+  </section>
+
+  <!-- COUNTDOWN — ƯU ĐÃI CUỐI TUẦN -->
+  <section id="countdown-offer">
+    <div class="countdown-bar">
+      <div class="cd-label-block">
+        <span class="cd-fire">🔥</span>
+        <div>
+          <div class="cd-title">Ưu Đãi Cuối Tuần</div>
+          <div class="cd-sub">Weekend Special · Giảm giá đặc biệt</div>
+        </div>
+      </div>
+      <div class="countdown-timer">
+        <div class="cd-unit">
+          <span class="cd-num" id="cdDays">00</span>
+          <span class="cd-unit-label">Ngày</span>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <span class="cd-num" id="cdHours">00</span>
+          <span class="cd-unit-label">Giờ</span>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <span class="cd-num" id="cdMins">00</span>
+          <span class="cd-unit-label">Phút</span>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <span class="cd-num" id="cdSecs">00</span>
+          <span class="cd-unit-label">Giây</span>
+        </div>
+      </div>
+      <a href="tel:0968987311" class="cd-cta-btn">📞 Đặt Ngay</a>
     </div>
   </section>
 
@@ -2242,6 +2362,30 @@
         document.getElementById('tab-' + target).classList.add('active');
       });
     });
+
+    // COUNTDOWN — Ưu đãi cuối tuần
+    (function startCountdown() {
+      function getTarget() {
+        const now  = new Date();
+        const day  = now.getDay();
+        const diff = day === 0 ? 0 : 7 - day;
+        const t    = new Date(now);
+        t.setDate(now.getDate() + diff);
+        t.setHours(23, 59, 59, 0);
+        return t;
+      }
+      const pad = n => String(n).padStart(2, '0');
+      function tick() {
+        const left = getTarget() - new Date();
+        if (left <= 0) { tick(); return; }
+        document.getElementById('cdDays').textContent  = pad(Math.floor(left / 86400000));
+        document.getElementById('cdHours').textContent = pad(Math.floor((left % 86400000) / 3600000));
+        document.getElementById('cdMins').textContent  = pad(Math.floor((left % 3600000)  / 60000));
+        document.getElementById('cdSecs').textContent  = pad(Math.floor((left % 60000)    / 1000));
+      }
+      tick();
+      setInterval(tick, 1000);
+    })();
 
     // WEATHER WIDGET — Open-Meteo (free, no API key)
     (async function loadWeather() {
