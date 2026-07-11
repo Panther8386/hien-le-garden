@@ -710,8 +710,8 @@
     }
 
     .room-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+      transform: translateY(-10px);
+      box-shadow: 0 28px 56px rgba(13,43,26,0.18), 0 0 0 1.5px rgba(201,168,76,0.35);
       border-color: var(--border-gold);
     }
 
@@ -725,11 +725,13 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform var(--transition-slow);
+      transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  filter 0.55s ease;
     }
 
     .room-card:hover .room-img img {
-      transform: scale(1.08);
+      transform: scale(1.12);
+      filter: brightness(1.07) saturate(1.06);
     }
 
     .room-badge {
@@ -995,14 +997,15 @@
     .gallery-item img {
       width: 100%;
       display: block;
-      transition: transform var(--transition-slow);
+      transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  filter 0.55s ease;
     }
 
     .gallery-item::after {
       content: '⊕ Xem ảnh';
       position: absolute;
       inset: 0;
-      background: rgba(13,43,26,0.6);
+      background: rgba(13,43,26,0.55);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1014,7 +1017,16 @@
       transition: opacity var(--transition);
     }
 
-    .gallery-item:hover img { transform: scale(1.06); }
+    .gallery-item {
+      transition: box-shadow 0.45s ease;
+    }
+    .gallery-item:hover {
+      box-shadow: 0 20px 56px rgba(0,0,0,0.22), 0 4px 16px rgba(201,168,76,0.08);
+    }
+    .gallery-item:hover img {
+      transform: scale(1.1);
+      filter: brightness(1.06) saturate(1.07);
+    }
     .gallery-item:hover::after { opacity: 1; }
 
     /* Lightbox */
@@ -1639,6 +1651,43 @@
       .cd-num { font-size: 1.75rem; }
       .cd-cta-btn { width: 100%; text-align: center; display: block; }
     }
+
+    /* ============================================
+       CURSOR EFFECT
+    ============================================ */
+    .cursor-dot,
+    .cursor-ring {
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      will-change: left, top, width, height;
+      opacity: 0;
+      border-radius: 50%;
+      transition: opacity 0.3s ease,
+                  width  0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  height 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  border-color 0.3s ease,
+                  background  0.3s ease;
+    }
+    .cursor-dot {
+      width: 6px; height: 6px;
+      background: var(--accent-gold);
+    }
+    .cursor-ring {
+      width: 42px; height: 42px;
+      border: 1.5px solid rgba(201,168,76,0.5);
+    }
+    .cursor-ring.on-image {
+      width: 72px; height: 72px;
+      border-color: rgba(201,168,76,0.9);
+      background: rgba(201,168,76,0.06);
+    }
+    body.cursor-active .cursor-dot,
+    body.cursor-active .cursor-ring { opacity: 1; }
+    .gallery-item  { cursor: none; }
+    .room-img      { cursor: none; }
 
     /* ============================================
        GOOGLE MAP — Upgraded
@@ -2659,6 +2708,48 @@
     }, { threshold: 0.4 });
 
     sections.forEach(s => sectionObserver.observe(s));
+
+    // === CURSOR EFFECT ===
+    (function initCursor() {
+      if (window.matchMedia('(pointer: coarse)').matches) return; // skip touch devices
+
+      const dot  = document.createElement('div');
+      const ring = document.createElement('div');
+      dot.className  = 'cursor-dot';
+      ring.className = 'cursor-ring';
+      document.body.appendChild(dot);
+      document.body.appendChild(ring);
+
+      let mx = 0, my = 0, rx = 0, ry = 0;
+      let rafId;
+
+      document.addEventListener('mousemove', e => {
+        mx = e.clientX; my = e.clientY;
+        dot.style.left = mx + 'px';
+        dot.style.top  = my + 'px';
+        document.body.classList.add('cursor-active');
+      }, { passive: true });
+
+      document.addEventListener('mouseleave', () => {
+        document.body.classList.remove('cursor-active');
+      });
+
+      function animRing() {
+        rx += (mx - rx) * 0.1;
+        ry += (my - ry) * 0.1;
+        ring.style.left = rx + 'px';
+        ring.style.top  = ry + 'px';
+        rafId = requestAnimationFrame(animRing);
+      }
+      animRing();
+
+      // Expand ring over image zones
+      const zones = document.querySelectorAll('.gallery-item, .room-img');
+      zones.forEach(el => {
+        el.addEventListener('mouseenter', () => ring.classList.add('on-image'));
+        el.addEventListener('mouseleave', () => ring.classList.remove('on-image'));
+      });
+    })();
 
     // === PARALLAX ===
     (function initParallax() {
