@@ -1690,6 +1690,100 @@
     .room-img      { cursor: none; }
 
     /* ============================================
+       WEATHER FX — Floating Animation
+    ============================================ */
+    #weatherFx {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9;
+      overflow: hidden;
+    }
+    @media (prefers-reduced-motion: reduce) { #weatherFx { display: none; } }
+
+    @keyframes wxRainFall {
+      0%   { transform: translateY(-130px) translateX(0); opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 0.8; }
+      100% { transform: translateY(calc(100vh + 40px)) translateX(30px); opacity: 0; }
+    }
+    .wx-rain {
+      position: absolute;
+      top: 0;
+      width: 1px;
+      border-radius: 2px;
+      background: linear-gradient(to bottom,
+        transparent, rgba(174,214,241,0.65) 40%, rgba(174,214,241,0.35));
+      animation: wxRainFall linear infinite;
+    }
+
+    @keyframes wxCloudDrift {
+      from { transform: translateX(-280px); }
+      to   { transform: translateX(calc(100vw + 280px)); }
+    }
+    .wx-cloud {
+      position: absolute;
+      border-radius: 60px;
+      background: rgba(255,255,255,0.07);
+      filter: blur(20px);
+      animation: wxCloudDrift linear infinite;
+    }
+
+    @keyframes wxSparkle {
+      0%, 100% { transform: scale(0.7) translateY(0); opacity: 0.15; }
+      50%       { transform: scale(1.4) translateY(-10px); opacity: 0.65; }
+    }
+    .wx-spark {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,215,60,0.6);
+      filter: blur(2px);
+      animation: wxSparkle ease-in-out infinite;
+    }
+
+    @keyframes wxFogDrift {
+      from { transform: translateX(-420px); opacity: 0; }
+      15%  { opacity: 1; }
+      85%  { opacity: 1; }
+      to   { transform: translateX(calc(100vw + 420px)); opacity: 0; }
+    }
+    .wx-fog {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(to right, transparent, rgba(195,215,200,0.1), transparent);
+      filter: blur(22px);
+      animation: wxFogDrift linear infinite;
+    }
+
+    @keyframes wxFlash {
+      0%, 84%, 100% { opacity: 0; }
+      85% { opacity: 0.12; }
+      87% { opacity: 0; }
+      89% { opacity: 0.07; }
+      91% { opacity: 0; }
+    }
+    .wx-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(210,230,255,1);
+      pointer-events: none;
+      animation: wxFlash 5s ease infinite;
+    }
+
+    @keyframes wxSnowFall {
+      0%   { transform: translateY(-20px) translateX(0) rotate(0deg); opacity: 0.9; }
+      100% { transform: translateY(calc(100vh + 20px)) translateX(35px) rotate(360deg); opacity: 0.2; }
+    }
+    .wx-snow {
+      position: absolute;
+      top: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.85);
+      filter: blur(0.5px);
+      animation: wxSnowFall linear infinite;
+    }
+
+    /* ============================================
        GOOGLE MAP — Upgraded
     ============================================ */
     #map { background: var(--bg-secondary); padding: var(--spacing-lg) 0 0; }
@@ -2629,6 +2723,7 @@
         document.getElementById('weatherTemp').textContent = Math.round(temp) + '°C';
         document.getElementById('weatherDesc').textContent = desc;
         document.getElementById('weatherMeta').textContent = '💧 ' + hum + '%  🌬️ ' + Math.round(wind) + ' km/h';
+        startWeatherFx(code);
       } catch {
         document.getElementById('weatherDesc').textContent = 'Không thể tải';
       }
@@ -2710,6 +2805,83 @@
     sections.forEach(s => sectionObserver.observe(s));
 
     // === CURSOR EFFECT ===
+    function startWeatherFx(code) {
+      const fx = document.getElementById('weatherFx');
+      if (!fx) return;
+      fx.innerHTML = '';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const rnd = (a, b) => Math.random() * (b - a) + a;
+      const mk  = cls => { const e = document.createElement('div'); e.className = cls; return e; };
+      const RAIN  = [51,53,55,61,63,65,80,81,82,95,96,99];
+      const STORM = [95,96,99];
+      const CLOUD = [2,3];
+      const FOG   = [45,48];
+      const SUNNY = [0,1];
+      const SNOW  = [71];
+      if (RAIN.includes(code)) {
+        const n = STORM.includes(code) ? 65 : code === 65 ? 50 : 30;
+        for (let i = 0; i < n; i++) {
+          const d = mk('wx-rain');
+          d.style.left   = rnd(-5, 110) + '%';
+          d.style.height = rnd(55, 115) + 'px';
+          d.style.opacity = rnd(0.2, 0.65);
+          d.style.animationDuration = rnd(0.55, 1.15) + 's';
+          d.style.animationDelay   = '-' + rnd(0, 4) + 's';
+          fx.appendChild(d);
+        }
+        if (STORM.includes(code)) {
+          const f = mk('wx-flash');
+          f.style.animationDelay = rnd(0, 3) + 's';
+          fx.appendChild(f);
+        }
+      } else if (CLOUD.includes(code)) {
+        for (let i = 0; i < 5; i++) {
+          const d = mk('wx-cloud');
+          d.style.top    = rnd(3, 45) + '%';
+          d.style.width  = rnd(160, 340) + 'px';
+          d.style.height = rnd(55, 95) + 'px';
+          d.style.opacity = rnd(0.4, 0.85);
+          d.style.animationDuration = rnd(45, 90) + 's';
+          d.style.animationDelay   = '-' + rnd(0, 80) + 's';
+          fx.appendChild(d);
+        }
+      } else if (FOG.includes(code)) {
+        for (let i = 0; i < 8; i++) {
+          const d = mk('wx-fog');
+          d.style.top    = rnd(15, 85) + '%';
+          d.style.width  = rnd(350, 650) + 'px';
+          d.style.height = rnd(60, 100) + 'px';
+          d.style.opacity = rnd(0.5, 1);
+          d.style.animationDuration = rnd(25, 50) + 's';
+          d.style.animationDelay   = '-' + rnd(0, 40) + 's';
+          fx.appendChild(d);
+        }
+      } else if (SUNNY.includes(code)) {
+        for (let i = 0; i < 18; i++) {
+          const d = mk('wx-spark');
+          const s = rnd(4, 11);
+          d.style.left   = rnd(5, 95) + '%';
+          d.style.top    = rnd(5, 92) + '%';
+          d.style.width  = s + 'px';
+          d.style.height = s + 'px';
+          d.style.animationDuration = rnd(2.5, 5.5) + 's';
+          d.style.animationDelay   = rnd(0, 5) + 's';
+          fx.appendChild(d);
+        }
+      } else if (SNOW.includes(code)) {
+        for (let i = 0; i < 30; i++) {
+          const d = mk('wx-snow');
+          const s = rnd(3, 7);
+          d.style.left   = rnd(0, 100) + '%';
+          d.style.width  = s + 'px';
+          d.style.height = s + 'px';
+          d.style.animationDuration = rnd(3, 7) + 's';
+          d.style.animationDelay   = '-' + rnd(0, 6) + 's';
+          fx.appendChild(d);
+        }
+      }
+    }
+
     (function initCursor() {
       if (window.matchMedia('(pointer: coarse)').matches) return; // skip touch devices
 
@@ -2789,6 +2961,7 @@
   </script>
 
   <!-- WEATHER WIDGET -->
+  <div id="weatherFx"></div>
   <div class="weather-widget" id="weatherWidget">
     <div class="weather-icon-wrap" id="weatherIcon">🌤️</div>
     <div class="weather-info">
