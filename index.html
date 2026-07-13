@@ -2036,6 +2036,40 @@
     @media (max-width: 600px) {
       .map-distances { grid-template-columns: 1fr; }
     }
+
+    /* ── Language Toggle ── */
+    .lang-toggle {
+      background: none;
+      border: 1px solid rgba(245,239,228,0.25);
+      border-radius: 20px;
+      color: var(--text-dim);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0.28rem 0.8rem;
+      transition: border-color 0.2s, color 0.2s;
+      font-family: var(--font-sans);
+      flex-shrink: 0;
+    }
+    .lang-toggle:hover { border-color: var(--accent-gold); color: var(--accent-gold); }
+    html.lang-en .lang-toggle { color: var(--accent-gold); border-color: var(--accent-gold); }
+
+    /* ── EN mode: stat labels ── */
+    html:not(.lang-en) .stat-label-en { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); }
+    html.lang-en .stat-label-vi { display: none; }
+    html.lang-en .stat-label-en { font-size: 0.85rem; font-weight: 400; color: var(--text-primary); letter-spacing: 0; text-transform: none; }
+
+    /* ── EN mode: feature card titles ── */
+    html.lang-en .feature-title-vi { display: none; }
+    html.lang-en .feature-title-en {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      color: var(--text-primary);
+      letter-spacing: 0;
+      text-transform: none;
+      margin-bottom: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -2047,24 +2081,26 @@
     </a>
 
     <ul class="nav-links">
-      <li><a href="#overview">Tổng Quan</a></li>
-      <li><a href="#rooms">Phòng</a></li>
-      <li><a href="#experience">Trải Nghiệm</a></li>
-      <li><a href="#pricing">Bảng Giá</a></li>
-      <li><a href="#contact">Liên Hệ</a></li>
+      <li><a href="#overview" data-i18n="nav.overview">Tổng Quan</a></li>
+      <li><a href="#rooms" data-i18n="nav.rooms">Phòng</a></li>
+      <li><a href="#experience" data-i18n="nav.exp">Trải Nghiệm</a></li>
+      <li><a href="#pricing" data-i18n="nav.pricing">Bảng Giá</a></li>
+      <li><a href="#contact" data-i18n="nav.contact">Liên Hệ</a></li>
     </ul>
 
     <div class="nav-cta-group">
       <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" class="nav-cta-btn nav-btn-book" target="_blank" rel="noopener noreferrer">
-        <span>📅</span><span class="nav-btn-label">Đặt phòng</span>
+        <span>📅</span><span class="nav-btn-label" data-i18n="nav.book">Đặt phòng</span>
       </a>
       <a href="tel:0968987311" class="nav-cta-btn nav-btn-call">
-        <span>📞</span><span class="nav-btn-label">Gọi ngay</span>
+        <span>📞</span><span class="nav-btn-label" data-i18n="nav.call">Gọi ngay</span>
       </a>
       <a href="https://zalo.me/0968987311" class="nav-cta-btn nav-btn-zalo" target="_blank" rel="noopener noreferrer">
         <span>💬</span><span class="nav-btn-label">Zalo</span>
       </a>
     </div>
+
+    <button class="lang-toggle" id="langToggle" aria-label="Switch language" title="Switch language">VI</button>
 
     <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -2074,11 +2110,11 @@
   <!-- Mobile Overlay -->
   <div class="nav-mobile-overlay" id="mobileOverlay">
     <button class="nav-mobile-close" id="mobileClose">✕</button>
-    <a href="#overview" class="mobile-nav-link">Tổng Quan</a>
-    <a href="#rooms" class="mobile-nav-link">Phòng</a>
-    <a href="#experience" class="mobile-nav-link">Trải Nghiệm</a>
-    <a href="#pricing" class="mobile-nav-link">Bảng Giá</a>
-    <a href="#contact" class="mobile-nav-link">Liên Hệ</a>
+    <a href="#overview" class="mobile-nav-link" data-i18n="nav.overview">Tổng Quan</a>
+    <a href="#rooms" class="mobile-nav-link" data-i18n="nav.rooms">Phòng</a>
+    <a href="#experience" class="mobile-nav-link" data-i18n="nav.exp">Trải Nghiệm</a>
+    <a href="#pricing" class="mobile-nav-link" data-i18n="nav.pricing">Bảng Giá</a>
+    <a href="#contact" class="mobile-nav-link" data-i18n="nav.contact">Liên Hệ</a>
     <a href="tel:0968987311" class="btn btn-emerald">📞 0968 987 311</a>
   </div>
 
@@ -2088,19 +2124,19 @@
     <div class="hero-content">
       <span class="hero-eyebrow">Farmstay · Nam Gia Nghĩa, Lâm Đồng</span>
       <h1 class="hero-title">
-        <span class="hero-title-line">Bình Yên</span>
-        <span class="hero-title-line gold-line">Giữa Lòng</span>
-        <span class="hero-title-line">Thành Phố</span>
+        <span class="hero-title-line" data-i18n="hero.line1">Bình Yên</span>
+        <span class="hero-title-line gold-line" data-i18n="hero.line2">Giữa Lòng</span>
+        <span class="hero-title-line" data-i18n="hero.line3">Thành Phố</span>
       </h1>
-      <p class="hero-sub">Check-in thiên nhiên — View hồ cực chill · Nature Check-in — Stunning Lake Views</p>
+      <p class="hero-sub" data-i18n="hero.sub">Check-in thiên nhiên — View hồ cực chill · Nature Check-in — Stunning Lake Views</p>
       <div class="hero-actions">
-        <a href="#rooms" class="btn btn-gold">Khám Phá Phòng</a>
-        <a href="#pricing" class="btn btn-outline">Xem Bảng Giá</a>
+        <a href="#rooms" class="btn btn-gold" data-i18n="hero.btn.rooms">Khám Phá Phòng</a>
+        <a href="#pricing" class="btn btn-outline" data-i18n="hero.btn.pricing">Xem Bảng Giá</a>
       </div>
     </div>
     <div class="hero-scroll">
       <div class="scroll-line"></div>
-      <span>Khám phá</span>
+      <span data-i18n="hero.scroll">Khám phá</span>
     </div>
   </section>
 
@@ -2132,63 +2168,63 @@
   <section class="section" id="experience">
     <div class="container">
       <div class="section-header fade-in">
-        <span class="label">Trải Nghiệm · Experience</span>
-        <h2>Mọi Khoảnh Khắc Đều Đáng Nhớ</h2>
+        <span class="label" data-i18n="exp.label">Trải Nghiệm · Experience</span>
+        <h2 data-i18n="exp.h2">Mọi Khoảnh Khắc Đều Đáng Nhớ</h2>
       </div>
       <div class="features-grid">
         <div class="feature-card fade-in">
           <span class="feature-icon">🏔️</span>
           <div class="feature-title-vi">View Hồ Panorama</div>
           <div class="feature-title-en">Lake Panorama View</div>
-          <p class="feature-desc">Tầm nhìn rộng mở ra hồ nước xanh mát, cảnh quan thiên nhiên hùng vĩ chỉ cách thành phố vài phút.</p>
+          <p class="feature-desc" data-i18n="exp.desc.1">Tầm nhìn rộng mở ra hồ nước xanh mát, cảnh quan thiên nhiên hùng vĩ chỉ cách thành phố vài phút.</p>
         </div>
         <div class="feature-card fade-in">
           <span class="feature-icon">🏠</span>
           <div class="feature-title-vi">Triangle House</div>
           <div class="feature-title-en">Iconic A-Frame Cabins</div>
-          <p class="feature-desc">Kiến trúc mái tam giác độc đáo, không gian ấm cúng với gỗ tự nhiên, hoà mình vào cảnh quan xanh.</p>
+          <p class="feature-desc" data-i18n="exp.desc.2">Kiến trúc mái tam giác độc đáo, không gian ấm cúng với gỗ tự nhiên, hoà mình vào cảnh quan xanh.</p>
         </div>
         <div class="feature-card fade-in">
           <span class="feature-icon">⭕</span>
           <div class="feature-title-vi">Circle House</div>
           <div class="feature-title-en">Artistic Barrel Rooms</div>
-          <p class="feature-desc">Phòng hình tròn nghệ thuật độc đáo — điểm check-in ấn tượng, nội thất hiện đại trong không gian thiên nhiên.</p>
+          <p class="feature-desc" data-i18n="exp.desc.3">Phòng hình tròn nghệ thuật độc đáo — điểm check-in ấn tượng, nội thất hiện đại trong không gian thiên nhiên.</p>
         </div>
         <div class="feature-card fade-in">
           <span class="feature-icon">🌸</span>
           <div class="feature-title-vi">Vườn Hoa Cỏ May</div>
           <div class="feature-title-en">Wildflower Garden</div>
-          <p class="feature-desc">Cánh đồng hoa cỏ may rực rỡ theo mùa — khung cảnh nên thơ lý tưởng cho ảnh cưới và check-in.</p>
+          <p class="feature-desc" data-i18n="exp.desc.4">Cánh đồng hoa cỏ may rực rỡ theo mùa — khung cảnh nên thơ lý tưởng cho ảnh cưới và check-in.</p>
         </div>
         <div class="feature-card fade-in">
           <span class="feature-icon">🔥</span>
           <div class="feature-title-vi">Campfire & Glamping</div>
           <div class="feature-title-en">Campfire & Overnight Camping</div>
-          <p class="feature-desc">Đốt lửa trại dưới bầu trời đêm, cắm trại qua đêm giữa thiên nhiên — trải nghiệm không thể quên.</p>
+          <p class="feature-desc" data-i18n="exp.desc.5">Đốt lửa trại dưới bầu trời đêm, cắm trại qua đêm giữa thiên nhiên — trải nghiệm không thể quên.</p>
         </div>
         <div class="feature-card fade-in">
           <span class="feature-icon">☕</span>
           <div class="feature-title-vi">Cà Phê Giữa Vườn</div>
           <div class="feature-title-en">Garden Café</div>
-          <p class="feature-desc">Thưởng thức cà phê Ban Mê giữa không gian xanh mát, ngắm hồ — khoảnh khắc bình yên giữa lòng thành phố.</p>
+          <p class="feature-desc" data-i18n="exp.desc.6">Thưởng thức cà phê Ban Mê giữa không gian xanh mát, ngắm hồ — khoảnh khắc bình yên giữa lòng thành phố.</p>
         </div>
         <div class="feature-card fade-in">
           <span class="feature-icon">👥</span>
           <div class="feature-title-vi">Team Building</div>
           <div class="feature-title-en">Corporate Events & Team Building</div>
-          <p class="feature-desc">Không gian rộng rãi cho sự kiện doanh nghiệp 20–100 người, thiết kế theo yêu cầu riêng.</p>
+          <p class="feature-desc" data-i18n="exp.desc.7">Không gian rộng rãi cho sự kiện doanh nghiệp 20–100 người, thiết kế theo yêu cầu riêng.</p>
         </div>
         <div class="feature-card fade-in">
           <span class="feature-icon">📸</span>
           <div class="feature-title-vi">Check-in Sống Ảo</div>
           <div class="feature-title-en">Photo & Check-in Spots</div>
-          <p class="feature-desc">Hàng chục góc chụp ảnh đẹp — từ cổng làng đến bờ hồ, vườn hoa đến các căn phòng nghệ thuật.</p>
+          <p class="feature-desc" data-i18n="exp.desc.8">Hàng chục góc chụp ảnh đẹp — từ cổng làng đến bờ hồ, vườn hoa đến các căn phòng nghệ thuật.</p>
         </div>
         <div class="feature-card fade-in">
           <span class="feature-icon">🌱</span>
           <div class="feature-title-vi">Nông Nghiệm Trải Nghiệm</div>
           <div class="feature-title-en">Agri-Experience</div>
-          <p class="feature-desc">Trồng rau, hái quả, học chăm sóc cây trái — trải nghiệm nông nghiệp thực thụ cho mọi lứa tuổi.</p>
+          <p class="feature-desc" data-i18n="exp.desc.9">Trồng rau, hái quả, học chăm sóc cây trái — trải nghiệm nông nghiệp thực thụ cho mọi lứa tuổi.</p>
         </div>
       </div>
     </div>
@@ -2197,8 +2233,8 @@
   <section class="section" id="rooms">
     <div class="container">
       <div class="section-header fade-in">
-        <span class="label">Lưu Trú · Accommodation</span>
-        <h2>Chọn Không Gian Của Bạn</h2>
+        <span class="label" data-i18n="rooms.label">Lưu Trú · Accommodation</span>
+        <h2 data-i18n="rooms.h2">Chọn Không Gian Của Bạn</h2>
       </div>
       <div class="rooms-grid">
 
@@ -2213,9 +2249,9 @@
             <div class="room-name">Triangle House</div>
             <div class="room-meta">
               <span>👥 2–3 người</span>
-              <span>🌿 View vườn</span>
+              <span data-i18n="room.meta.garden">🌿 View vườn</span>
             </div>
-            <p class="room-desc">Cabin mái tam giác độc đáo, giường đôi, không gian gỗ ấm cúng giữa thiên nhiên.</p>
+            <p class="room-desc" data-i18n="room.desc.1">Cabin mái tam giác độc đáo, giường đôi, không gian gỗ ấm cúng giữa thiên nhiên.</p>
           </div>
         </div>
 
@@ -2230,9 +2266,9 @@
             <div class="room-name">Circle House — Superior</div>
             <div class="room-meta">
               <span>👥 2–4 người</span>
-              <span>🏔️ View hồ</span>
+              <span data-i18n="room.meta.lake">🏔️ View hồ</span>
             </div>
-            <p class="room-desc">Phòng hình tròn nghệ thuật, view hồ, tiện nghi cao cấp hơn. Điểm check-in ấn tượng.</p>
+            <p class="room-desc" data-i18n="room.desc.2">Phòng hình tròn nghệ thuật, view hồ, tiện nghi cao cấp hơn. Điểm check-in ấn tượng.</p>
           </div>
         </div>
 
@@ -2247,9 +2283,9 @@
             <div class="room-name">E Đê Cozy House — Deluxe</div>
             <div class="room-meta">
               <span>👥 2–4 người</span>
-              <span>🏔️ Bản sắc cao nguyên</span>
+              <span data-i18n="room.meta.highland">🏔️ Bản sắc cao nguyên</span>
             </div>
-            <p class="room-desc">Tái hiện nét sống truyền thống của người Ê Đê tại Gia Nghĩa - Đắk Nông, với không gian mộc mạc, ấm cúng, gần gũi thiên nhiên và đậm bản sắc cao nguyên.</p>
+            <p class="room-desc" data-i18n="room.desc.3">Tái hiện nét sống truyền thống của người Ê Đê tại Gia Nghĩa - Đắk Nông, với không gian mộc mạc, ấm cúng, gần gũi thiên nhiên và đậm bản sắc cao nguyên.</p>
           </div>
         </div>
 
@@ -2258,15 +2294,15 @@
             <img src="./images/room-vip-house.jpg" alt="VIP House" loading="lazy">
             <!-- LOCAL: VIP House / Premium Garden View photo -->
             <span class="room-badge">VIP House</span>
-            <div class="room-price-badge">900K<small>đ / đêm</small></div>
+            <div class="room-price-badge" style="font-size:0.85rem">700K–900K<small>đ / đêm</small></div>
           </div>
           <div class="room-info">
             <div class="room-name">VIP House — Premium</div>
             <div class="room-meta">
               <span>👥 3–5 người</span>
-              <span>🌅 Sân hiên riêng</span>
+              <span data-i18n="room.meta.terrace">🌅 Sân hiên riêng</span>
             </div>
-            <p class="room-desc">View đẹp nhất khu, sân hiên riêng nhìn ra hồ và vườn hoa, tiện nghi cao cấp đầy đủ.</p>
+            <p class="room-desc" data-i18n="room.desc.4">View đẹp nhất khu, sân hiên riêng nhìn ra hồ và vườn hoa, tiện nghi cao cấp đầy đủ.</p>
           </div>
         </div>
 
@@ -2275,15 +2311,15 @@
             <img src="./images/room-bungalow.jpg" alt="Bungalow Gia Dinh" loading="lazy">
             <!-- LOCAL: Bungalow / Family room photo -->
             <span class="room-badge">Bungalow</span>
-            <div class="room-price-badge">1.2M<small>đ / đêm</small></div>
+            <div class="room-price-badge">900K<small>đ / đêm</small></div>
           </div>
           <div class="room-info">
-            <div class="room-name">Bungalow Gia Đình</div>
+            <div class="room-name" data-i18n="room.name.bungalow">Bungalow Gia Đình</div>
             <div class="room-meta">
               <span>👥 4–6 người</span>
               <span>🏠 Full amenities</span>
             </div>
-            <p class="room-desc">Không gian rộng rãi nhất, đầy đủ tiện nghi cao cấp, phù hợp gia đình hoặc nhóm bạn.</p>
+            <p class="room-desc" data-i18n="room.desc.5">Không gian rộng rãi nhất, đầy đủ tiện nghi cao cấp, phù hợp gia đình hoặc nhóm bạn.</p>
           </div>
         </div>
 
@@ -2295,12 +2331,12 @@
             <div class="room-price-badge">150K<small>đ / người</small></div>
           </div>
           <div class="room-info">
-            <div class="room-name">Phòng Tập Thể</div>
+            <div class="room-name" data-i18n="room.name.dorm">Phòng Tập Thể</div>
             <div class="room-meta">
               <span>👥 10–20 người</span>
-              <span>🛏️ Giường tầng</span>
+              <span data-i18n="room.meta.bunk">🛏️ Giường tầng</span>
             </div>
-            <p class="room-desc">Giường tầng, giá hợp lý theo đầu người. Lý tưởng cho nhóm bạn trẻ, lớp học, đoàn tham quan.</p>
+            <p class="room-desc" data-i18n="room.desc.6">Giường tầng, giá hợp lý theo đầu người. Lý tưởng cho nhóm bạn trẻ, lớp học, đoàn tham quan.</p>
           </div>
         </div>
 
@@ -2311,13 +2347,13 @@
   <section class="section" id="pricing">
     <div class="container">
       <div class="section-header fade-in">
-        <span class="label">Bảng Giá · Pricing</span>
-        <h2>Minh Bạch, Hợp Lý</h2>
+        <span class="label" data-i18n="pricing.label">Bảng Giá · Pricing</span>
+        <h2 data-i18n="pricing.h2">Minh Bạch, Hợp Lý</h2>
       </div>
 
       <div class="pricing-tabs" role="tablist">
-        <button class="pricing-tab active" data-tab="overnight" role="tab" aria-selected="true">Lưu Trú</button>
-        <button class="pricing-tab" data-tab="activities" role="tab" aria-selected="false">F&B & Hoạt Động</button>
+        <button class="pricing-tab active" data-tab="overnight" role="tab" aria-selected="true" data-i18n="pricing.tab.overnight">Lưu Trú</button>
+        <button class="pricing-tab" data-tab="activities" role="tab" aria-selected="false" data-i18n="pricing.tab.activities">F&B & Hoạt Động</button>
         <button class="pricing-tab" data-tab="events" role="tab" aria-selected="false">Sự Kiện &amp; Team Building</button>
       </div>
 
@@ -2327,48 +2363,48 @@
         <table class="pricing-table">
           <thead>
             <tr>
-              <th>Loại Phòng</th>
-              <th>Đơn Giá</th>
-              <th>Sức Chứa</th>
-              <th>Ghi Chú</th>
+              <th data-i18n="pricing.th.room">Loại Phòng</th>
+              <th data-i18n="pricing.th.price">Đơn Giá</th>
+              <th data-i18n="pricing.th.capacity">Sức Chứa</th>
+              <th data-i18n="pricing.th.notes">Ghi Chú</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>Triangle House (Tiêu Chuẩn)</td>
               <td><span class="price">300.000 đ</span></td>
-              <td class="capacity">2–3 người</td>
-              <td class="note">View vườn, giường đôi</td>
+              <td class="capacity" data-i18n="pricing.cap.r1">2–3 người</td>
+              <td class="note" data-i18n="pricing.note.r1">View vườn, giường đôi</td>
             </tr>
             <tr>
               <td>Circle House — Superior</td>
               <td><span class="price">600.000 đ</span></td>
-              <td class="capacity">2–4 người</td>
-              <td class="note">View hồ, tiện nghi cao cấp hơn</td>
+              <td class="capacity" data-i18n="pricing.cap.r2">2–4 người</td>
+              <td class="note" data-i18n="pricing.note.r2">View hồ, tiện nghi cao cấp hơn</td>
             </tr>
             <tr>
               <td>E Đê Cozy — Deluxe</td>
               <td><span class="price">700.000 đ</span></td>
-              <td class="capacity">2–4 người</td>
-              <td class="note">Bao gồm bữa sáng</td>
+              <td class="capacity" data-i18n="pricing.cap.r3">2–4 người</td>
+              <td class="note" data-i18n="pricing.note.r3">Bao gồm bữa sáng</td>
             </tr>
             <tr>
               <td>VIP House — Premium Garden View</td>
-              <td><span class="price">900.000 đ</span></td>
-              <td class="capacity">3–5 người</td>
-              <td class="note">Sân hiên riêng, view tốt nhất</td>
+              <td><span class="price">700.000–900.000 đ</span></td>
+              <td class="capacity" data-i18n="pricing.cap.r4">3–5 người</td>
+              <td class="note" data-i18n="pricing.note.r4">Sân hiên riêng, view tốt nhất</td>
             </tr>
             <tr>
               <td>Bungalow Gia Đình</td>
-              <td><span class="price">1.200.000 đ</span></td>
-              <td class="capacity">4–6 người</td>
-              <td class="note">Phòng rộng, full amenities</td>
+              <td><span class="price">900.000 đ</span></td>
+              <td class="capacity" data-i18n="pricing.cap.r5">4–6 người</td>
+              <td class="note" data-i18n="pricing.note.r5">Phòng rộng, full amenities</td>
             </tr>
             <tr>
               <td>Phòng Tập Thể</td>
               <td><span class="price">150.000 đ</span></td>
-              <td class="capacity">10–20 người</td>
-              <td class="note">Tính theo đầu người, giường tầng</td>
+              <td class="capacity" data-i18n="pricing.cap.r6">10–20 người</td>
+              <td class="note" data-i18n="pricing.note.r6">Tính theo đầu người, giường tầng</td>
             </tr>
           </tbody>
         </table>
@@ -2636,8 +2672,8 @@
   <section id="direct-booking-offer">
     <div class="offer-bar">
       <span class="offer-icon">🌿</span>
-      <p class="offer-text">Ưu đãi dành cho khách đặt trực tiếp — liên hệ để nhận chính sách theo ngày lưu trú.</p>
-      <a href="https://zalo.me/0968987311" target="_blank" rel="noopener noreferrer" class="offer-cta">Liên Hệ Ngay</a>
+      <p class="offer-text" data-i18n="offer.text">Ưu đãi dành cho khách đặt trực tiếp — liên hệ để nhận chính sách theo ngày lưu trú.</p>
+      <a href="https://zalo.me/0968987311" target="_blank" rel="noopener noreferrer" class="offer-cta" data-i18n="offer.cta">Liên Hệ Ngay</a>
     </div>
   </section>
 
@@ -2645,49 +2681,49 @@
     <div class="cta-bg"></div>
     <div class="container">
       <div class="cta-content fade-in">
-        <span class="label">Đặt Phòng · Book Now</span>
-        <h2>Bắt Đầu <em>Hành Trình</em><br>Của Bạn</h2>
-        <p class="cta-sub">Điền thông tin bên dưới — Nhân viên sẽ xác nhận và hướng dẫn đặt cọc qua Zalo</p>
+        <span class="label" data-i18n="book.label">Đặt Phòng · Book Now</span>
+        <h2 data-i18n-html="book.h2">Bắt Đầu <em>Hành Trình</em><br>Của Bạn</h2>
+        <p class="cta-sub" data-i18n="book.sub">Điền thông tin bên dưới — Nhân viên sẽ xác nhận và hướng dẫn đặt cọc qua Zalo</p>
 
         <div class="bk-steps" aria-label="Quy trình đặt phòng">
           <div class="bk-step">
             <div class="bk-step-num">1</div>
-            <div class="bk-step-label">Chọn ngày</div>
+            <div class="bk-step-label" data-i18n="book.step1">Chọn ngày</div>
           </div>
           <div class="bk-arrow" aria-hidden="true">›</div>
           <div class="bk-step">
             <div class="bk-step-num">2</div>
-            <div class="bk-step-label">Số người</div>
+            <div class="bk-step-label" data-i18n="book.step2">Số người</div>
           </div>
           <div class="bk-arrow" aria-hidden="true">›</div>
           <div class="bk-step">
             <div class="bk-step-num">3</div>
-            <div class="bk-step-label">Loại phòng</div>
+            <div class="bk-step-label" data-i18n="book.step3">Loại phòng</div>
           </div>
           <div class="bk-arrow" aria-hidden="true">›</div>
           <div class="bk-step">
             <div class="bk-step-num">4</div>
-            <div class="bk-step-label">Gửi Zalo</div>
+            <div class="bk-step-label" data-i18n="book.step4">Gửi Zalo</div>
           </div>
           <div class="bk-arrow" aria-hidden="true">›</div>
           <div class="bk-step">
             <div class="bk-step-num">5</div>
-            <div class="bk-step-label">Xác nhận</div>
+            <div class="bk-step-label" data-i18n="book.step5">Xác nhận</div>
           </div>
         </div>
 
         <div class="bk-form">
           <div class="bk-form-grid">
             <div class="bk-field">
-              <label for="v1CheckIn">📅 Ngày nhận phòng</label>
+              <label for="v1CheckIn" data-i18n="book.field.checkin">📅 Ngày nhận phòng</label>
               <input type="date" id="v1CheckIn" class="bk-input" oninput="v1SyncCheckOut()">
             </div>
             <div class="bk-field">
-              <label for="v1CheckOut">📅 Ngày trả phòng</label>
+              <label for="v1CheckOut" data-i18n="book.field.checkout">📅 Ngày trả phòng</label>
               <input type="date" id="v1CheckOut" class="bk-input">
             </div>
             <div class="bk-field">
-              <label for="v1Guests">👥 Số người</label>
+              <label for="v1Guests" data-i18n="book.field.guests">👥 Số người</label>
               <select id="v1Guests" class="bk-input">
                 <option value="">-- Chọn số người --</option>
                 <option value="1 người">1 người</option>
@@ -2700,14 +2736,14 @@
               </select>
             </div>
             <div class="bk-field">
-              <label for="v1RoomType">🏡 Loại phòng</label>
+              <label for="v1RoomType" data-i18n="book.field.room">🏡 Loại phòng</label>
               <select id="v1RoomType" class="bk-input">
                 <option value="">-- Chọn loại phòng --</option>
                 <option value="Triangle House — 300K đ/đêm (2–3 người)">Triangle House — 300K đ/đêm</option>
                 <option value="Circle House Superior — 600K đ/đêm (2–4 người)">Circle House Superior — 600K đ/đêm</option>
                 <option value="E Đê Cozy House Deluxe — 700K đ/đêm (2–4 người)">E Đê Cozy Deluxe — 700K đ/đêm</option>
-                <option value="VIP House Premium — 900K đ/đêm (3–5 người)">VIP House Premium — 900K đ/đêm</option>
-                <option value="Bungalow Gia Đình — 1.200K đ/đêm (4–6 người)">Bungalow Gia Đình — 1,2M đ/đêm</option>
+                <option value="VIP House Premium — 700K–900K đ/đêm (3–5 người)">VIP House Premium — 700K–900K đ/đêm</option>
+                <option value="Bungalow Gia Đình — 900K đ/đêm (4–6 người)">Bungalow Gia Đình — 900K đ/đêm</option>
                 <option value="Phòng Tập Thể — 150K đ/người/đêm (10–20 người)">Phòng Tập Thể — 150K đ/người</option>
                 <option value="Chưa quyết định — cần tư vấn thêm về loại phòng">Chưa quyết định — cần tư vấn</option>
               </select>
@@ -2718,16 +2754,16 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 2C6.48 2 2 6.21 2 11.4c0 2.85 1.32 5.41 3.41 7.14L4 22l3.72-1.88A10.5 10.5 0 0012 20.8c5.52 0 10-4.21 10-9.4C22 6.21 17.52 2 12 2z" fill="currentColor"/>
             </svg>
-            Gửi Yêu Cầu Qua Zalo
+            <span data-i18n="book.submit">Gửi Yêu Cầu Qua Zalo</span>
           </button>
 
-          <div class="bk-note">
-            <strong>Bước 5 — Nhân viên xác nhận:</strong> Sau khi nhận tin nhắn, đội ngũ Hiền Lê Garden sẽ kiểm tra phòng trống và phản hồi trong <strong>30 phút</strong>, hướng dẫn đặt cọc để giữ phòng cho bạn.
+          <div class="bk-note" data-i18n-html="book.note">
+            <strong>Bước 5 — Nhân viên xác nhận:</strong> Sau khi nhận tin nhắn, đội ngũ Hiền Lê Garden sẽ kiểm tra phòng trống và phản hồi sớm nhất trong giờ hoạt động, hướng dẫn đặt cọc để giữ phòng cho bạn.
           </div>
         </div>
 
         <div class="bk-alt">
-          <span>Hoặc liên hệ trực tiếp</span>
+          <span data-i18n="book.alt">Hoặc liên hệ trực tiếp</span>
           <a href="tel:0968987311" class="btn btn-gold" style="font-size:0.85rem;padding:0.5rem 1.1rem;">📞 0968 987 311</a>
           <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="font-size:0.85rem;padding:0.5rem 1.1rem;">Facebook</a>
         </div>
@@ -2748,26 +2784,26 @@
       </div>
 
       <div>
-        <div class="footer-heading">Dịch Vụ</div>
+        <div class="footer-heading" data-i18n="footer.services">Dịch Vụ</div>
         <ul class="footer-links">
-          <li><a href="#rooms">Phòng Lưu Trú</a></li>
-          <li><a href="#pricing">Thuê Theo Giờ</a></li>
+          <li><a href="#rooms" data-i18n="footer.accommodation">Phòng Lưu Trú</a></li>
+          <li><a href="#pricing" data-i18n="footer.hourly">Thuê Theo Giờ</a></li>
           <li><a href="#pricing">F&B & Café</a></li>
           <li><a href="#pricing">Campfire & Glamping</a></li>
           <li><a href="#pricing">Team Building</a></li>
-          <li><a href="#pricing">Sự Kiện & Tiệc</a></li>
+          <li><a href="#pricing" data-i18n="footer.events">Sự Kiện & Tiệc</a></li>
         </ul>
       </div>
 
       <div>
-        <div class="footer-heading">Trải Nghiệm</div>
+        <div class="footer-heading" data-i18n="footer.experiences">Trải Nghiệm</div>
         <ul class="footer-links">
           <li><a href="#experience">View Hồ Panorama</a></li>
-          <li><a href="#experience">Vườn Hoa Cỏ May</a></li>
-          <li><a href="#experience">Chụp Ảnh Check-in</a></li>
-          <li><a href="#experience">Hái Trái Cây</a></li>
-          <li><a href="#experience">Nông Nghiệm Trải Nghiệm</a></li>
-          <li><a href="#experience">Khu Vui Chơi Trẻ Em</a></li>
+          <li><a href="#experience" data-i18n="footer.wildflowers">Vườn Hoa Cỏ May</a></li>
+          <li><a href="#experience" data-i18n="footer.photospots">Chụp Ảnh Check-in</a></li>
+          <li><a href="#experience" data-i18n="footer.fruitpicking">Hái Trái Cây</a></li>
+          <li><a href="#experience" data-i18n="footer.agriexp">Nông Nghiệm Trải Nghiệm</a></li>
+          <li><a href="#experience" data-i18n="footer.playground">Khu Vui Chơi Trẻ Em</a></li>
         </ul>
       </div>
     </div>
@@ -3214,6 +3250,252 @@
       clearTimeout(t._timer);
       t._timer = setTimeout(() => t.classList.remove('show'), 3800);
     }
+
+    /* ─── Language Toggle ─── */
+    (function initLangToggle() {
+      const TRANS = {
+        vi: {
+          'nav.overview': 'Tổng Quan',
+          'nav.rooms': 'Phòng',
+          'nav.exp': 'Trải Nghiệm',
+          'nav.pricing': 'Bảng Giá',
+          'nav.contact': 'Liên Hệ',
+          'nav.book': 'Đặt phòng',
+          'nav.call': 'Gọi ngay',
+
+          'hero.line1': 'Bình Yên',
+          'hero.line2': 'Giữa Lòng',
+          'hero.line3': 'Thành Phố',
+          'hero.sub': 'Check-in thiên nhiên — View hồ cực chill · Nature Check-in — Stunning Lake Views',
+          'hero.btn.rooms': 'Khám Phá Phòng',
+          'hero.btn.pricing': 'Xem Bảng Giá',
+          'hero.scroll': 'Khám phá',
+
+          'exp.label': 'Trải Nghiệm · Experience',
+          'exp.h2': 'Mọi Khoảnh Khắc Đều Đáng Nhớ',
+          'exp.desc.1': 'Tầm nhìn rộng mở ra hồ nước xanh mát, cảnh quan thiên nhiên hùng vĩ chỉ cách thành phố vài phút.',
+          'exp.desc.2': 'Kiến trúc mái tam giác độc đáo, không gian ấm cúng với gỗ tự nhiên, hoà mình vào cảnh quan xanh.',
+          'exp.desc.3': 'Phòng hình tròn nghệ thuật độc đáo — điểm check-in ấn tượng, nội thất hiện đại trong không gian thiên nhiên.',
+          'exp.desc.4': 'Cánh đồng hoa cỏ may rực rỡ theo mùa — khung cảnh nên thơ lý tưởng cho ảnh cưới và check-in.',
+          'exp.desc.5': 'Đốt lửa trại dưới bầu trời đêm, cắm trại qua đêm giữa thiên nhiên — trải nghiệm không thể quên.',
+          'exp.desc.6': 'Thưởng thức cà phê Ban Mê giữa không gian xanh mát, ngắm hồ — khoảnh khắc bình yên giữa lòng thành phố.',
+          'exp.desc.7': 'Không gian rộng rãi cho sự kiện doanh nghiệp 20–100 người, thiết kế theo yêu cầu riêng.',
+          'exp.desc.8': 'Hàng chục góc chụp ảnh đẹp — từ cổng làng đến bờ hồ, vườn hoa đến các căn phòng nghệ thuật.',
+          'exp.desc.9': 'Trồng rau, hái quả, học chăm sóc cây trái — trải nghiệm nông nghiệp thực thụ cho mọi lứa tuổi.',
+
+          'rooms.label': 'Lưu Trú · Accommodation',
+          'rooms.h2': 'Chọn Không Gian Của Bạn',
+          'room.meta.garden': '🌿 View vườn',
+          'room.meta.lake': '🏔️ View hồ',
+          'room.meta.highland': '🏔️ Bản sắc cao nguyên',
+          'room.meta.terrace': '🌅 Sân hiên riêng',
+          'room.meta.bunk': '🛏️ Giường tầng',
+          'room.name.bungalow': 'Bungalow Gia Đình',
+          'room.name.dorm': 'Phòng Tập Thể',
+          'room.desc.1': 'Cabin mái tam giác độc đáo, giường đôi, không gian gỗ ấm cúng giữa thiên nhiên.',
+          'room.desc.2': 'Phòng hình tròn nghệ thuật, view hồ, tiện nghi cao cấp hơn. Điểm check-in ấn tượng.',
+          'room.desc.3': 'Tái hiện nét sống truyền thống của người Ê Đê tại Gia Nghĩa - Đắk Nông, với không gian mộc mạc, ấm cúng, gần gũi thiên nhiên và đậm bản sắc cao nguyên.',
+          'room.desc.4': 'View đẹp nhất khu, sân hiên riêng nhìn ra hồ và vườn hoa, tiện nghi cao cấp đầy đủ.',
+          'room.desc.5': 'Không gian rộng rãi nhất, đầy đủ tiện nghi cao cấp, phù hợp gia đình hoặc nhóm bạn.',
+          'room.desc.6': 'Giường tầng, giá hợp lý theo đầu người. Lý tưởng cho nhóm bạn trẻ, lớp học, đoàn tham quan.',
+
+          'pricing.label': 'Bảng Giá · Pricing',
+          'pricing.h2': 'Minh Bạch, Hợp Lý',
+          'pricing.tab.overnight': 'Lưu Trú',
+          'pricing.tab.activities': 'F&B & Hoạt Động',
+          'pricing.th.room': 'Loại Phòng',
+          'pricing.th.price': 'Đơn Giá',
+          'pricing.th.capacity': 'Sức Chứa',
+          'pricing.th.notes': 'Ghi Chú',
+          'pricing.cap.r1': '2–3 người',
+          'pricing.cap.r2': '2–4 người',
+          'pricing.cap.r3': '2–4 người',
+          'pricing.cap.r4': '3–5 người',
+          'pricing.cap.r5': '4–6 người',
+          'pricing.cap.r6': '10–20 người',
+          'pricing.note.r1': 'View vườn, giường đôi',
+          'pricing.note.r2': 'View hồ, tiện nghi cao cấp hơn',
+          'pricing.note.r3': 'Bao gồm bữa sáng',
+          'pricing.note.r4': 'Sân hiên riêng, view tốt nhất',
+          'pricing.note.r5': 'Phòng rộng, full amenities',
+          'pricing.note.r6': 'Tính theo đầu người, giường tầng',
+
+          'offer.text': 'Ưu đãi dành cho khách đặt trực tiếp — liên hệ để nhận chính sách theo ngày lưu trú.',
+          'offer.cta': 'Liên Hệ Ngay',
+
+          'book.label': 'Đặt Phòng · Book Now',
+          'book.sub': 'Điền thông tin bên dưới — Nhân viên sẽ xác nhận và hướng dẫn đặt cọc qua Zalo',
+          'book.step1': 'Chọn ngày',
+          'book.step2': 'Số người',
+          'book.step3': 'Loại phòng',
+          'book.step4': 'Gửi Zalo',
+          'book.step5': 'Xác nhận',
+          'book.field.checkin': '📅 Ngày nhận phòng',
+          'book.field.checkout': '📅 Ngày trả phòng',
+          'book.field.guests': '👥 Số người',
+          'book.field.room': '🏡 Loại phòng',
+          'book.submit': 'Gửi Yêu Cầu Qua Zalo',
+          'book.alt': 'Hoặc liên hệ trực tiếp',
+
+          'footer.services': 'Dịch Vụ',
+          'footer.accommodation': 'Phòng Lưu Trú',
+          'footer.hourly': 'Thuê Theo Giờ',
+          'footer.events': 'Sự Kiện & Tiệc',
+          'footer.experiences': 'Trải Nghiệm',
+          'footer.wildflowers': 'Vườn Hoa Cỏ May',
+          'footer.photospots': 'Chụp Ảnh Check-in',
+          'footer.fruitpicking': 'Hái Trái Cây',
+          'footer.agriexp': 'Nông Nghiệm Trải Nghiệm',
+          'footer.playground': 'Khu Vui Chơi Trẻ Em',
+
+          'fab.call': 'Gọi ngay',
+          'fab.book': 'Đặt phòng',
+        },
+        en: {
+          'nav.overview': 'Overview',
+          'nav.rooms': 'Rooms',
+          'nav.exp': 'Experience',
+          'nav.pricing': 'Pricing',
+          'nav.contact': 'Contact',
+          'nav.book': 'Book Now',
+          'nav.call': 'Call Us',
+
+          'hero.line1': 'Peace',
+          'hero.line2': 'In Nature',
+          'hero.line3': 'Awaits',
+          'hero.sub': 'Nature Check-in — Stunning Lake Views · Farmstay in the Heart of the City',
+          'hero.btn.rooms': 'Explore Rooms',
+          'hero.btn.pricing': 'View Pricing',
+          'hero.scroll': 'Discover',
+
+          'exp.label': 'Experience',
+          'exp.h2': 'Every Moment Worth Remembering',
+          'exp.desc.1': 'Wide open views of the lake — majestic natural scenery just minutes from the city centre.',
+          'exp.desc.2': 'Unique A-frame architecture with warm timber interiors, seamlessly blending into the surrounding landscape.',
+          'exp.desc.3': 'Artistic circular rooms — a striking check-in spot with contemporary interiors set in natural surroundings.',
+          'exp.desc.4': 'Seasonal wildflowers in full bloom — a poetic backdrop perfect for wedding and lifestyle photography.',
+          'exp.desc.5': 'Campfire under the stars and overnight camping in nature — a truly unforgettable experience.',
+          'exp.desc.6': 'Savour Ban Me coffee in a lush garden overlooking the lake — tranquil mornings in the heart of the city.',
+          'exp.desc.7': 'Spacious venue for corporate events from 20 to 100 guests, fully customisable to your requirements.',
+          'exp.desc.8': 'Dozens of photo spots — from the village gate to the lakeside, wildflower garden to artistic rooms.',
+          'exp.desc.9': 'Grow vegetables, harvest fruits, and learn to tend crops — hands-on agri-experiences for all ages.',
+
+          'rooms.label': 'Accommodation',
+          'rooms.h2': 'Choose Your Space',
+          'room.meta.garden': '🌿 Garden View',
+          'room.meta.lake': '🏔️ Lake View',
+          'room.meta.highland': '🏔️ Highland Character',
+          'room.meta.terrace': '🌅 Private Terrace',
+          'room.meta.bunk': '🛏️ Bunk Beds',
+          'room.name.bungalow': 'Family Bungalow',
+          'room.name.dorm': 'Dormitory Room',
+          'room.desc.1': 'A-frame cabin with double bed and warm timber interior, nestled among the trees.',
+          'room.desc.2': 'Artistic circular room with lake view and elevated amenities — a standout check-in destination.',
+          'room.desc.3': 'Inspired by the Ê Đê highland culture of Gia Nghia, with rustic warmth and a deep connection to nature.',
+          'room.desc.4': 'The best view in the garden — a private terrace overlooking the lake and wildflower grounds.',
+          'room.desc.5': 'Our most spacious option, fully equipped with premium amenities — perfect for families or groups.',
+          'room.desc.6': 'Bunk beds at an affordable per-person rate — ideal for youth groups, school trips, and tour parties.',
+
+          'pricing.label': 'Pricing',
+          'pricing.h2': 'Clear & Fair Pricing',
+          'pricing.tab.overnight': 'Overnight',
+          'pricing.tab.activities': 'F&B & Activities',
+          'pricing.th.room': 'Room Type',
+          'pricing.th.price': 'Price',
+          'pricing.th.capacity': 'Capacity',
+          'pricing.th.notes': 'Notes',
+          'pricing.cap.r1': '2–3 guests',
+          'pricing.cap.r2': '2–4 guests',
+          'pricing.cap.r3': '2–4 guests',
+          'pricing.cap.r4': '3–5 guests',
+          'pricing.cap.r5': '4–6 guests',
+          'pricing.cap.r6': '10–20 guests',
+          'pricing.note.r1': 'Garden view, double bed',
+          'pricing.note.r2': 'Lake view, enhanced amenities',
+          'pricing.note.r3': 'Breakfast included',
+          'pricing.note.r4': 'Private terrace, best view',
+          'pricing.note.r5': 'Spacious room, full amenities',
+          'pricing.note.r6': 'Per person, bunk beds',
+
+          'offer.text': 'Special rates for direct bookings — contact us for a quote tailored to your stay.',
+          'offer.cta': 'Contact Us',
+
+          'book.label': 'Book Now',
+          'book.sub': 'Fill in your details below — our team will confirm availability and guide you through the deposit via Zalo.',
+          'book.step1': 'Pick dates',
+          'book.step2': 'Guests',
+          'book.step3': 'Room',
+          'book.step4': 'Send via Zalo',
+          'book.step5': 'Confirm',
+          'book.field.checkin': '📅 Check-in Date',
+          'book.field.checkout': '📅 Check-out Date',
+          'book.field.guests': '👥 Number of Guests',
+          'book.field.room': '🏡 Room Type',
+          'book.submit': 'Send Request via Zalo',
+          'book.alt': 'Or contact us directly',
+
+          'footer.services': 'Services',
+          'footer.accommodation': 'Accommodation',
+          'footer.hourly': 'Hourly Rental',
+          'footer.events': 'Events & Functions',
+          'footer.experiences': 'Experiences',
+          'footer.wildflowers': 'Wildflower Garden',
+          'footer.photospots': 'Photo Check-in Spots',
+          'footer.fruitpicking': 'Fruit Picking',
+          'footer.agriexp': 'Agri-Experience',
+          'footer.playground': "Children's Play Area",
+
+          'fab.call': 'Call',
+          'fab.book': 'Book',
+        }
+      };
+
+      const HTML_TRANS = {
+        vi: {
+          'book.h2': 'Bắt Đầu <em>Hành Trình</em><br>Của Bạn',
+          'book.note': '<strong>Bước 5 — Nhân viên xác nhận:</strong> Sau khi nhận tin nhắn, đội ngũ Hiền Lê Garden sẽ kiểm tra phòng trống và phản hồi sớm nhất trong giờ hoạt động, hướng dẫn đặt cọc để giữ phòng cho bạn.',
+        },
+        en: {
+          'book.h2': 'Start Your <em>Journey</em><br>Here',
+          'book.note': '<strong>Step 5 — Confirmation:</strong> After receiving your message, the Hiền Lê Garden team will check availability and respond as soon as possible during business hours, then guide you through the deposit to secure your booking.',
+        }
+      };
+
+      function applyLang(lang) {
+        const isEn = lang === 'en';
+        document.documentElement.classList.toggle('lang-en', isEn);
+        document.documentElement.lang = isEn ? 'en' : 'vi';
+        const t = TRANS[lang];
+        const th = HTML_TRANS[lang];
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+          const key = el.dataset.i18n;
+          if (t[key] !== undefined) el.textContent = t[key];
+        });
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+          const key = el.dataset.i18nHtml;
+          if (th[key] !== undefined) el.innerHTML = th[key];
+        });
+
+        const btn = document.getElementById('langToggle');
+        if (btn) btn.textContent = isEn ? 'EN' : 'VI';
+
+        localStorage.setItem('hlg-lang', lang);
+      }
+
+      // Init toggle button
+      const toggleBtn = document.getElementById('langToggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const current = document.documentElement.classList.contains('lang-en') ? 'en' : 'vi';
+          applyLang(current === 'en' ? 'vi' : 'en');
+        });
+      }
+
+      // Restore saved lang
+      const saved = localStorage.getItem('hlg-lang');
+      if (saved && saved !== 'vi') applyLang(saved);
+    })();
   </script>
 
   <!-- WEATHER WIDGET -->
@@ -3232,7 +3514,7 @@
   <div class="fab-group">
     <a href="tel:0968987311" class="fab fab-call">
       <span class="fab-icon">📞</span>
-      <span class="fab-label">Gọi ngay</span>
+      <span class="fab-label" data-i18n="fab.call">Gọi ngay</span>
     </a>
     <a href="https://zalo.me/0968987311" class="fab fab-zalo" target="_blank" rel="noopener noreferrer">
       <span class="fab-icon">💬</span>
@@ -3244,7 +3526,7 @@
     </a>
     <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" class="fab fab-book" target="_blank" rel="noopener noreferrer">
       <span class="fab-icon">📅</span>
-      <span class="fab-label">Đặt phòng</span>
+      <span class="fab-label" data-i18n="fab.book">Đặt phòng</span>
     </a>
   </div>
 </body>
