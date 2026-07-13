@@ -1207,6 +1207,54 @@
     }
 
     /* ============================================
+       DIRECT BOOKING OFFER BANNER
+    ============================================ */
+    #direct-booking-offer {
+      background: linear-gradient(135deg, #0D2B1A 0%, #163322 100%);
+      border-top: 1.5px solid var(--accent-gold);
+      border-bottom: 1.5px solid var(--accent-gold);
+      padding: 1.25rem var(--spacing-md);
+    }
+    .offer-bar {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      text-align: center;
+    }
+    .offer-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .offer-text {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-style: italic;
+      color: rgba(255,255,255,0.9);
+      flex: 1;
+      min-width: 200px;
+    }
+    .offer-cta {
+      background: var(--accent-gold);
+      color: #1A3326;
+      padding: 0.65rem 1.5rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 0.22s ease, transform 0.22s ease;
+    }
+    .offer-cta:hover { background: var(--accent-gold-lt); transform: translateY(-2px); }
+    @media (max-width: 640px) {
+      .offer-text { font-size: 0.92rem; }
+      .offer-cta { width: 100%; text-align: center; display: block; }
+    }
+
+    /* ============================================
        BOOKING FORM — CTA section V1
     ============================================ */
     .cta-content { max-width: 840px; }
@@ -2582,6 +2630,14 @@
           <a href="https://maps.app.goo.gl/AiBnXYKt2pzVoPrD6" target="_blank" rel="noopener noreferrer" class="map-sidebar-btn">Chỉ Đường →</a>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section id="direct-booking-offer">
+    <div class="offer-bar">
+      <span class="offer-icon">🌿</span>
+      <p class="offer-text">Ưu đãi dành cho khách đặt trực tiếp — liên hệ để nhận chính sách theo ngày lưu trú.</p>
+      <a href="https://zalo.me/0968987311" target="_blank" rel="noopener noreferrer" class="offer-cta">Liên Hệ Ngay</a>
     </div>
   </section>
 
