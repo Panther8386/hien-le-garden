@@ -1207,6 +1207,191 @@
     }
 
     /* ============================================
+       BOOKING FORM — CTA section V1
+    ============================================ */
+    .cta-content { max-width: 840px; }
+
+    .bk-steps {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 0;
+      margin: 1.25rem 0 2.25rem;
+      flex-wrap: nowrap;
+    }
+    .bk-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      flex-shrink: 0;
+    }
+    .bk-step-num {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent-gold);
+      font-family: var(--font-sans);
+    }
+    .bk-step:nth-child(9) .bk-step-num {
+      border-style: dashed;
+      opacity: 0.65;
+    }
+    .bk-step-label {
+      font-size: 0.58rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      text-align: center;
+      max-width: 60px;
+      line-height: 1.3;
+    }
+    .bk-arrow {
+      flex-shrink: 0;
+      color: rgba(180,144,74,0.35);
+      font-size: 0.7rem;
+      margin: 0 2px;
+      margin-top: 9px;
+    }
+
+    .bk-form {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 2rem 2rem 1.75rem;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.08);
+      text-align: left;
+    }
+    .bk-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .bk-field label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 0.4rem;
+    }
+    .bk-input {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-family: var(--font-sans);
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      box-sizing: border-box;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .bk-input:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+    select.bk-input {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%238AA898' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.85rem center;
+      padding-right: 2.2rem;
+      cursor: pointer;
+    }
+    .bk-submit {
+      width: 100%;
+      padding: 0.95rem 1rem;
+      background: #0068FF;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      margin-top: 0.25rem;
+    }
+    .bk-submit:hover {
+      background: #0052CC;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,104,255,0.3);
+    }
+    .bk-submit:active { transform: translateY(0); }
+    .bk-note {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      border-left: 3px solid var(--accent-gold);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+    .bk-note strong { color: var(--text-primary); }
+
+    .bk-alt {
+      margin-top: 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      font-style: italic;
+      font-family: var(--font-serif);
+    }
+
+    /* Toast */
+    .bk-toast {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-16px);
+      z-index: 9000;
+      background: #0052CC;
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      font-family: var(--font-sans);
+      box-shadow: 0 8px 28px rgba(0,82,204,0.4);
+      opacity: 0;
+      transition: all 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .bk-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (max-width: 640px) {
+      .bk-form-grid { grid-template-columns: 1fr; }
+      .bk-steps { gap: 0; }
+      .bk-step-label { font-size: 0.52rem; max-width: 46px; }
+      .bk-form { padding: 1.5rem 1.25rem 1.25rem; }
+    }
+    @media (max-width: 400px) {
+      .bk-steps { display: none; }
+    }
+
+    /* ============================================
        FOOTER
     ============================================ */
     footer {
@@ -2406,11 +2591,89 @@
       <div class="cta-content fade-in">
         <span class="label">Đặt Phòng · Book Now</span>
         <h2>Bắt Đầu <em>Hành Trình</em><br>Của Bạn</h2>
-        <p class="cta-sub">Begin Your Journey · Trải nghiệm trọn vẹn — Kỷ niệm đáng nhớ tại Hiền Lê Garden</p>
-        <a href="tel:0968987311" class="cta-hotline">0968 987 311</a>
-        <div class="cta-actions">
-          <a href="tel:0968987311" class="btn btn-gold">📞 Gọi Đặt Phòng</a>
-          <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">Facebook Fanpage</a>
+        <p class="cta-sub">Điền thông tin bên dưới — Nhân viên sẽ xác nhận và hướng dẫn đặt cọc qua Zalo</p>
+
+        <div class="bk-steps" aria-label="Quy trình đặt phòng">
+          <div class="bk-step">
+            <div class="bk-step-num">1</div>
+            <div class="bk-step-label">Chọn ngày</div>
+          </div>
+          <div class="bk-arrow" aria-hidden="true">›</div>
+          <div class="bk-step">
+            <div class="bk-step-num">2</div>
+            <div class="bk-step-label">Số người</div>
+          </div>
+          <div class="bk-arrow" aria-hidden="true">›</div>
+          <div class="bk-step">
+            <div class="bk-step-num">3</div>
+            <div class="bk-step-label">Loại phòng</div>
+          </div>
+          <div class="bk-arrow" aria-hidden="true">›</div>
+          <div class="bk-step">
+            <div class="bk-step-num">4</div>
+            <div class="bk-step-label">Gửi Zalo</div>
+          </div>
+          <div class="bk-arrow" aria-hidden="true">›</div>
+          <div class="bk-step">
+            <div class="bk-step-num">5</div>
+            <div class="bk-step-label">Xác nhận</div>
+          </div>
+        </div>
+
+        <div class="bk-form">
+          <div class="bk-form-grid">
+            <div class="bk-field">
+              <label for="v1CheckIn">📅 Ngày nhận phòng</label>
+              <input type="date" id="v1CheckIn" class="bk-input" oninput="v1SyncCheckOut()">
+            </div>
+            <div class="bk-field">
+              <label for="v1CheckOut">📅 Ngày trả phòng</label>
+              <input type="date" id="v1CheckOut" class="bk-input">
+            </div>
+            <div class="bk-field">
+              <label for="v1Guests">👥 Số người</label>
+              <select id="v1Guests" class="bk-input">
+                <option value="">-- Chọn số người --</option>
+                <option value="1 người">1 người</option>
+                <option value="2 người">2 người</option>
+                <option value="3 người">3 người</option>
+                <option value="4 người">4 người</option>
+                <option value="5 người">5 người</option>
+                <option value="6 người">6 người</option>
+                <option value="7+ người (nhóm)">7+ người (nhóm)</option>
+              </select>
+            </div>
+            <div class="bk-field">
+              <label for="v1RoomType">🏡 Loại phòng</label>
+              <select id="v1RoomType" class="bk-input">
+                <option value="">-- Chọn loại phòng --</option>
+                <option value="Triangle House — 300K đ/đêm (2–3 người)">Triangle House — 300K đ/đêm</option>
+                <option value="Circle House Superior — 600K đ/đêm (2–4 người)">Circle House Superior — 600K đ/đêm</option>
+                <option value="E Đê Cozy House Deluxe — 700K đ/đêm (2–4 người, bao sáng)">E Đê Cozy Deluxe — 700K đ/đêm</option>
+                <option value="VIP House Premium — 900K đ/đêm (3–5 người)">VIP House Premium — 900K đ/đêm</option>
+                <option value="Bungalow Gia Đình — 1.200K đ/đêm (4–6 người)">Bungalow Gia Đình — 1,2M đ/đêm</option>
+                <option value="Phòng Tập Thể — 150K đ/người/đêm (10–20 người)">Phòng Tập Thể — 150K đ/người</option>
+                <option value="Chưa quyết định — cần tư vấn thêm về loại phòng">Chưa quyết định — cần tư vấn</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="bk-submit" onclick="v1SendZalo()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2C6.48 2 2 6.21 2 11.4c0 2.85 1.32 5.41 3.41 7.14L4 22l3.72-1.88A10.5 10.5 0 0012 20.8c5.52 0 10-4.21 10-9.4C22 6.21 17.52 2 12 2z" fill="currentColor"/>
+            </svg>
+            Gửi Yêu Cầu Qua Zalo
+          </button>
+
+          <div class="bk-note">
+            <strong>Bước 5 — Nhân viên xác nhận:</strong> Sau khi nhận tin nhắn, đội ngũ Hiền Lê Garden sẽ kiểm tra phòng trống và phản hồi trong <strong>30 phút</strong>, hướng dẫn đặt cọc để giữ phòng cho bạn.
+          </div>
+        </div>
+
+        <div class="bk-alt">
+          <span>Hoặc liên hệ trực tiếp</span>
+          <a href="tel:0968987311" class="btn btn-gold" style="font-size:0.85rem;padding:0.5rem 1.1rem;">📞 0968 987 311</a>
+          <a href="https://www.facebook.com/p/Hi%E1%BB%81n-L%C3%AA-Garden-61556329706262/" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="font-size:0.85rem;padding:0.5rem 1.1rem;">Facebook</a>
         </div>
       </div>
     </div>
@@ -2814,6 +3077,87 @@
       window.addEventListener('resize', update, { passive: true });
       update();
     })();
+
+    /* ---- Booking Form (V1) ---- */
+    (function initBookingForm() {
+      const today = new Date().toISOString().split('T')[0];
+      const ciEl  = document.getElementById('v1CheckIn');
+      const coEl  = document.getElementById('v1CheckOut');
+      if (ciEl) ciEl.min = today;
+      if (coEl) coEl.min = today;
+    })();
+
+    function v1SyncCheckOut() {
+      const ci = document.getElementById('v1CheckIn').value;
+      if (!ci) return;
+      const next = new Date(ci);
+      next.setDate(next.getDate() + 1);
+      const coEl = document.getElementById('v1CheckOut');
+      coEl.min = next.toISOString().split('T')[0];
+      if (coEl.value && coEl.value <= ci) coEl.value = '';
+    }
+
+    function v1SendZalo() {
+      const ci    = document.getElementById('v1CheckIn').value;
+      const co    = document.getElementById('v1CheckOut').value;
+      const guests = document.getElementById('v1Guests').value;
+      const room  = document.getElementById('v1RoomType').value;
+
+      const missing = [];
+      if (!ci)     missing.push('ngày nhận phòng');
+      if (!co)     missing.push('ngày trả phòng');
+      if (!guests) missing.push('số người');
+      if (!room)   missing.push('loại phòng');
+      if (missing.length) {
+        alert('Vui lòng điền đầy đủ: ' + missing.join(', ') + '.');
+        return;
+      }
+
+      const nights = Math.round((new Date(co) - new Date(ci)) / 86400000);
+      if (nights < 1) {
+        alert('Ngày trả phòng phải sau ngày nhận phòng!');
+        return;
+      }
+
+      const fmt = d => new Date(d + 'T00:00:00').toLocaleDateString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric'
+      });
+
+      const msg =
+        'Xin chào Hiền Lê Garden! 🌿\n\n' +
+        'Mình muốn đặt phòng:\n' +
+        '📅 Nhận phòng: ' + fmt(ci) + '\n' +
+        '📅 Trả phòng: ' + fmt(co) + ' (' + nights + ' đêm)\n' +
+        '👥 Số người: ' + guests + '\n' +
+        '🏡 Loại phòng: ' + room + '\n\n' +
+        'Mình cần xác nhận phòng còn trống và thông tin đặt cọc. Cảm ơn bạn!';
+
+      const openZalo = () => window.open('https://zalo.me/0968987311', '_blank');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(msg)
+          .then(() => {
+            v1ShowBkToast('✓ Đã sao chép tin nhắn — Dán vào Zalo và gửi đi!');
+            openZalo();
+          })
+          .catch(() => openZalo());
+      } else {
+        openZalo();
+      }
+    }
+
+    function v1ShowBkToast(text) {
+      let t = document.querySelector('.bk-toast');
+      if (!t) {
+        t = document.createElement('div');
+        t.className = 'bk-toast';
+        document.body.appendChild(t);
+      }
+      t.textContent = text;
+      t.classList.add('show');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove('show'), 3800);
+    }
   </script>
 
   <!-- WEATHER WIDGET -->
