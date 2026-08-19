@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { env } from 'cloudflare:test';
 import { onRequestPost as login } from '../functions/api/auth/login.js';
+import { onRequestPost as logout } from '../functions/api/auth/logout.js';
 import { hashPassword } from '../lib/auth.js';
 
 beforeEach(async () => {
@@ -33,5 +34,40 @@ describe('POST /api/auth/login', () => {
     });
     const response = await login({ request, env });
     expect(response.status).toBe(401);
+  });
+});
+
+describe('POST /api/auth/logout', () => {
+  it('deletes the session from the database', async () => {
+    // First, log in to create a session
+    const loginRequest = new Request('https://crm.hienlegarden.vn/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username: 'quan_ly_a', password: 's3cret-pass' }),
+    });
+    const loginResponse = await login({ request: loginRequest, env });
+    const setCookie = loginResponse.headers.get('Set-Cookie');
+    const sessionToken = setCookie.match(/session=([^;]+)/)[1];
+
+    // Verify the session exists in the database
+    const sessionBefore = await env.DB.prepare('SELECT * FROM sessions WHERE token = ?')
+      .bind(sessionToken)
+      .first();
+    expect(sessionBefore).toBeDefined();
+
+    // Now log out with the session cookie
+    const logoutRequest = new Request('https://crm.hienlegarden.vn/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Cookie': `session=${sessionToken}` },
+    });
+    const logoutResponse = await logout({ request: logoutRequest, env });
+
+    // Verify logout returned 204
+    expect(logoutResponse.status).toBe(204);
+
+    // Verify the session was deleted from the database
+    const sessionAfter = await env.DB.prepare('SELECT * FROM sessions WHERE token = ?')
+      .bind(sessionToken)
+      .first();
+    expect(sessionAfter).toBeNull();
   });
 });
