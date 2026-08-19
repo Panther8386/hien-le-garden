@@ -35,6 +35,15 @@ describe('POST /api/auth/login', () => {
     const response = await login({ request, env });
     expect(response.status).toBe(401);
   });
+
+  it('rejects a malformed JSON body with 400 instead of crashing', async () => {
+    const request = new Request('https://crm.hienlegarden.vn/api/auth/login', {
+      method: 'POST',
+      body: 'not json',
+    });
+    const response = await login({ request, env });
+    expect(response.status).toBe(400);
+  });
 });
 
 describe('POST /api/auth/logout', () => {
