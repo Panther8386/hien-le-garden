@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chia sẻ trải nghiệm — Hiền Lê Garden</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="card">
+    <h1>Cảm ơn bạn đã ghé Hiền Lê Garden!</h1>
+    <p>Chia sẻ trải nghiệm để nhận mã ưu đãi cho lần sau.</p>
+
+    <form id="surveyForm">
+      <label>Họ tên <input type="text" name="guestName" required /></label>
+      <label>Số điện thoại <input type="tel" name="phone" required /></label>
+      <label>Email (không bắt buộc) <input type="email" name="email" /></label>
+      <label class="checkbox"><input type="checkbox" name="wantsTelegram" /> Nhận mã qua Telegram</label>
+
+      <fieldset>
+        <legend>Đánh giá trải nghiệm</legend>
+        <div class="rating" role="radiogroup" aria-label="Đánh giá 1 đến 5 sao">
+          <label><input type="radio" name="rating" value="1" required /> 1</label>
+          <label><input type="radio" name="rating" value="2" /> 2</label>
+          <label><input type="radio" name="rating" value="3" /> 3</label>
+          <label><input type="radio" name="rating" value="4" /> 4</label>
+          <label><input type="radio" name="rating" value="5" /> 5</label>
+        </div>
+      </fieldset>
+
+      <label>Nhận xét (không bắt buộc) <textarea name="comment"></textarea></label>
+      <label class="checkbox">
+        <input type="checkbox" name="consentGiven" required />
+        Tôi đồng ý để Hiền Lê Garden sử dụng thông tin này để liên hệ ưu đãi.
+      </label>
+
+      <button type="submit">Gửi đánh giá</button>
+      <p id="formError" class="error" role="alert"></p>
+    </form>
+
+    <section id="confirmation" hidden>
+      <h2>Cảm ơn bạn!</h2>
+      <p>Mã ưu đãi của bạn: <strong id="promoCode"></strong></p>
+      <p id="promoDetails"></p>
+      <p id="giftLine" hidden>Mang mã này đến quầy lễ tân để nhận thêm quà lưu niệm nhé!</p>
+      <a id="telegramLink" href="#" hidden>Nhận mã qua Telegram</a>
+    </section>
+  </main>
+
+  <script src="survey.js"></script>
+</body>
+</html>
