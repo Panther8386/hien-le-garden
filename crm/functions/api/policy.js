@@ -11,10 +11,25 @@ export async function onRequestPost({ request, env }) {
   const auth = await requireAuth(request, env, ['manager']);
   if (auth instanceof Response) return auth;
 
-  const { discountPercent, validFrom, validTo, giftEnabled } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch (err) {
+    return jsonError('Dữ liệu không hợp lệ', 400);
+  }
+  const { discountPercent, validFrom, validTo, giftEnabled } = body;
 
   if (!Number.isInteger(discountPercent) || discountPercent < 0 || discountPercent > 100) {
     return jsonError('Phần trăm giảm giá phải là số nguyên từ 0 đến 100', 400);
+  }
+  if (typeof validFrom !== 'string' || isNaN(Date.parse(validFrom))) {
+    return jsonError('Ngày bắt đầu không hợp lệ', 400);
+  }
+  if (typeof validTo !== 'string' || isNaN(Date.parse(validTo))) {
+    return jsonError('Ngày kết thúc không hợp lệ', 400);
+  }
+  if (Date.parse(validFrom) > Date.parse(validTo)) {
+    return jsonError('Ngày bắt đầu phải trước hoặc bằng ngày kết thúc', 400);
   }
 
   await env.DB.prepare(

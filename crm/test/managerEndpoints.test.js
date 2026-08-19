@@ -51,6 +51,40 @@ describe('POST /api/policy', () => {
     const response = await createPolicy({ request, env });
     expect(response.status).toBe(400);
   });
+
+  it('rejects an invalid validFrom date format (400)', async () => {
+    const request = authedRequest('https://x/api/policy', managerToken, 'POST', {
+      discountPercent: 20, validFrom: 'not-a-date', validTo: '2026-09-30', giftEnabled: false,
+    });
+    const response = await createPolicy({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects an invalid validTo date format (400)', async () => {
+    const request = authedRequest('https://x/api/policy', managerToken, 'POST', {
+      discountPercent: 20, validFrom: '2026-09-01', validTo: 'not-a-date', giftEnabled: false,
+    });
+    const response = await createPolicy({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects validFrom later than validTo (400)', async () => {
+    const request = authedRequest('https://x/api/policy', managerToken, 'POST', {
+      discountPercent: 20, validFrom: '2026-09-30', validTo: '2026-09-01', giftEnabled: false,
+    });
+    const response = await createPolicy({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects a malformed JSON body with 400 instead of crashing', async () => {
+    const request = new Request('https://x/api/policy', {
+      method: 'POST',
+      headers: { Cookie: `session=${managerToken}`, 'Content-Type': 'application/json' },
+      body: 'not json',
+    });
+    const response = await createPolicy({ request, env });
+    expect(response.status).toBe(400);
+  });
 });
 
 describe('GET /api/policy', () => {
@@ -99,6 +133,32 @@ describe('POST /api/gift-inventory', () => {
       request: authedRequest('https://x/api/gift-inventory', managerToken, 'POST', { name: 'Túi vải', stockCount: -3 }),
       env,
     });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects a missing name (400)', async () => {
+    const response = await setGiftStock({
+      request: authedRequest('https://x/api/gift-inventory', managerToken, 'POST', { stockCount: 10 }),
+      env,
+    });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects an empty/whitespace-only name (400)', async () => {
+    const response = await setGiftStock({
+      request: authedRequest('https://x/api/gift-inventory', managerToken, 'POST', { name: '   ', stockCount: 10 }),
+      env,
+    });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects a malformed JSON body with 400 instead of crashing', async () => {
+    const request = new Request('https://x/api/gift-inventory', {
+      method: 'POST',
+      headers: { Cookie: `session=${managerToken}`, 'Content-Type': 'application/json' },
+      body: 'not json',
+    });
+    const response = await setGiftStock({ request, env });
     expect(response.status).toBe(400);
   });
 });

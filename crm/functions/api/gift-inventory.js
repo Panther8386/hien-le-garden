@@ -11,10 +11,19 @@ export async function onRequestPost({ request, env }) {
   const auth = await requireAuth(request, env, ['manager']);
   if (auth instanceof Response) return auth;
 
-  const { name, stockCount } = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch (err) {
+    return jsonError('Dữ liệu không hợp lệ', 400);
+  }
+  const { name, stockCount } = body;
 
   if (!Number.isInteger(stockCount) || stockCount < 0) {
     return jsonError('Số lượng tồn kho phải là số nguyên không âm', 400);
+  }
+  if (typeof name !== 'string' || name.trim().length === 0) {
+    return jsonError('Tên quà không được để trống', 400);
   }
 
   const existing = await env.DB.prepare(`SELECT id FROM gift_inventory ORDER BY id DESC LIMIT 1`).first();
