@@ -10,7 +10,7 @@ export function escapeMarkdown(str) {
 export async function sendTelegramMessage(env, { chatId, guestName, promoCode, discountPercent, expiresAt, giftOffered }) {
   const safeGuestName = escapeMarkdown(guestName);
   const safePromoCode = escapeMarkdown(promoCode);
-  const giftLine = giftOffered ? '\n🎁 Mang mã này đến quầy lễ tân để nhận thêm quà lưu niệm nhé!' : '';
+  const giftLine = giftOffered ? '\n🎁 Mang mã này đến quầy lễ tân — nếu quà lưu niệm vẫn còn, bạn sẽ được nhận thêm nhé!' : '';
   const text =
     `🌿 *Hiền Lê Garden Farmstay*\n\n` +
     `Xin chào ${safeGuestName}, cảm ơn bạn đã chia sẻ trải nghiệm!\n\n` +

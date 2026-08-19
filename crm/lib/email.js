@@ -16,7 +16,7 @@ function buildHtml({ guestName, promoCode, discountPercent, expiresAt, giftOffer
   const safeGuestName = escapeHtml(guestName);
   const safePromoCode = escapeHtml(promoCode);
   const giftLine = giftOffered
-    ? '<p>Mang mã này đến quầy lễ tân để nhận thêm quà lưu niệm nhé!</p>'
+    ? '<p>Mang mã này đến quầy lễ tân — nếu quà lưu niệm vẫn còn, bạn sẽ được nhận thêm nhé!</p>'
     : '';
   return `
     <div style="font-family: Georgia, serif; background:#0D1F14; color:#F5F0E6; padding:32px;">
