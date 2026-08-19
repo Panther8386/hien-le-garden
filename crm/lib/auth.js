@@ -29,6 +29,15 @@ async function deriveKey(password, saltBytes) {
   return bufferToHex(bits);
 }
 
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) {
+    diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return diff === 0;
+}
+
 export async function hashPassword(password) {
   const saltBytes = crypto.getRandomValues(new Uint8Array(16));
   const hash = await deriveKey(password, saltBytes);
@@ -38,7 +47,7 @@ export async function hashPassword(password) {
 export async function verifyPassword(password, stored) {
   const [saltHex, expectedHash] = stored.split(':');
   const actualHash = await deriveKey(password, hexToBuffer(saltHex));
-  return actualHash === expectedHash;
+  return timingSafeEqual(actualHash, expectedHash);
 }
 
 export async function createSession(db, staffId) {
