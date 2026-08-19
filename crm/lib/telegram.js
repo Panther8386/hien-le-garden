@@ -3,12 +3,18 @@ function formatDate(date) {
   return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+export function escapeMarkdown(str) {
+  return String(str).replace(/([_*`\[])/g, '\\$1');
+}
+
 export async function sendTelegramMessage(env, { chatId, guestName, promoCode, discountPercent, expiresAt, giftOffered }) {
+  const safeGuestName = escapeMarkdown(guestName);
+  const safePromoCode = escapeMarkdown(promoCode);
   const giftLine = giftOffered ? '\n🎁 Mang mã này đến quầy lễ tân để nhận thêm quà lưu niệm nhé!' : '';
   const text =
     `🌿 *Hiền Lê Garden Farmstay*\n\n` +
-    `Xin chào ${guestName}, cảm ơn bạn đã chia sẻ trải nghiệm!\n\n` +
-    `Mã ưu đãi của bạn: *${promoCode}*\n` +
+    `Xin chào ${safeGuestName}, cảm ơn bạn đã chia sẻ trải nghiệm!\n\n` +
+    `Mã ưu đãi của bạn: *${safePromoCode}*\n` +
     `Giảm *${discountPercent}%* cho lần sau, có hiệu lực đến *${formatDate(expiresAt)}*.` +
     giftLine;
 
