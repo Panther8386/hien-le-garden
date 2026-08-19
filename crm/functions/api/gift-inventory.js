@@ -1,10 +1,22 @@
 import { requireAuth } from '../../lib/requireAuth.js';
 
+function jsonError(message, status) {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
 export async function onRequestPost({ request, env }) {
   const auth = await requireAuth(request, env, ['manager']);
   if (auth instanceof Response) return auth;
 
   const { name, stockCount } = await request.json();
+
+  if (!Number.isInteger(stockCount) || stockCount < 0) {
+    return jsonError('Số lượng tồn kho phải là số nguyên không âm', 400);
+  }
+
   const existing = await env.DB.prepare(`SELECT id FROM gift_inventory ORDER BY id DESC LIMIT 1`).first();
 
   if (existing) {

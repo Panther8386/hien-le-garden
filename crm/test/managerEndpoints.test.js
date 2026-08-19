@@ -43,6 +43,14 @@ describe('POST /api/policy', () => {
     const response = await createPolicy({ request, env });
     expect(response.status).toBe(403);
   });
+
+  it('rejects out-of-range discountPercent (400)', async () => {
+    const request = authedRequest('https://x/api/policy', managerToken, 'POST', {
+      discountPercent: 150, validFrom: '2026-09-01', validTo: '2026-09-30', giftEnabled: false,
+    });
+    const response = await createPolicy({ request, env });
+    expect(response.status).toBe(400);
+  });
 });
 
 describe('GET /api/policy', () => {
@@ -52,6 +60,16 @@ describe('GET /api/policy', () => {
     expect(response.status).toBe(200);
     const body = await response.json();
     expect(body).toHaveLength(1);
+  });
+
+  it('returns boolean values for isActive and giftEnabled', async () => {
+    await createPolicy({ request: authedRequest('https://x/api/policy', managerToken, 'POST', { discountPercent: 20, validFrom: '2026-09-01', validTo: '2026-09-30', giftEnabled: true }), env });
+    const response = await listPolicy({ request: authedRequest('https://x/api/policy', managerToken, 'GET'), env });
+    const body = await response.json();
+    expect(body[0].isActive).toBe(true);
+    expect(body[0].giftEnabled).toBe(true);
+    expect(typeof body[0].isActive).toBe('boolean');
+    expect(typeof body[0].giftEnabled).toBe('boolean');
   });
 });
 
@@ -74,5 +92,13 @@ describe('POST /api/gift-inventory', () => {
       env,
     });
     expect(response.status).toBe(403);
+  });
+
+  it('rejects negative stockCount (400)', async () => {
+    const response = await setGiftStock({
+      request: authedRequest('https://x/api/gift-inventory', managerToken, 'POST', { name: 'Túi vải', stockCount: -3 }),
+      env,
+    });
+    expect(response.status).toBe(400);
   });
 });
