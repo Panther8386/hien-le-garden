@@ -81,4 +81,35 @@ describe('POST /api/feedback', () => {
     const body = await response.json();
     expect(body.giftOffered).toBe(false);
   });
+
+  it('rejects rating above 5', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody({ rating: 999 })),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects rating below 1', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody({ rating: 0 })),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('falls back to zero discount and no gift when no active policy exists', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody()),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(201);
+
+    const body = await response.json();
+    expect(body.discountPercent).toBe(0);
+    expect(body.giftOffered).toBe(false);
+  });
 });

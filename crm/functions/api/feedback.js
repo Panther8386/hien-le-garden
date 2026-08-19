@@ -22,6 +22,9 @@ export async function onRequestPost({ request, env }) {
   if (!guestName || !phone || !rating) {
     return jsonError('Thiếu thông tin bắt buộc', 400);
   }
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return jsonError('Đánh giá phải là số từ 1 đến 5', 400);
+  }
 
   const now = new Date();
   const todayISODate = now.toISOString().slice(0, 10);
