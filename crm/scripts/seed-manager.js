@@ -1,8 +1,11 @@
 // Run once against production after the first deploy:
-//   node crm/scripts/seed-manager.js <username> <password>
+//   node crm/scripts/seed-manager.js <username> <password> [role]
+// role defaults to 'manager' if omitted; pass 'reception' to create a reception account.
 // then apply the printed SQL with:
 //   wrangler d1 execute hien_le_garden_crm --remote --command "<printed SQL>"
 import { webcrypto as crypto } from 'node:crypto';
+
+const VALID_ROLES = ['manager', 'reception'];
 
 async function hashPassword(password) {
   const saltBytes = crypto.getRandomValues(new Uint8Array(16));
@@ -16,12 +19,16 @@ async function hashPassword(password) {
   return `${toHex(saltBytes)}:${toHex(bits)}`;
 }
 
-const [username, password] = process.argv.slice(2);
+const [username, password, role = 'manager'] = process.argv.slice(2);
 if (!username || !password) {
-  console.error('Usage: node seed-manager.js <username> <password>');
+  console.error('Usage: node seed-manager.js <username> <password> [role]');
+  process.exit(1);
+}
+if (!VALID_ROLES.includes(role)) {
+  console.error(`Usage: node seed-manager.js <username> <password> [role]\nrole must be one of: ${VALID_ROLES.join(', ')}`);
   process.exit(1);
 }
 const hash = await hashPassword(password);
 console.log(
-  `INSERT INTO staff_accounts (username, password_hash, role, created_at) VALUES ('${username}', '${hash}', 'manager', '${new Date().toISOString()}');`
+  `INSERT INTO staff_accounts (username, password_hash, role, created_at) VALUES ('${username}', '${hash}', '${role}', '${new Date().toISOString()}');`
 );

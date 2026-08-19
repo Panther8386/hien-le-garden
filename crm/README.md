@@ -12,6 +12,7 @@ Cloudflare Pages + Pages Functions + D1. See `docs/specs/2026-08-19-v4-crm-loyal
 4. Create the first manager account:
    - `node scripts/seed-manager.js <username> <password>`
    - Run the printed `INSERT` with `wrangler d1 execute hien_le_garden_crm --remote --command "<sql>"`
+   - `seed-manager.js` accepts an optional 3rd argument for role (`manager` or `reception`, defaults to `manager`). Create a reception account the same way: `node scripts/seed-manager.js <username> <password> reception`
 5. Create the Telegram bot via @BotFather, set its webhook:
    - `curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=https://crm.hienlegarden.vn/api/telegram/webhook"`
 6. Point `crm.hienlegarden.vn` DNS at the Cloudflare Pages project (Cloudflare dashboard → Pages → Custom domains).
