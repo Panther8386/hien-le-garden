@@ -19,8 +19,8 @@ function buildHtml({ guestName, promoCode, discountPercent, expiresAt, giftOffer
     ? '<p>Mang mã này đến quầy lễ tân — nếu quà lưu niệm vẫn còn, bạn sẽ được nhận thêm nhé!</p>'
     : '';
   return `
-    <div style="font-family: Georgia, serif; background:#0D1F14; color:#F5F0E6; padding:32px;">
-      <h1 style="color:#C9A84C;">Hiền Lê Garden Farmstay</h1>
+    <div style="font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background:#0D1F14; color:#F5F0E6; padding:32px; max-width:480px; margin:0 auto;">
+      <h1 style="color:#C9A84C; font-size:22px;">Hiền Lê Garden Farmstay</h1>
       <p>Xin chào ${safeGuestName},</p>
       <p>Cảm ơn bạn đã chia sẻ trải nghiệm tại Hiền Lê Garden. Đây là mã ưu đãi dành riêng cho bạn:</p>
       <p style="font-size:28px; letter-spacing:2px; color:#C9A84C; font-weight:bold;">${safePromoCode}</p>

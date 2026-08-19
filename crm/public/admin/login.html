@@ -2,17 +2,23 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>Đăng nhập — Hiền Lê Garden CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
-  <h1>Đăng nhập nhân viên</h1>
-  <form id="loginForm">
-    <label>Tài khoản <input type="text" name="username" required /></label>
-    <label>Mật khẩu <input type="password" name="password" required /></label>
-    <button type="submit">Đăng nhập</button>
-    <p id="loginError" class="error"></p>
-  </form>
+  <div class="page">
+    <h1>Đăng nhập nhân viên</h1>
+    <form id="loginForm">
+      <label>Tài khoản <input type="text" name="username" required autocomplete="username" /></label>
+      <label>Mật khẩu <input type="password" name="password" required autocomplete="current-password" /></label>
+      <button type="submit">Đăng nhập</button>
+      <p id="loginError" class="error"></p>
+    </form>
+  </div>
   <script src="login.js"></script>
 </body>
 </html>

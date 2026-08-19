@@ -2,36 +2,44 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>Quản lý khuyến mãi — Hiền Lê Garden CRM</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
-  <h1>Cấu hình khuyến mãi</h1>
-  <nav><a href="reception.html">Tra cứu mã &rarr;</a></nav>
-  <form id="policyForm">
-    <label>% giảm giá <input type="number" name="discountPercent" min="0" max="100" required /></label>
-    <label>Từ ngày <input type="date" name="validFrom" required /></label>
-    <label>Đến ngày <input type="date" name="validTo" required /></label>
-    <label><input type="checkbox" name="giftEnabled" /> Kèm quà lưu niệm</label>
-    <button type="submit">Lưu chương trình</button>
-    <p id="policyError" class="error"></p>
-  </form>
+  <div class="page">
+    <h1>Cấu hình khuyến mãi</h1>
+    <nav><a href="reception.html">Tra cứu mã &rarr;</a></nav>
+    <form id="policyForm">
+      <label class="checkbox"><input type="checkbox" name="giftEnabled" /> Kèm quà lưu niệm</label>
+      <label>% giảm giá <input type="number" name="discountPercent" min="0" max="100" required /></label>
+      <label>Từ ngày <input type="date" name="validFrom" required /></label>
+      <label>Đến ngày <input type="date" name="validTo" required /></label>
+      <button type="submit">Lưu chương trình</button>
+      <p id="policyError" class="error"></p>
+    </form>
 
-  <h2>Các chương trình đã cấu hình</h2>
-  <p id="policyLoadError" class="error"></p>
-  <table id="policyTable">
-    <thead><tr><th>%</th><th>Từ</th><th>Đến</th><th>Quà</th></tr></thead>
-    <tbody></tbody>
-  </table>
+    <h2>Các chương trình đã cấu hình</h2>
+    <p id="policyLoadError" class="error"></p>
+    <div class="table-scroll">
+      <table id="policyTable">
+        <thead><tr><th>%</th><th>Từ</th><th>Đến</th><th>Quà</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-  <h2>Kho quà lưu niệm</h2>
-  <p id="giftInventoryDisplay"></p>
-  <form id="giftForm">
-    <label>Tên quà <input type="text" name="name" required /></label>
-    <label>Số lượng <input type="number" name="stockCount" min="0" required /></label>
-    <button type="submit">Cập nhật kho</button>
-    <p id="giftError" class="error"></p>
-  </form>
+    <h2>Kho quà lưu niệm</h2>
+    <p id="giftInventoryDisplay"></p>
+    <form id="giftForm">
+      <label>Tên quà <input type="text" name="name" required /></label>
+      <label>Số lượng <input type="number" name="stockCount" min="0" required /></label>
+      <button type="submit">Cập nhật kho</button>
+      <p id="giftError" class="error"></p>
+    </form>
+  </div>
 
   <script src="manager.js"></script>
 </body>
