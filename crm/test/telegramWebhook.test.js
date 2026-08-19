@@ -43,4 +43,18 @@ describe('POST /api/telegram/webhook', () => {
     const response = await webhook({ request, env: { ...env, TELEGRAM_BOT_TOKEN: 'test-token' } });
     expect(response.status).toBe(200);
   });
+
+  it('returns 200 for malformed payload with message text but no chat', async () => {
+    const update = { message: { text: '/start fb-1' } };
+    const request = new Request('https://crm.hienlegarden.vn/api/telegram/webhook', {
+      method: 'POST',
+      body: JSON.stringify(update),
+    });
+    const response = await webhook({ request, env: { ...env, TELEGRAM_BOT_TOKEN: 'test-token' } });
+    expect(response.status).toBe(200);
+
+    const row = await env.DB.prepare(`SELECT telegram_chat_id FROM feedback_responses WHERE id = 'fb-1'`).first();
+    expect(row?.telegram_chat_id).toBeNull();
+  });
+
 });
