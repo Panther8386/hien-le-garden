@@ -9,8 +9,15 @@ function jsonError(message, status) {
   });
 }
 
+const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function onRequestPost({ request, env }) {
-  const body = await request.json();
+  let body;
+  try {
+    body = await request.json();
+  } catch (err) {
+    return jsonError('Dữ liệu không hợp lệ', 400);
+  }
   const { guestName, phone, email, wantsTelegram, rating, comment, consentGiven } = body;
 
   if (!consentGiven) {
@@ -24,6 +31,18 @@ export async function onRequestPost({ request, env }) {
   }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return jsonError('Đánh giá phải là số từ 1 đến 5', 400);
+  }
+  if (email && !EMAIL_FORMAT.test(email)) {
+    return jsonError('Email không hợp lệ', 400);
+  }
+  if (guestName.length > 200) {
+    return jsonError('Tên khách quá dài', 400);
+  }
+  if (phone.length > 200) {
+    return jsonError('Số điện thoại quá dài', 400);
+  }
+  if (comment && comment.length > 2000) {
+    return jsonError('Nhận xét quá dài', 400);
   }
 
   const now = new Date();

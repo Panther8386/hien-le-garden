@@ -100,6 +100,42 @@ describe('POST /api/feedback', () => {
     expect(response.status).toBe(400);
   });
 
+  it('rejects an invalid email format', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody({ email: 'not-an-email' })),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects an oversized guestName', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody({ guestName: 'A'.repeat(201) })),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects an oversized comment', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody({ comment: 'A'.repeat(2001) })),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects a malformed JSON body with 400 instead of crashing', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: 'not json',
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(400);
+  });
+
   it('falls back to zero discount and no gift when no active policy exists', async () => {
     const request = new Request('https://x/api/feedback', {
       method: 'POST',

@@ -3,16 +3,27 @@ function formatDate(date) {
   return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+export function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function buildHtml({ guestName, promoCode, discountPercent, expiresAt, giftOffered }) {
+  const safeGuestName = escapeHtml(guestName);
+  const safePromoCode = escapeHtml(promoCode);
   const giftLine = giftOffered
     ? '<p>Mang mã này đến quầy lễ tân để nhận thêm quà lưu niệm nhé!</p>'
     : '';
   return `
     <div style="font-family: Georgia, serif; background:#0D1F14; color:#F5F0E6; padding:32px;">
       <h1 style="color:#C9A84C;">Hiền Lê Garden Farmstay</h1>
-      <p>Xin chào ${guestName},</p>
+      <p>Xin chào ${safeGuestName},</p>
       <p>Cảm ơn bạn đã chia sẻ trải nghiệm tại Hiền Lê Garden. Đây là mã ưu đãi dành riêng cho bạn:</p>
-      <p style="font-size:28px; letter-spacing:2px; color:#C9A84C; font-weight:bold;">${promoCode}</p>
+      <p style="font-size:28px; letter-spacing:2px; color:#C9A84C; font-weight:bold;">${safePromoCode}</p>
       <p>Giảm <strong>${discountPercent}%</strong> cho lần sử dụng dịch vụ tiếp theo, có hiệu lực đến <strong>${formatDate(expiresAt)}</strong>.</p>
       ${giftLine}
       <p>Hẹn gặp lại bạn tại Hiền Lê Garden!</p>
