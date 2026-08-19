@@ -1,0 +1,8 @@
+:root { --gold: #C9A84C; --dark-green: #0D1F14; --cream: #F5F0E6; }
+body { font-family: Georgia, serif; background: var(--dark-green); color: var(--cream); padding: 24px; }
+input, button { padding: 8px; margin: 4px 0; }
+button { background: var(--gold); color: var(--dark-green); border: none; font-weight: bold; cursor: pointer; }
+.error { color: #ff8a8a; }
+.hidden { display: none; }
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+td, th { border-bottom: 1px solid #333; padding: 8px; text-align: left; }

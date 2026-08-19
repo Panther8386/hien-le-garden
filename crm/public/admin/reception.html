@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tra cứu mã — Hiền Lê Garden CRM</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <h1>Tra cứu & đổi mã ưu đãi</h1>
+  <form id="lookupForm">
+    <label>Mã ưu đãi <input type="text" name="code" required /></label>
+    <button type="submit">Tra cứu</button>
+  </form>
+  <p id="lookupError" class="error"></p>
+
+  <section id="result" class="hidden">
+    <p>Khách: <strong id="guestName"></strong></p>
+    <p>Giảm giá: <strong id="discountPercent"></strong>%</p>
+    <p>Hạn dùng: <span id="expiresAt"></span></p>
+    <p>Trạng thái: <span id="status"></span></p>
+    <button id="redeemBtn">Đánh dấu đã dùng</button>
+    <button id="claimGiftBtn">Đã phát quà</button>
+    <p id="actionError" class="error"></p>
+  </section>
+
+  <script src="reception.js"></script>
+</body>
+</html>

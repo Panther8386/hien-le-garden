@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quản lý khuyến mãi — Hiền Lê Garden CRM</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <h1>Cấu hình khuyến mãi</h1>
+  <form id="policyForm">
+    <label>% giảm giá <input type="number" name="discountPercent" min="0" max="100" required /></label>
+    <label>Từ ngày <input type="date" name="validFrom" required /></label>
+    <label>Đến ngày <input type="date" name="validTo" required /></label>
+    <label><input type="checkbox" name="giftEnabled" /> Kèm quà lưu niệm</label>
+    <button type="submit">Lưu chương trình</button>
+  </form>
+
+  <h2>Các chương trình đã cấu hình</h2>
+  <table id="policyTable">
+    <thead><tr><th>%</th><th>Từ</th><th>Đến</th><th>Quà</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h2>Kho quà lưu niệm</h2>
+  <form id="giftForm">
+    <label>Tên quà <input type="text" name="name" required /></label>
+    <label>Số lượng <input type="number" name="stockCount" min="0" required /></label>
+    <button type="submit">Cập nhật kho</button>
+  </form>
+
+  <script src="manager.js"></script>
+</body>
+</html>
