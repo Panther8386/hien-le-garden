@@ -7,6 +7,8 @@ export default defineWorkersConfig(async () => {
 
   return {
     test: {
+      restoreMocks: true,
+      unstubGlobals: true,
       setupFiles: ['./test/apply-migrations.js'],
       poolOptions: {
         workers: {

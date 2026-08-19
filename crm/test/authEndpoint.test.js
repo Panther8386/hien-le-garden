@@ -1,17 +1,23 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { env } from 'cloudflare:test';
 import { onRequestPost as login } from '../functions/api/auth/login.js';
 import { onRequestPost as logout } from '../functions/api/auth/logout.js';
 import { hashPassword } from '../lib/auth.js';
 
+// PBKDF2 hashing (100,000 iterations) is the slowest operation in the suite.
+// Derive it once for the whole file instead of re-deriving it before every test.
+let sharedPasswordHash;
+beforeAll(async () => {
+  sharedPasswordHash = await hashPassword('s3cret-pass');
+});
+
 beforeEach(async () => {
   await env.DB.exec('DELETE FROM staff_accounts');
   await env.DB.exec('DELETE FROM sessions');
-  const hash = await hashPassword('s3cret-pass');
   await env.DB.prepare(
     `INSERT INTO staff_accounts (id, username, password_hash, role, created_at)
      VALUES (1, 'quan_ly_a', ?, 'manager', '2026-08-01T00:00:00Z')`
-  ).bind(hash).run();
+  ).bind(sharedPasswordHash).run();
 });
 
 describe('POST /api/auth/login', () => {
