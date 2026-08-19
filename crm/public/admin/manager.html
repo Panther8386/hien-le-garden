@@ -13,19 +13,23 @@
     <label>Đến ngày <input type="date" name="validTo" required /></label>
     <label><input type="checkbox" name="giftEnabled" /> Kèm quà lưu niệm</label>
     <button type="submit">Lưu chương trình</button>
+    <p id="policyError" class="error"></p>
   </form>
 
   <h2>Các chương trình đã cấu hình</h2>
+  <p id="policyLoadError" class="error"></p>
   <table id="policyTable">
     <thead><tr><th>%</th><th>Từ</th><th>Đến</th><th>Quà</th></tr></thead>
     <tbody></tbody>
   </table>
 
   <h2>Kho quà lưu niệm</h2>
+  <p id="giftInventoryDisplay"></p>
   <form id="giftForm">
     <label>Tên quà <input type="text" name="name" required /></label>
     <label>Số lượng <input type="number" name="stockCount" min="0" required /></label>
     <button type="submit">Cập nhật kho</button>
+    <p id="giftError" class="error"></p>
   </form>
 
   <script src="manager.js"></script>
