@@ -4,7 +4,7 @@ export async function onRequestPost({ request, env, params }) {
   const auth = await requireAuth(request, env, ['reception', 'manager']);
   if (auth instanceof Response) return auth;
 
-  const row = await env.DB.prepare(`SELECT promo_status FROM feedback_responses WHERE promo_code = ?`)
+  const row = await env.DB.prepare(`SELECT promo_status, promo_expires_at FROM feedback_responses WHERE promo_code = ?`)
     .bind(params.code).first();
 
   if (!row) {
@@ -12,6 +12,9 @@ export async function onRequestPost({ request, env, params }) {
   }
   if (row.promo_status === 'used') {
     return new Response(JSON.stringify({ error: 'Mã đã được sử dụng' }), { status: 409, headers: { 'Content-Type': 'application/json' } });
+  }
+  if (row.promo_status === 'unused' && new Date(row.promo_expires_at) < new Date()) {
+    return new Response(JSON.stringify({ error: 'Mã đã hết hạn' }), { status: 409, headers: { 'Content-Type': 'application/json' } });
   }
 
   await env.DB.prepare(

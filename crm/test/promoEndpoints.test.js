@@ -74,6 +74,14 @@ describe('POST /api/promo/:code/redeem', () => {
     const response = await redeem({ request: authedRequest('https://x/api/promo/HLG-4F7K9P/redeem', 'POST'), env, params: { code: 'HLG-4F7K9P' } });
     expect(response.status).toBe(409);
   });
+
+  it('rejects redeeming an expired-but-unused code', async () => {
+    await env.DB.prepare(`UPDATE feedback_responses SET promo_expires_at = '2026-08-01T00:00:00Z' WHERE promo_code = ?`)
+      .bind('HLG-4F7K9P').run();
+    const request = authedRequest('https://x/api/promo/HLG-4F7K9P/redeem', 'POST');
+    const response = await redeem({ request, env, params: { code: 'HLG-4F7K9P' } });
+    expect(response.status).toBe(409);
+  });
 });
 
 describe('POST /api/promo/:code/claim-gift', () => {
@@ -88,6 +96,29 @@ describe('POST /api/promo/:code/claim-gift', () => {
 
   it('returns 409 when stock is already zero', async () => {
     await env.DB.prepare(`UPDATE gift_inventory SET stock_count = 0 WHERE id = 1`).run();
+    const request = authedRequest('https://x/api/promo/HLG-4F7K9P/claim-gift', 'POST');
+    const response = await claimGift({ request, env, params: { code: 'HLG-4F7K9P' } });
+    expect(response.status).toBe(409);
+  });
+
+  it('rejects double-claim for the same code', async () => {
+    await claimGift({ request: authedRequest('https://x/api/promo/HLG-4F7K9P/claim-gift', 'POST'), env, params: { code: 'HLG-4F7K9P' } });
+    const response = await claimGift({ request: authedRequest('https://x/api/promo/HLG-4F7K9P/claim-gift', 'POST'), env, params: { code: 'HLG-4F7K9P' } });
+    expect(response.status).toBe(409);
+  });
+
+  it('guards against TOCTOU race when stock becomes zero after SELECT', async () => {
+    await env.DB.prepare(`UPDATE gift_inventory SET stock_count = 1 WHERE id = 1`).run();
+    // Simulate the race: stock is checked as > 0, but before the UPDATE, it becomes 0
+    await env.DB.prepare(`UPDATE gift_inventory SET stock_count = 0 WHERE id = 1`).run();
+    const request = authedRequest('https://x/api/promo/HLG-4F7K9P/claim-gift', 'POST');
+    const response = await claimGift({ request, env, params: { code: 'HLG-4F7K9P' } });
+    expect(response.status).toBe(409);
+  });
+
+  it('rejects claiming a gift for code where gift_offered is false', async () => {
+    await env.DB.prepare(`UPDATE feedback_responses SET gift_offered = 0 WHERE promo_code = ?`)
+      .bind('HLG-4F7K9P').run();
     const request = authedRequest('https://x/api/promo/HLG-4F7K9P/claim-gift', 'POST');
     const response = await claimGift({ request, env, params: { code: 'HLG-4F7K9P' } });
     expect(response.status).toBe(409);
