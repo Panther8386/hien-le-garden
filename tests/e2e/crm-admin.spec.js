@@ -3,6 +3,13 @@ const { test, expect } = require('@playwright/test');
 
 test.describe('CRM admin', () => {
   test('reception can look up a code and redeem it', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ username: 'hienle', role: 'reception' }),
+      })
+    );
     await page.route('**/api/promo/HLG-TEST99', (route) =>
       route.fulfill({
         status: 200,
@@ -24,5 +31,17 @@ test.describe('CRM admin', () => {
     await expect(page.locator('#guestName')).toHaveText('Test User');
     await page.click('#redeemBtn');
     await expect(page.locator('#status')).toHaveText('used');
+  });
+
+  test('redirects reception.html to login.html when not authenticated', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401 }));
+    await page.goto('/admin/reception.html');
+    await page.waitForURL('**/admin/login.html');
+  });
+
+  test('redirects manager.html to login.html when not authenticated', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401 }));
+    await page.goto('/admin/manager.html');
+    await page.waitForURL('**/admin/login.html');
   });
 });
