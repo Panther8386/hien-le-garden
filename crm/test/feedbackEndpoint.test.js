@@ -136,6 +136,58 @@ describe('POST /api/feedback', () => {
     expect(response.status).toBe(400);
   });
 
+  it('stores the optional experience fields when provided', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(
+        validBody({
+          stayDate: '2026-08-15',
+          wishesNextTime: 'Muốn thử phòng Circle House',
+          favoriteActivities: ['bbq', 'ca-phe-vuon'],
+        })
+      ),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(201);
+
+    const body = await response.json();
+    const row = await env.DB.prepare(`SELECT * FROM feedback_responses WHERE id = ?`).bind(body.feedbackId).first();
+    expect(row.stay_date).toBe('2026-08-15');
+    expect(row.wishes_next_time).toBe('Muốn thử phòng Circle House');
+    expect(JSON.parse(row.favorite_activities)).toEqual(['bbq', 'ca-phe-vuon']);
+  });
+
+  it('stores null for the optional experience fields when omitted', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody()),
+    });
+    const response = await submitFeedback({ request, env });
+    const body = await response.json();
+    const row = await env.DB.prepare(`SELECT * FROM feedback_responses WHERE id = ?`).bind(body.feedbackId).first();
+    expect(row.stay_date).toBeNull();
+    expect(row.wishes_next_time).toBeNull();
+    expect(row.favorite_activities).toBeNull();
+  });
+
+  it('rejects a malformed stayDate', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody({ stayDate: 'not-a-date' })),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(400);
+  });
+
+  it('rejects favoriteActivities that is not an array', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      body: JSON.stringify(validBody({ favoriteActivities: 'bbq' })),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.status).toBe(400);
+  });
+
   it('falls back to zero discount and no gift when no active policy exists', async () => {
     const request = new Request('https://x/api/feedback', {
       method: 'POST',

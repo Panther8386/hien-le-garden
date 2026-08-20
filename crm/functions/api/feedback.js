@@ -18,7 +18,18 @@ export async function onRequestPost({ request, env }) {
   } catch (err) {
     return jsonError('Dữ liệu không hợp lệ', 400);
   }
-  const { guestName, phone, email, wantsTelegram, rating, comment, consentGiven } = body;
+  const {
+    guestName,
+    phone,
+    email,
+    wantsTelegram,
+    rating,
+    comment,
+    consentGiven,
+    stayDate,
+    wishesNextTime,
+    favoriteActivities,
+  } = body;
 
   if (!consentGiven) {
     return jsonError('Cần đồng ý sử dụng thông tin để tiếp tục', 400);
@@ -44,6 +55,15 @@ export async function onRequestPost({ request, env }) {
   if (comment && comment.length > 2000) {
     return jsonError('Nhận xét quá dài', 400);
   }
+  if (stayDate && isNaN(Date.parse(stayDate))) {
+    return jsonError('Ngày lưu trú không hợp lệ', 400);
+  }
+  if (wishesNextTime && wishesNextTime.length > 2000) {
+    return jsonError('Mong muốn lần sau quá dài', 400);
+  }
+  if (favoriteActivities !== undefined && !Array.isArray(favoriteActivities)) {
+    return jsonError('Hoạt động yêu thích không hợp lệ', 400);
+  }
 
   const now = new Date();
   const todayISODate = now.toISOString().slice(0, 10);
@@ -62,8 +82,9 @@ export async function onRequestPost({ request, env }) {
   await env.DB.prepare(
     `INSERT INTO feedback_responses
      (id, submitted_at, guest_name, phone, email, wants_telegram, rating, comment, consent_given,
-      promo_code, discount_percent, promo_expires_at, promo_status, gift_offered, gift_claimed)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, 'unused', ?, 0)`
+      promo_code, discount_percent, promo_expires_at, promo_status, gift_offered, gift_claimed,
+      stay_date, wishes_next_time, favorite_activities)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?, ?, ?, 'unused', ?, 0, ?, ?, ?)`
   )
     .bind(
       feedbackId,
@@ -77,7 +98,10 @@ export async function onRequestPost({ request, env }) {
       promoCode,
       policy.discountPercent,
       expiresAt.toISOString(),
-      giftOffered ? 1 : 0
+      giftOffered ? 1 : 0,
+      stayDate || null,
+      wishesNextTime || null,
+      favoriteActivities && favoriteActivities.length ? JSON.stringify(favoriteActivities) : null
     )
     .run();
 

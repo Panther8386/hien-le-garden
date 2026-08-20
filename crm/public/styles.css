@@ -86,6 +86,9 @@ legend { font-size: 0.95rem; padding: 0 6px; }
   accent-color: var(--gold);
 }
 
+.activities .checkbox { margin-bottom: 10px; }
+.activities .checkbox:last-child { margin-bottom: 0; }
+
 .rating {
   display: flex;
   flex-wrap: wrap;

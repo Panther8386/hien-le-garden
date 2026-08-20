@@ -6,6 +6,7 @@ form.addEventListener('submit', async (event) => {
   errorEl.textContent = '';
 
   const data = new FormData(form);
+  const favoriteActivities = data.getAll('favoriteActivities');
   const payload = {
     guestName: data.get('guestName'),
     phone: data.get('phone'),
@@ -14,6 +15,9 @@ form.addEventListener('submit', async (event) => {
     rating: Number(data.get('rating')),
     comment: data.get('comment') || undefined,
     consentGiven: data.get('consentGiven') === 'on',
+    stayDate: data.get('stayDate') || undefined,
+    wishesNextTime: data.get('wishesNextTime') || undefined,
+    favoriteActivities: favoriteActivities.length ? favoriteActivities : undefined,
   };
 
   const response = await fetch('/api/feedback', {

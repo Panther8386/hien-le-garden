@@ -18,6 +18,7 @@
       <label>Số điện thoại <input type="tel" name="phone" required /></label>
       <label>Email (không bắt buộc) <input type="email" name="email" /></label>
       <label class="checkbox"><input type="checkbox" name="wantsTelegram" /> Nhận mã qua Telegram</label>
+      <label>Ngày lưu trú (không bắt buộc) <input type="date" name="stayDate" /></label>
 
       <fieldset>
         <legend>Đánh giá trải nghiệm</legend>
@@ -30,7 +31,20 @@
         </div>
       </fieldset>
 
-      <label>Nhận xét (không bắt buộc) <textarea name="comment"></textarea></label>
+      <fieldset>
+        <legend>Hoạt động yêu thích (không bắt buộc)</legend>
+        <div class="activities">
+          <label class="checkbox"><input type="checkbox" name="favoriteActivities" value="bbq" /> BBQ & lửa trại</label>
+          <label class="checkbox"><input type="checkbox" name="favoriteActivities" value="ca-phe-vuon" /> Cà phê vườn</label>
+          <label class="checkbox"><input type="checkbox" name="favoriteActivities" value="nong-nghiep" /> Trải nghiệm nông nghiệp (hái cà phê, cho cá ăn)</label>
+          <label class="checkbox"><input type="checkbox" name="favoriteActivities" value="cau-ca-cheo-thuyen" /> Câu cá / chèo thuyền</label>
+          <label class="checkbox"><input type="checkbox" name="favoriteActivities" value="chup-anh" /> Chụp ảnh giữa thiên nhiên</label>
+          <label class="checkbox"><input type="checkbox" name="favoriteActivities" value="rang-ca-phe" /> Workshop rang cà phê</label>
+        </div>
+      </fieldset>
+
+      <label>Ghi chú trải nghiệm (không bắt buộc) <textarea name="comment"></textarea></label>
+      <label>Mong muốn lần sau (không bắt buộc) <textarea name="wishesNextTime"></textarea></label>
       <label class="checkbox">
         <input type="checkbox" name="consentGiven" required />
         Tôi đồng ý để Hiền Lê Garden sử dụng thông tin này để liên hệ ưu đãi.
