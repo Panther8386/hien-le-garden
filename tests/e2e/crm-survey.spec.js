@@ -1,9 +1,9 @@
-// tests/e2e/crm-survey.spec.js  (added to the existing root Playwright suite)
+// tests/e2e/crm-survey.spec.js — runs under the v4 Playwright project, targeting v4/tri-an-khach-hang/
 const { test, expect } = require('@playwright/test');
 
 test.describe('CRM survey page', () => {
   test('rejects submission without consent (HTML5 required validation)', async ({ page }) => {
-    await page.goto('/'); // this project's baseURL is configured separately for crm/public — see Task 13
+    await page.goto('/tri-an-khach-hang/index.html');
     await page.fill('input[name="guestName"]', 'Test User');
     await page.fill('input[name="phone"]', '0900000000');
     await page.check('input[name="rating"][value="5"]');
@@ -27,7 +27,7 @@ test.describe('CRM survey page', () => {
       })
     );
 
-    await page.goto('/');
+    await page.goto('/tri-an-khach-hang/index.html');
     await page.fill('input[name="guestName"]', 'Test User');
     await page.fill('input[name="phone"]', '0900000000');
     await page.fill('input[name="email"]', 'test@example.com');
@@ -57,7 +57,7 @@ test.describe('CRM survey page', () => {
       })
     );
 
-    await page.goto('/');
+    await page.goto('/tri-an-khach-hang/index.html');
     await page.fill('input[name="guestName"]', 'Test User');
     await page.fill('input[name="phone"]', '0900000000');
     await page.fill('input[name="email"]', 'test@example.com');
