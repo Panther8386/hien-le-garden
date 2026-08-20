@@ -188,6 +188,16 @@ describe('POST /api/feedback', () => {
     expect(response.status).toBe(400);
   });
 
+  it('echoes an allowlisted Origin back in Access-Control-Allow-Origin', async () => {
+    const request = new Request('https://x/api/feedback', {
+      method: 'POST',
+      headers: { Origin: 'https://hienlegarden.vn' },
+      body: JSON.stringify(validBody()),
+    });
+    const response = await submitFeedback({ request, env });
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('https://hienlegarden.vn');
+  });
+
   it('falls back to zero discount and no gift when no active policy exists', async () => {
     const request = new Request('https://x/api/feedback', {
       method: 'POST',

@@ -132,7 +132,10 @@ button:active { opacity: 0.85; }
 
 #confirmation strong { color: var(--gold); font-size: 1.4em; }
 
-#telegramLink {
+/* :not([hidden]) — an explicit display here would otherwise outrank the
+   browser's [hidden] { display: none } rule (ID selector beats attribute
+   selector), making the `hidden` attribute a no-op on this element. */
+#telegramLink:not([hidden]) {
   display: inline-block;
   margin-top: 12px;
   background: #0068FF;

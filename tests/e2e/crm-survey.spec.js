@@ -38,6 +38,35 @@ test.describe('CRM survey page', () => {
 
     await expect(page.locator('#promoCode')).toHaveText('HLG-TEST99');
     await expect(page.locator('#giftLine')).toBeVisible();
+    await expect(page.locator('#telegramLink')).toBeVisible();
     await expect(page.locator('#telegramLink')).toHaveAttribute('href', 'https://t.me/HienLeGardenBot?start=fb-test-1');
+  });
+
+  test('hides the Telegram deep link when the guest did not opt in', async ({ page }) => {
+    await page.route('**/api/feedback', (route) =>
+      route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          feedbackId: 'fb-test-2',
+          promoCode: 'HLG-TEST00',
+          discountPercent: 0,
+          expiresAt: '2027-02-19T00:00:00Z',
+          giftOffered: false,
+        }),
+      })
+    );
+
+    await page.goto('/');
+    await page.fill('input[name="guestName"]', 'Test User');
+    await page.fill('input[name="phone"]', '0900000000');
+    await page.fill('input[name="email"]', 'test@example.com');
+    // wantsTelegram intentionally left unchecked
+    await page.check('input[name="rating"][value="5"]');
+    await page.check('input[name="consentGiven"]');
+    await page.click('button[type="submit"]');
+
+    await expect(page.locator('#promoCode')).toHaveText('HLG-TEST00');
+    await expect(page.locator('#telegramLink')).toBeHidden();
   });
 });
