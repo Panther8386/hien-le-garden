@@ -233,8 +233,12 @@ Body: `{ role }`. Rejects with 400 if this would leave zero accounts with
 
 ### `DELETE /api/users/:id` — manager only
 
-Rejects with 400 if `id` is the requesting manager's own account, or if it
-is the last remaining `manager` account.
+Rejects with 400 if `id` is the requesting manager's own account. This
+alone guarantees at least one manager always remains: deleting a manager
+requires being an authenticated manager who isn't the target, so the
+acting manager is always still there afterward — a separate "last manager"
+count guard would be unreachable dead code on this endpoint (contrast with
+`PATCH .../role` below, where a manager *can* target their own account).
 
 ### `POST /api/auth/change-password` — self-service, manager + reception
 
