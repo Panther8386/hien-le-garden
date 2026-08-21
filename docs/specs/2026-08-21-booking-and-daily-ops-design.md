@@ -66,9 +66,12 @@ Enforced server-side via `requireAuth(request, env, ['reception',
 'manager'])` or `['manager']`, following the existing pattern in
 `functions/api/policy.js`. Public endpoints (`GET /api/availability`,
 `POST /api/bookings`) add no auth check, matching `functions/api/
-feedback.js`'s precedent for guest-facing writes — and, like that
-endpoint, do **not** add CORS handling (same-origin only; the booking
-modal is served from this same site).
+feedback.js`'s precedent for guest-facing writes — but, unlike
+`feedback.js` (which adds CORS because the survey page is designed to be
+embeddable cross-origin), these add **no CORS handling**: the booking
+modal lives in `index.html` itself and is only ever called same-origin,
+matching the no-CORS precedent set by the admin-only endpoints
+(`functions/api/policy.js`, `functions/api/gift-inventory.js`).
 
 ## Data model
 
@@ -221,10 +224,12 @@ No new page. Both existing entry points funnel into one real flow:
   current check-in/out/guests/room fields, plus an optional **Ghi chú**.
 - On check-in/out/room-type change, call `GET /api/availability` and
   show the result inline (e.g. "Còn 3 phòng trống" / "Đã hết phòng loại
-  này trong khoảng ngày này"). Submission is blocked with an inline
-  message when `available = 0`, suggesting different dates or a
-  different room type — everywhere else, submission proceeds even on a
-  tight count, since this is a request, not a lock.
+  này trong khoảng ngày này"). This is a hint only, not a gate:
+  submission still proceeds even when `available = 0`, consistent with
+  `POST /api/bookings` itself never checking availability server-side
+  (see that endpoint's row above) — a guest can still ask for a
+  sold-out type and staff resolves it, the same as every other
+  capacity question in this request-based design.
 - `submitBooking()` calls `POST /api/bookings` instead of only rendering
   a local summary. The confirm state keeps the existing summary rows and
   the call/Zalo buttons (guests who want instant human contact still
