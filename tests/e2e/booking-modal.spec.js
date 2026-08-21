@@ -14,7 +14,7 @@ test.describe('Homepage booking modal', () => {
     });
 
     await page.goto('/');
-    await page.click('.nav-btn-book');
+    await page.click('.fab-book');
     await expect(page.locator('#bmOverlay')).toHaveClass(/open/);
 
     await page.fill('#bmGuestName', 'Nguyễn Văn A');
@@ -39,7 +39,7 @@ test.describe('Homepage booking modal', () => {
     });
 
     await page.goto('/');
-    await page.click('.nav-btn-book');
+    await page.click('.fab-book');
     await page.fill('#bmGuestName', 'Nguyễn Văn A');
     await page.fill('#bmPhone', '0900000001');
     await page.selectOption('#bmRoom', 'circle');
