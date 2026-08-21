@@ -26,7 +26,7 @@ test.describe('CRM admin', () => {
 
     await page.goto('/admin/reception.html');
     await page.fill('input[name="code"]', 'HLG-TEST99');
-    await page.click('button[type="submit"]');
+    await page.click('#lookupForm button[type="submit"]');
 
     await expect(page.locator('#guestName')).toHaveText('Test User');
     await page.click('#redeemBtn');
