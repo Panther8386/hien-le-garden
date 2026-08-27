@@ -22,7 +22,22 @@ test.describe('Clean role-based URLs', () => {
   ];
 
   for (const c of cases) {
-    test(`${c.url} serves content without a 404`, async ({ page }) => {
+    test(`${c.url} serves content without a 404`, async ({ page, baseURL }) => {
+      // Track same-origin subresource failures. Attached before goto() so it
+      // catches failures during the initial navigation too, and checks the
+      // actual HTTP status rather than relying on 'requestfailed' — that
+      // event only fires for network-level errors (DNS, connection reset,
+      // etc.), never for HTTP-level error statuses like a 404. This is what
+      // actually catches a 404'd /admin/nav-drawer.js or /admin/admin.css
+      // being requested under a clean URL like /manager/dashboard.
+      const siteOrigin = new URL(baseURL).origin;
+      const failed = [];
+      page.on('response', (res) => {
+        if (res.status() >= 400 && new URL(res.url()).origin === siteOrigin) {
+          failed.push(`${res.status()} ${res.url()}`);
+        }
+      });
+
       const response = await page.goto(c.url);
       expect(response.status()).toBeLessThan(400);
       // Every unauthenticated visit to a role page bounces to /admin via
@@ -30,10 +45,8 @@ test.describe('Clean role-based URLs', () => {
       if (c.expectRedirectToLogin) {
         await page.waitForURL('**/admin');
       }
-      // Confirm the page's own JS assets actually loaded (no console 404s
-      // for nav-drawer.js/admin.css under this URL).
-      const failed = [];
-      page.on('requestfailed', (req) => failed.push(req.url()));
+      // Confirm the page's own JS/CSS assets actually loaded (no 404s for
+      // nav-drawer.js/admin.css under this clean URL).
       await page.waitForLoadState('networkidle');
       expect(failed).toEqual([]);
     });
