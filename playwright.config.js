@@ -41,6 +41,20 @@ module.exports = defineConfig({
       name: 'v4',
       use: { baseURL: `http://localhost:${V4_PORT}` },
       metadata: { version: 'v4' },
+      // clean-urls.spec.js relies on _redirects rewrites, which the local
+      // http-server does not honor; it only runs against the real
+      // deployment via the v4-live project below.
+      testMatch: /^(?!.*[\\/]clean-urls\.spec\.js$).+\.spec\.js$/,
+    },
+    {
+      // Runs clean-urls.spec.js against the real Cloudflare Pages deployment,
+      // since _redirects rewrites are not honored by the local http-server
+      // used by the other projects above. Not run automatically; see
+      // tests/e2e/clean-urls.spec.js for manual invocation instructions.
+      name: 'v4-live',
+      use: { baseURL: 'https://hien-le-garden-v4.pages.dev' },
+      metadata: { version: 'v4-live' },
+      testMatch: /clean-urls\.spec\.js/,
     },
   ],
 });
