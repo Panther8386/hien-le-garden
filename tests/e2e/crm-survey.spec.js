@@ -39,7 +39,7 @@ test.describe('CRM survey page', () => {
     await expect(page.locator('#promoCode')).toHaveText('HLG-TEST99');
     await expect(page.locator('#giftLine')).toBeVisible();
     await expect(page.locator('#telegramLink')).toBeVisible();
-    await expect(page.locator('#telegramLink')).toHaveAttribute('href', 'https://t.me/HienLeGardenBot?start=fb-test-1');
+    await expect(page.locator('#telegramLink')).toHaveAttribute('href', 'https://t.me/HienLeGardenbot?start=fb-test-1');
   });
 
   test('hides the Telegram deep link when the guest did not opt in', async ({ page }) => {
