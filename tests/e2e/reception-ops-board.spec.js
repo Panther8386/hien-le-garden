@@ -37,4 +37,22 @@ test.describe('Reception daily ops board', () => {
     await page.goto('/admin/reception.html');
     await page.waitForURL('**/admin/login.html');
   });
+
+  test('observer sees a read-only ops board', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'quan_sat', role: 'observer' }) }));
+    // Register the catch-all before the specific route: Playwright resolves overlapping
+    // page.route patterns in reverse registration order, so the more specific route
+    // (registered last) must come after the catch-all to take precedence for status=pending.
+    await page.route('**/api/bookings?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=pending', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 1, guestName: 'Khách A', phone: '0900000001', roomType: 'triangle', checkIn: '2026-09-01', checkOut: '2026-09-02', status: 'pending' }]) })
+    );
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 1, name: 'Triangle 1', roomType: 'triangle', needsCleaning: false, status: 'empty' }]) }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#newBookingSection')).toBeHidden();
+    await expect(page.locator('#promoLookupSection')).toBeHidden();
+    await expect(page.locator('#pendingList')).toContainText('Khách A');
+    await expect(page.locator('#pendingList button')).toHaveCount(0);
+  });
 });
