@@ -33,6 +33,11 @@ test.describe('CRM customer list', () => {
     await page.click('#customerTable tbody tr');
     await expect(page.locator('#detailPanel')).toBeVisible();
     await expect(page.locator('#detailContent')).toContainText('Rất tốt');
+
+    // Regression: customers.js's `let currentPage` used to collide with
+    // nav-drawer.js's top-level `function currentPage()`, throwing a
+    // SyntaxError that silently killed the whole nav drawer on this page only.
+    await expect(page.locator('.nav-toggle')).toBeVisible();
   });
 
   test('redirects to login.html when not authenticated', async ({ page }) => {
