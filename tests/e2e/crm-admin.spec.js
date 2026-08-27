@@ -36,12 +36,12 @@ test.describe('CRM admin', () => {
   test('redirects reception.html to login.html when not authenticated', async ({ page }) => {
     await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401 }));
     await page.goto('/admin/reception.html');
-    await page.waitForURL('**/admin/login.html');
+    await page.waitForURL('**/admin/');
   });
 
   test('redirects manager.html to login.html when not authenticated', async ({ page }) => {
     await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401 }));
     await page.goto('/admin/manager.html');
-    await page.waitForURL('**/admin/login.html');
+    await page.waitForURL('**/admin/');
   });
 });

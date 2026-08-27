@@ -35,7 +35,7 @@ test.describe('Reception daily ops board', () => {
   test('redirects to login.html when not authenticated', async ({ page }) => {
     await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401 }));
     await page.goto('/admin/reception.html');
-    await page.waitForURL('**/admin/login.html');
+    await page.waitForURL('**/admin/');
   });
 
   test('observer sees a read-only ops board', async ({ page }) => {

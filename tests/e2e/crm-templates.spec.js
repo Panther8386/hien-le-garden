@@ -29,6 +29,6 @@ test.describe('CRM template library', () => {
   test('redirects to login.html when not authenticated', async ({ page }) => {
     await page.route('**/api/auth/me', (route) => route.fulfill({ status: 401 }));
     await page.goto('/admin/templates.html');
-    await page.waitForURL('**/admin/login.html');
+    await page.waitForURL('**/admin/');
   });
 });
