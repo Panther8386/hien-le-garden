@@ -30,10 +30,15 @@ test.describe('Clean role-based URLs', () => {
       // etc.), never for HTTP-level error statuses like a 404. This is what
       // actually catches a 404'd /admin/nav-drawer.js or /admin/admin.css
       // being requested under a clean URL like /manager/dashboard.
+      // /api/* calls are expected to 401 for an unauthenticated visitor —
+      // that's the auth gate working correctly, not an asset failure. Only
+      // flag same-origin, non-API responses (the actual page/script/style
+      // assets this check exists to catch a 404 on).
       const siteOrigin = new URL(baseURL).origin;
       const failed = [];
       page.on('response', (res) => {
-        if (res.status() >= 400 && new URL(res.url()).origin === siteOrigin) {
+        const url = new URL(res.url());
+        if (res.status() >= 400 && url.origin === siteOrigin && !url.pathname.startsWith('/api/')) {
           failed.push(`${res.status()} ${res.url()}`);
         }
       });
