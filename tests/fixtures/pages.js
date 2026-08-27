@@ -6,6 +6,8 @@ const HOME_PAGE = { name: 'home', path: '/' };
 const SUB_PAGES = [
   { name: 'bang-gia', path: '/bang-gia/' },
   { name: 'gioi-thieu', path: '/gioi-thieu/' },
+  { name: 'tri-an-khach-hang', path: '/tri-an-khach-hang/' },
+  { name: 'cam-nang', path: '/cam-nang/' },
   { name: 'cam-nang-10-diem-check-in', path: '/cam-nang/10-diem-check-in/' },
   { name: 'cam-nang-am-thuc-gia-nghia', path: '/cam-nang/am-thuc-gia-nghia/' },
   { name: 'cam-nang-du-lich-gia-nghia', path: '/cam-nang/du-lich-gia-nghia/' },
