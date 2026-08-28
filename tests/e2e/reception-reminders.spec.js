@@ -30,6 +30,37 @@ test.describe('Reception reminders', () => {
     await expect(page.locator('#remindersSection')).toContainText('Phòng chưa dọn quá 60 phút (1)');
     await expect(page.locator('#remindersSection')).toContainText('Circle House 1');
     await expect(page.locator('#remindersSection')).toContainText('90 phút');
+    await expect(page.locator('#remindersSection')).not.toContainText('Không có việc cần nhắc');
+    await expect(page.locator('#remindersSection button')).toHaveCount(0);
+    await expect(page.locator('#remindersSection [onclick]')).toHaveCount(0);
+  });
+
+  test('shows only the populated list heading when just one list has items', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/reception/reminders', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          pendingNoDeposit: [],
+          arrivingToday: [],
+          roomsNotCleaned: [{ id: 3, name: 'Circle House 1', roomType: 'circle', needsCleaningSince: '2026-08-28T00:00:00Z', minutesWaiting: 90 }],
+          thresholds: { pendingDepositHours: 2, cleaningMinutes: 60 },
+        }),
+      })
+    );
+
+    await page.goto('/admin/reception.html');
+
+    await expect(page.locator('#remindersSection')).toContainText('Phòng chưa dọn quá 60 phút (1)');
+    await expect(page.locator('#remindersSection')).toContainText('Circle House 1');
+    await expect(page.locator('#remindersSection')).toContainText('90 phút');
+    await expect(page.locator('#remindersSection')).not.toContainText('Chờ cọc quá');
+    await expect(page.locator('#remindersSection')).not.toContainText('Khách sắp đến hôm nay');
+    await expect(page.locator('#remindersSection')).not.toContainText('Không có việc cần nhắc');
   });
 
   test('shows the all-clear message when there is nothing to flag', async ({ page }) => {
