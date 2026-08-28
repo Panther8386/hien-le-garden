@@ -194,12 +194,21 @@ the top of the page:
 - The six `.room-price-tag` spans on room cards: each card gains a
   `data-room-type="X"` attribute; on fetch success the tag's text is
   replaced with the live price + `/đêm`.
-- The FAQ chatbot's giá answer (currently a literal template string built
-  at module-load time): restructured to build the string from the cached
-  catalog fetch when available at answer-render time, falling back to
-  today's literal string otherwise — this answer is only assembled when
-  the visitor actually asks about price, by which point the page-load
-  fetch has normally resolved.
+- The FAQ chatbot's giá answer and its separate hoàn-tiền/huỷ answer
+  (currently two literal template strings evaluated once at module-load
+  time, stored in the chatbot's `KB` array — the huỷ answer already
+  publishes a concrete-looking cancellation policy today, "hủy trước 3
+  ngày hoàn 100%..." — discovered during implementation planning; per the
+  user's confirmation, `cancellation_policy_tier` is still seeded empty
+  rather than backfilled from that copy, but the chatbot answer is made
+  to read from the real (initially empty) table going forward, same as
+  the price answer). Both entries are overwritten in place on the shared
+  `KB` array once the page-load fetch (`/api/catalog` and
+  `/api/cancellation-policy?public=1`) resolves — the giá answer rebuilt
+  from catalog data, the hoàn-tiền answer rebuilt from policy tiers (or a
+  neutral "đang được cập nhật" message when no tiers are configured yet)
+  — falling back to today's literal strings if the fetch fails or hasn't
+  resolved by the time the visitor asks.
 
 ## Part B — Cancellation / Deposit-Refund Policy
 
@@ -236,6 +245,12 @@ explicit empty state rather than silently doing nothing.
   (observer excluded, matching the existing `promo_policy` convention in
   `functions/api/policy.js`). Returns all tiers ordered by
   `min_days_before_checkin DESC`.
+- `GET /api/cancellation-policy?public=1` — **no auth**. Same shape as
+  above. Added so the homepage FAQ chatbot (an anonymous-visitor surface,
+  see the updated Public-site sync note under Part A, extended to this
+  policy's FAQ answer too) can read the configured tiers without a staff
+  session — added during implementation planning once the FAQ-sync
+  requirement below was confirmed with the user.
 - `POST /api/cancellation-policy` — `['admin']` only.
 
 `functions/api/cancellation-policy/[id].js`:
@@ -283,16 +298,16 @@ policy to a guest over the phone.
 
 ### Reception cancel-flow UI change
 
-In `admin/reception.js`, the existing "Huỷ" action on a `confirmed`
-booking with `deposit_amount > 0` gains a preview: using the tiers already
-fetched for the admin page (or fetched once and cached the same way
-`loadLayoutHistory`-style calls already are in this file), compute the
-same day-math client-side and show "Hoàn cọc dự kiến: X% (~Y đ)" in the
-existing confirm dialog before the lễ tân confirms. After the cancel POST
-succeeds, the dialog's success message uses the **server-returned**
-`refundPercentApplied`/`refundAmount` (authoritative) rather than the
-client-side preview, since the server is the source of truth and the two
-could theoretically differ if a tier changed between preview and submit.
+`admin/reception.js`'s existing `cancelBooking(id)` is a direct one-click
+action today — there is no confirm dialog to attach a "before" preview to
+(checked during implementation planning; an earlier draft of this spec
+assumed one existed). Simplified accordingly: the cancel call's response
+now includes `refundPercentApplied`/`refundAmount` (server-computed,
+authoritative), and on success the existing `showOpsError(...)` status
+line — already used for both errors and cleared-on-success messages
+elsewhere in this file — displays "Đã huỷ đặt phòng. Hoàn cọc đề xuất: X%
+(~Y đ)" when the computed amount is greater than zero, or clears as
+before otherwise. No new dialog or UI chrome is added.
 
 ## Testing
 
@@ -319,4 +334,8 @@ could theoretically differ if a tier changed between preview and submit.
   `bang-gia` catalog-rendering check to `tests/e2e/` (mocked
   `/api/catalog` response renders the expected rows into the page) so a
   regression here is caught the same way the stray deleted `.jpg` was
-  caught earlier today.
+  caught earlier today. A further homepage e2e test mocks both
+  `/api/catalog` and `/api/cancellation-policy?public=1` and confirms the
+  booking select, room card price tags, and both FAQ chatbot answers (giá
+  and hoàn tiền, including its empty-tiers fallback message) all update
+  accordingly.
