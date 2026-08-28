@@ -18,7 +18,7 @@
 - **`GET /api/catalog` (no query string) takes NO `requireAuth` call at all** — it is consumed by anonymous visitors on the public site. This is deliberate, matching the existing precedent in `functions/api/availability.js`. Do not add auth to this branch.
 - `GET /api/catalog?all=1` requires auth, roles `['reception', 'manager', 'admin', 'observer']`.
 - `POST` / `PATCH` / `DELETE /api/catalog[...]` require auth, roles `['admin']` **only** — not `manager`, a deliberate exception to this codebase's usual `['manager', 'admin']` write convention.
-- `GET /api/cancellation-policy` (no query string) requires auth, roles `['reception', 'manager', 'admin']` (observer excluded, matching `functions/api/policy.js`'s existing convention for promo policy).
+- `GET /api/cancellation-policy` (no query string) requires auth, roles `['reception', 'manager', 'admin', 'observer']`. Originally scoped to `['reception', 'manager', 'admin']` (observer excluded, matching `functions/api/policy.js`'s existing convention for promo policy), but corrected during Task 7's review to include `observer`, matching this endpoint's own Admin UI role list and the sibling `catalog` endpoint's `?all=1` precedent.
 - `GET /api/cancellation-policy?public=1` takes **no auth** — consumed by the homepage FAQ chatbot.
 - `POST` / `PATCH` / `DELETE /api/cancellation-policy[...]` require auth, roles `['admin']` only.
 - The 20 `service_catalog` seed rows in Task 1 must match the wording and amounts already published on `/bang-gia` **exactly** — copy verbatim, do not paraphrase.

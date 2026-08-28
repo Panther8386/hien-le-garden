@@ -241,10 +241,16 @@ explicit empty state rather than silently doing nothing.
 ### API
 
 `functions/api/cancellation-policy/index.js`:
-- `GET /api/cancellation-policy` — `['reception', 'manager', 'admin']`
+- `GET /api/cancellation-policy` — `['reception', 'manager', 'admin',
+  'observer']`. Returns all tiers ordered by `min_days_before_checkin
+  DESC`. Originally scoped to `['reception', 'manager', 'admin']`
   (observer excluded, matching the existing `promo_policy` convention in
-  `functions/api/policy.js`). Returns all tiers ordered by
-  `min_days_before_checkin DESC`.
+  `functions/api/policy.js`), but corrected to include `observer` during
+  Task 7's review — this endpoint's own Admin UI prose above already
+  lists `observer` among the roles that can view the cancellation-policy
+  page, and the sibling `catalog` endpoint's `?all=1` variant sets the
+  same read-access-for-all-four-roles precedent, so excluding observer
+  here was an inconsistency rather than an intentional stricter rule.
 - `GET /api/cancellation-policy?public=1` — **no auth**. Same shape as
   above. Added so the homepage FAQ chatbot (an anonymous-visitor surface,
   see the updated Public-site sync note under Part A, extended to this
