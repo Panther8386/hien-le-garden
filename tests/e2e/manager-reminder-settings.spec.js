@@ -25,7 +25,7 @@ test.describe('Manager reminder-settings config', () => {
     await page.fill('input[name="cleaningMinutes"]', '45');
     await page.click('#reminderSettingsForm button[type="submit"]');
 
-    expect(saved).toEqual({ pendingDepositHours: 4, cleaningMinutes: 45 });
+    await expect.poll(() => saved).toEqual({ pendingDepositHours: 4, cleaningMinutes: 45 });
   });
 
   test('a manager (not admin) never sees the reminder-settings section', async ({ page }) => {
