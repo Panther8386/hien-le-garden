@@ -136,4 +136,22 @@ test.describe('Reception daily ops board', () => {
     await expect(page.locator('#pendingList')).toContainText('Khách A');
     await expect(page.locator('#pendingList input[type="number"]')).toHaveCount(0);
   });
+
+  test('cancelling a booking with a deposit shows the computed refund suggestion', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 9, guestName: 'Trần Thị B', phone: '0900000009', roomType: 'circle', checkIn: '2099-02-01', checkOut: '2099-02-03', status: 'confirmed' }]) })
+    );
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings/9/cancel', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, refundPercentApplied: 50, refundAmount: 150000 }) }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Trần Thị B');
+    await page.click('#upcomingConfirmedList >> text=Hủy đặt phòng');
+
+    await expect(page.locator('#opsError')).toContainText('50%');
+    await expect(page.locator('#opsError')).toContainText('150.000');
+  });
 });
