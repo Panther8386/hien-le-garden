@@ -41,4 +41,51 @@ test.describe('CRM user management', () => {
     await page.goto('/admin/users.html');
     await page.waitForURL('**/admin/');
   });
+
+  test('admin can reset another account\'s password', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'Vinhdx', role: 'admin' }) }));
+    await page.route('**/api/users', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, username: 'Vinhdx', role: 'admin', createdAt: '2026-08-01T00:00:00Z' },
+          { id: 2, username: 'hienle', role: 'reception', createdAt: '2026-08-20T00:00:00Z' },
+        ]),
+      })
+    );
+    let resetPayload = null;
+    await page.route('**/api/users/2/password', (route) => {
+      resetPayload = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/users.html');
+
+    const ownRow = page.locator('#userTable tbody tr', { hasText: 'Vinhdx' });
+    await expect(ownRow.locator('button', { hasText: 'Đặt lại mật khẩu' })).toBeDisabled();
+
+    const targetRow = page.locator('#userTable tbody tr', { hasText: 'hienle' });
+    await targetRow.locator('button', { hasText: 'Đặt lại mật khẩu' }).click();
+    await expect(page.locator('.reset-password-row')).toBeVisible();
+    await page.locator('.reset-password-row input[type="password"]').fill('MatKhauMoi123');
+    await page.locator('.reset-password-row button', { hasText: 'Xác nhận' }).click();
+
+    await expect(page.locator('.reset-password-row')).toHaveCount(0);
+    expect(resetPayload).toEqual({ password: 'MatKhauMoi123' });
+  });
+
+  test('the reset-password button is hidden for non-admin roles', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'Panther', role: 'manager' }) }));
+    await page.route('**/api/users', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ id: 1, username: 'Panther', role: 'manager', createdAt: '2026-08-01T00:00:00Z' }]),
+      })
+    );
+
+    await page.goto('/admin/users.html');
+    await expect(page.locator('#userTable tbody tr button', { hasText: 'Đặt lại mật khẩu' })).toHaveCount(0);
+  });
 });
