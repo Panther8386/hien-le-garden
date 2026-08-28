@@ -27,11 +27,49 @@ test.describe('Admin service catalog', () => {
 
     await page.click('#addServiceBtn');
     await page.fill('input[name="name"]', 'Trà đá');
-    await page.selectOption('select[name="priceType"]', 'fixed');
-    await page.fill('input[name="priceFixed"]', '20000');
+    await page.fill('input[name="priceMin"]', '20000');
+    // Giá B left empty -> implied fixed price, per the plan's A/B inference rule.
     await page.click('#catalogSubmitBtn');
 
     await expect(page.locator('#catalogTable tbody')).toContainText('Trà đá');
+  });
+
+  test('filling both Giá A and Giá B (B > A) submits a range price', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'Vinhdx', role: 'admin' }) }));
+    await page.route('**/api/catalog*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(catalogItems) }));
+
+    let posted = null;
+    await page.route('**/api/catalog', (route) => {
+      if (route.request().method() === 'POST') {
+        posted = route.request().postDataJSON();
+        return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(catalogItems) });
+    });
+
+    await page.goto('/admin/catalog.html');
+    await page.click('#addServiceBtn');
+    await page.fill('input[name="name"]', 'Đốt lửa trại');
+    await page.fill('input[name="priceMin"]', '500000');
+    await page.fill('input[name="priceMax"]', '1000000');
+    await page.click('#catalogSubmitBtn');
+
+    expect(posted).toMatchObject({ priceType: 'range', priceMin: 500000, priceMax: 1000000 });
+  });
+
+  test('a Giá B not greater than Giá A shows a validation error instead of submitting', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'Vinhdx', role: 'admin' }) }));
+    await page.route('**/api/catalog*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(catalogItems) }));
+
+    await page.goto('/admin/catalog.html');
+    await page.click('#addServiceBtn');
+    await page.fill('input[name="name"]', 'Giá sai');
+    await page.fill('input[name="priceMin"]', '100000');
+    await page.fill('input[name="priceMax"]', '100000');
+    await page.click('#catalogSubmitBtn');
+
+    await expect(page.locator('#formError')).toContainText('Giá B phải lớn hơn Giá A');
+    await expect(page.locator('#catalogForm')).toBeVisible();
   });
 
   test('a non-admin role sees the data read-only', async ({ page }) => {
