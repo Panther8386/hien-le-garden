@@ -189,6 +189,52 @@ test.describe('Reception daily ops board', () => {
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Tổng dịch vụ: 60.000 đ');
   });
 
+  test('the paid checkbox toggles the payment-method checkbox and is sent on submit', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 5, category: 'fnb_hoat_dong', subgroup: null, name: 'Cà phê', priceType: 'fixed', priceMin: 30000, priceMax: null, priceLabel: null, unitCapacity: '/ phần', note: '', roomTypeKey: null, displayOrder: 1, isActive: true }]) }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    let posted = null;
+    let serviceAdded = false;
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{
+          id: 15, guestName: 'Ngô Thị F', phone: '0900000015', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed',
+          services: serviceAdded ? [{ id: 2, bookingId: 15, name: 'Cà phê', unitPrice: 30000, quantity: 1, amount: 30000, status: 'posted', paymentStatus: 'paid', paymentMethod: 'transfer', createdBy: 'hienle', createdAt: '2026-08-28T00:00:00Z', voidedBy: null, voidedAt: null }] : [],
+        }]),
+      })
+    );
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings/15/services', (route) => {
+      posted = route.request().postDataJSON();
+      serviceAdded = true;
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 2, ok: true }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Ngô Thị F');
+    await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
+    await page.locator('.add-service-form select').selectOption('5');
+
+    const paidCheckbox = page.locator('.add-service-form .checkbox-label', { hasText: 'Đã thanh toán' }).locator('input[type="checkbox"]');
+    const methodLabel = page.locator('.add-service-form .checkbox-label', { hasText: 'Tiền mặt' });
+    const methodCheckbox = methodLabel.locator('input[type="checkbox"]');
+
+    await expect(methodLabel).toBeHidden();
+    await paidCheckbox.check();
+    await expect(methodLabel).toBeVisible();
+    await expect(methodCheckbox).toBeChecked();
+    await methodCheckbox.uncheck();
+
+    await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
+
+    expect(posted).toMatchObject({ serviceCatalogId: 5, paid: true, paymentMethod: 'transfer' });
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Đã thanh toán (Chuyển khoản)');
+  });
+
   test('voiding a service line strikes it through and drops it from the total', async ({ page }) => {
     await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
     await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
