@@ -42,6 +42,7 @@ New migration `0014_experience_slots.sql`:
 
 ```sql
 ALTER TABLE service_catalog ADD COLUMN is_scheduled INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE service_catalog ADD COLUMN terms_and_conditions TEXT;
 
 CREATE TABLE service_slot_template (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,6 +73,7 @@ ALTER TABLE booking_service_items ADD COLUMN experience_date TEXT;
 ALTER TABLE booking_service_items ADD COLUMN slot_template_id INTEGER REFERENCES service_slot_template(id);
 ALTER TABLE booking_service_items ADD COLUMN experience_slot_label TEXT;
 ALTER TABLE booking_service_items ADD COLUMN experience_start_time TEXT;
+ALTER TABLE booking_service_items ADD COLUMN terms_accepted_at TEXT;
 ```
 
 No `CHECK` constraints on any `ALTER TABLE`-added column, matching this
@@ -88,6 +90,14 @@ elsewhere — see `lib/dashboardMetrics.js`'s date-boundary math). E.g.
 pattern already established for `reminder_settings`/`notification_settings`
 — reading the latest row via `ORDER BY id DESC LIMIT 1`, never an in-place
 `UPDATE`.
+
+`service_catalog.terms_and_conditions` is free text configured by admin,
+meaningful only for scheduled items (see the catalog UI section below).
+`booking_service_items.terms_accepted_at` is a nullable ISO timestamp,
+set only when the item being registered had non-empty terms and reception
+confirmed the guest was informed and agreed (see "Terms & conditions
+consent" below) — `NULL` for every non-scheduled item and for any scheduled
+item whose catalog entry has no terms configured.
 
 ### Why `booking_service_items` snapshots the slot's label and time
 
@@ -116,10 +126,25 @@ The existing catalog form gains one new checkbox, placed after the
 
 ```html
 <label class="checkbox"><input type="checkbox" name="isScheduled" /> Có khung giờ + sức chứa (trải nghiệm)</label>
+<label id="termsField" class="hidden">Điều khoản &amp; điều kiện sử dụng dịch vụ (hiển thị cho lễ tân khi đăng ký)
+  <textarea name="termsAndConditions" rows="4" placeholder="VD: Trẻ em dưới 12 tuổi cần người lớn đi kèm. Không hoàn phí nếu huỷ trong ngày..."></textarea>
+</label>
 ```
 
-Submitting the form includes `isScheduled: boolean` in the payload to
-`POST`/`PATCH /api/catalog`(`/:id`) alongside the existing fields.
+`termsField` toggles visibility the same way `roomTypeField`/`priceLabelField`
+already do in this form — shown only when `isScheduled` is checked (a
+`change` listener on the `isScheduled` checkbox, mirroring the existing
+`updatePriceTypeFields()` pattern). Leaving the textarea blank is valid —
+it means this scheduled item has no terms to show, and the reception-side
+consent checkbox described below simply never appears for it.
+
+Submitting the form includes `isScheduled: boolean` and
+`termsAndConditions: string | null` in the payload to
+`POST`/`PATCH /api/catalog`(`/:id`) alongside the existing fields. No new
+validation on `termsAndConditions` beyond "string or null/absent" — free
+text, admin's own responsibility for content, matching `note`'s existing
+validation (`typeof note !== 'string'` is the only check `validateCatalogFields`
+already applies to that field).
 
 When editing an existing item (`openEditForm`) whose `isScheduled` is
 `true`, a new section appears below the form (only reachable from the edit
@@ -269,15 +294,49 @@ see below), two new fields appear that don't exist for a normal item:
 `catalogItems` (populated once at page load via `GET /api/catalog`, already
 existing) needs no shape change on the frontend side — `GET /api/catalog`
 already returns every column via `SELECT *`-equivalent aliasing; this spec
-adds `is_scheduled AS isScheduled` to that existing `SELECT` list in
-`functions/api/catalog/index.js` (both the `all=1` and public list
-variants) so the frontend can branch on it without an extra request.
+adds `is_scheduled AS isScheduled, terms_and_conditions AS termsAndConditions`
+to that existing `SELECT` list in `functions/api/catalog/index.js` (both
+the `all=1` and public list variants) so the frontend can branch on it
+without an extra request.
+
+### Terms & conditions consent
+
+When the selected catalog item `isScheduled` **and** its
+`termsAndConditions` is a non-empty string, one more block appears in the
+add-service form, directly below the slot `<select>`:
+
+```html
+<blockquote id="termsDisplay"></blockquote>
+<label class="checkbox-label">
+  <input type="checkbox" id="termsAcceptedCheckbox" />
+  Đã giải thích & khách đồng ý điều khoản trên
+</label>
+```
+
+`termsDisplay.textContent` is set to the selected catalog item's
+`termsAndConditions` when the block appears. This mirrors the confirm
+checkbox style already used elsewhere in this form (`paidLabel`/`methodLabel`,
+both `class="checkbox-label"`).
+
+When this block is showing, submit additionally requires
+`termsAcceptedCheckbox.checked` (client-side check: `"Vui lòng xác nhận đã
+thông báo điều khoản dịch vụ cho khách"` in `errorEl` if unchecked). The
+POST body gains `termsAccepted: true` only when the block was shown and
+checked — omitted (not merely `false`) otherwise, so the server can tell
+"not applicable" apart from "shown but declined" (though the client
+already blocks submission in the declined case; the server-side check
+below is the authoritative guard regardless).
+
+When the selected item is `isScheduled` but its `termsAndConditions` is
+empty/`null`, this whole block is skipped — no checkbox forced, matching
+"leaving the textarea blank means no terms to show" from the catalog admin
+section above.
 
 ## `POST /api/bookings/:id/services`: capacity enforcement
 
-Body gains two optional fields: `experienceDate` (string `YYYY-MM-DD`),
-`slotTemplateId` (integer). After the existing `unitPrice`/`quantity`
-validation and the existing `catalogItem` lookup:
+Body gains three optional fields: `experienceDate` (string `YYYY-MM-DD`),
+`slotTemplateId` (integer), `termsAccepted` (boolean). After the existing
+`unitPrice`/`quantity` validation and the existing `catalogItem` lookup:
 
 ```js
 if (catalogItem.isScheduled) {
@@ -313,8 +372,17 @@ if (catalogItem.isScheduled) {
       { status: 409, headers: { 'Content-Type': 'application/json' } }
     );
   }
+
+  if (catalogItem.termsAndConditions && termsAccepted !== true) {
+    return jsonError('Vui lòng xác nhận đã thông báo điều khoản dịch vụ cho khách', 400);
+  }
 }
 ```
+
+The `termsAccepted` check is deliberately scoped to `catalogItem.termsAndConditions`
+being non-empty — a scheduled item with no configured terms never requires
+this field, matching the frontend's own "block skipped when terms are
+blank" behavior.
 
 `DATE_FORMAT` here is the same `/^\d{4}-\d{2}-\d{2}$/` regex already
 defined in `functions/api/bookings/index.js` — duplicated locally in this
@@ -323,16 +391,18 @@ tolerates small constant duplication across endpoint files (e.g. each
 endpoint file defines its own local `jsonError`) rather than introducing a
 new shared-lib import for a one-line regex.
 
-`catalogItem`'s lookup query gains `is_scheduled AS isScheduled` to its
-existing `SELECT id, name FROM service_catalog WHERE id = ? AND is_active =
-1` (becomes `SELECT id, name, is_scheduled AS isScheduled FROM
-service_catalog ...`).
+`catalogItem`'s lookup query gains `is_scheduled AS isScheduled,
+terms_and_conditions AS termsAndConditions` to its existing `SELECT id,
+name FROM service_catalog WHERE id = ? AND is_active = 1` (becomes `SELECT
+id, name, is_scheduled AS isScheduled, terms_and_conditions AS
+termsAndConditions FROM service_catalog ...`).
 
-The final `INSERT` gains four bound values for the four new
+The final `INSERT` gains five bound values for the five new
 `booking_service_items` columns — `experience_date`, `slot_template_id`,
 `experience_slot_label` (bound from `template.label`), `experience_start_time`
-(bound from `template.start_time`) — all `NULL` when the item isn't
-scheduled.
+(bound from `template.start_time`), and `terms_accepted_at` (bound to
+`new Date().toISOString()` when `termsAccepted === true`, else `NULL`) —
+all `NULL` when the item isn't scheduled.
 
 ### `findAlternativeSlots(env, catalogId, fromDate, requiredQuantity)`
 
@@ -457,7 +527,11 @@ containing only slots with `remaining >= requiredQuantity`; a request
 within capacity succeeds and the inserted row's `experience_slot_label`/
 `experience_start_time` match the template's values at insert time (not a
 live join); voiding a posted registration frees its capacity for a
-subsequent request in the same slot.
+subsequent request in the same slot; a scheduled item whose catalog entry
+has non-empty `termsAndConditions` is rejected (400) when `termsAccepted`
+is missing/`false`, succeeds when `true` and stamps `terms_accepted_at`;
+a scheduled item with no configured terms succeeds without `termsAccepted`
+and leaves `terms_accepted_at` `NULL`.
 
 New `test/experienceBookingSettings.test.js` covering
 `GET`/`PATCH /api/experience-booking-settings`, structurally identical to
@@ -470,7 +544,12 @@ selecting a scheduled catalog item, confirming the date/slot fields
 appear and the slot `<select>` populates from a mocked
 `slot-availability` response; one test for the 409-with-suggestions path,
 confirming a suggestion renders and clicking `[chọn]` fills the date/slot
-fields. A new small `tests/e2e/experience-settings.spec.js` for the
+fields; one test for a scheduled item with configured terms, confirming
+the terms block renders with the configured text, submit is blocked until
+the checkbox is checked, and `termsAccepted: true` is present in the POST
+payload once checked; one test for a scheduled item with no configured
+terms, confirming the terms block never appears and submit succeeds
+without it. A new small `tests/e2e/experience-settings.spec.js` for the
 admin-only settings form on `catalog.html`, matching the shape of the
 prior plan's `manager-reminder-settings.spec.js`.
 
@@ -488,6 +567,10 @@ prior plan's `manager-reminder-settings.spec.js`.
   parent booking to be `confirmed`/`checked_in`).
 - Any notification (Telegram/Zalo/email) when a slot fills up or frees a
   spot — this feature is synchronous, request-time capacity checking only.
+- Surfacing `terms_accepted_at` on the rendered service line in
+  `renderServicesSection` — the timestamp is captured and stored for
+  potential future audit/dispute use, but this iteration doesn't add any
+  inline "✓ đã đồng ý điều khoản" indicator to the existing line display.
 - Editing or voiding an existing scheduled registration's date/slot after
   the fact (e.g. "move this guest from Saturday to Sunday") — the existing
   void-and-re-add flow already covers this without new code, since voiding
