@@ -454,4 +454,23 @@ test.describe('Reception daily ops board', () => {
     await expect(page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' })).toHaveCount(0);
     await expect(page.locator('#upcomingConfirmedList button', { hasText: 'Huỷ' })).toHaveCount(0);
   });
+
+  test('shows the experience date and slot on a posted service line', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{
+        id: 30, guestName: 'Trải Nghiệm E', phone: '0900000030', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed',
+        services: [{ id: 40, bookingId: 30, name: 'Đốt lửa trại', unitPrice: 500000, quantity: 10, amount: 5000000, status: 'posted', paymentStatus: 'pending', paymentMethod: null, createdBy: 'hienle', createdAt: '2026-08-28T00:00:00Z', voidedBy: null, voidedAt: null, experienceDate: '2099-03-15', slotTemplateId: 7, experienceSlotLabel: 'Suất tối', experienceStartTime: '19:00', termsAcceptedAt: null }],
+      }]),
+    }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList .service-line')).toContainText('15/03 19:00 (Suất tối)');
+  });
 });
