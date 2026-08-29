@@ -181,7 +181,7 @@ test.describe('Reception daily ops board', () => {
     await page.goto('/admin/reception.html');
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Lê Thị C');
     await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
-    await page.locator('.add-service-form select').selectOption('5');
+    await page.locator('.add-service-form select').first().selectOption('5');
     await page.locator('.add-service-form input[type="number"]').nth(1).fill('2');
     await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
 
@@ -217,7 +217,7 @@ test.describe('Reception daily ops board', () => {
     await page.goto('/admin/reception.html');
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Ngô Thị F');
     await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
-    await page.locator('.add-service-form select').selectOption('5');
+    await page.locator('.add-service-form select').first().selectOption('5');
 
     const paidCheckbox = page.locator('.add-service-form .checkbox-label', { hasText: 'Đã thanh toán' }).locator('input[type="checkbox"]');
     const methodLabel = page.locator('.add-service-form .checkbox-label', { hasText: 'Tiền mặt' });
@@ -233,6 +233,159 @@ test.describe('Reception daily ops board', () => {
 
     expect(posted).toMatchObject({ serviceCatalogId: 5, paid: true, paymentMethod: 'transfer' });
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Đã thanh toán (Chuyển khoản)');
+  });
+
+  test('selecting a scheduled catalog item reveals the date/slot picker populated from live availability', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 9, category: 'fnb_hoat_dong', subgroup: null, name: 'Đốt lửa trại', priceType: 'fixed', priceMin: 500000, priceMax: null, priceLabel: null, unitCapacity: '/ buổi', note: '', roomTypeKey: null, displayOrder: 1, isActive: true, isScheduled: true, termsAndConditions: null }]),
+    }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 20, guestName: 'Trải Nghiệm A', phone: '0900000020', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed', services: [] }]),
+    }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/catalog/9/slot-availability**', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 7, label: 'Suất tối', startTime: '19:00', capacity: 30, booked: 18, remaining: 12 }]),
+    }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Trải Nghiệm A');
+    await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
+    await page.locator('.add-service-form select').first().selectOption('9');
+
+    const dateInput = page.locator('.add-service-form input[type="date"]');
+    await expect(dateInput).toBeVisible();
+    await dateInput.fill('2099-03-15');
+
+    const slotSelect = page.locator('.add-service-form select').nth(1);
+    await expect(slotSelect).toContainText('19:00 — còn 12/30 chỗ');
+  });
+
+  test('shows alternative slots when a registration exceeds remaining capacity', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 9, category: 'fnb_hoat_dong', subgroup: null, name: 'Đốt lửa trại', priceType: 'fixed', priceMin: 500000, priceMax: null, priceLabel: null, unitCapacity: '/ buổi', note: '', roomTypeKey: null, displayOrder: 1, isActive: true, isScheduled: true, termsAndConditions: null }]),
+    }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 21, guestName: 'Trải Nghiệm B', phone: '0900000021', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed', services: [] }]),
+    }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/catalog/9/slot-availability**', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 7, label: 'Suất tối', startTime: '19:00', capacity: 30, booked: 25, remaining: 5 }]),
+    }));
+    await page.route('**/api/bookings/21/services', (route) => route.fulfill({
+      status: 409,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        error: 'Suất này chỉ còn 5 chỗ, không đủ cho 10 khách',
+        alternatives: [{ date: '2099-03-16', slotTemplateId: 8, label: 'Suất tối', startTime: '19:00', remaining: 25 }],
+      }),
+    }));
+
+    await page.goto('/admin/reception.html');
+    await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
+    await page.locator('.add-service-form select').first().selectOption('9');
+    await page.locator('.add-service-form input[type="date"]').fill('2099-03-15');
+    await page.locator('.add-service-form select').nth(1).selectOption('7');
+    await page.locator('.add-service-form input[type="number"]').nth(1).fill('10');
+    await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
+
+    await expect(page.locator('.add-service-form')).toContainText('Suất này chỉ còn 5 chỗ');
+    await expect(page.locator('.add-service-form')).toContainText('16/03 — 19:00 (còn 25 chỗ)');
+  });
+
+  test('requires terms acceptance for a scheduled item with configured terms before submit', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 10, category: 'fnb_hoat_dong', subgroup: null, name: 'Cắm trại qua đêm', priceType: 'fixed', priceMin: 300000, priceMax: null, priceLabel: null, unitCapacity: '/ đêm', note: '', roomTypeKey: null, displayOrder: 1, isActive: true, isScheduled: true, termsAndConditions: 'Trẻ em dưới 12 tuổi cần người lớn đi kèm.' }]),
+    }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 22, guestName: 'Trải Nghiệm C', phone: '0900000022', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed', services: [] }]),
+    }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/catalog/10/slot-availability**', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 12, label: 'Suất đêm', startTime: '18:00', capacity: 10, booked: 2, remaining: 8 }]),
+    }));
+
+    let posted = null;
+    await page.route('**/api/bookings/22/services', (route) => {
+      posted = route.request().postDataJSON();
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 5, ok: true }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
+    await page.locator('.add-service-form select').first().selectOption('10');
+    await page.locator('.add-service-form input[type="date"]').fill('2099-03-15');
+    await page.locator('.add-service-form select').nth(1).selectOption('12');
+
+    await expect(page.locator('.add-service-form blockquote')).toContainText('Trẻ em dưới 12 tuổi cần người lớn đi kèm.');
+
+    await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
+    await expect(page.locator('.add-service-form')).toContainText('Vui lòng xác nhận đã thông báo điều khoản dịch vụ cho khách');
+    expect(posted).toBeNull();
+
+    await page.locator('.add-service-form .checkbox-label', { hasText: 'Đã giải thích' }).locator('input[type="checkbox"]').check();
+    await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
+
+    expect(posted).toMatchObject({ serviceCatalogId: 10, experienceDate: '2099-03-15', slotTemplateId: 12, termsAccepted: true });
+  });
+
+  test('never shows the terms block for a scheduled item with no configured terms', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 9, category: 'fnb_hoat_dong', subgroup: null, name: 'Đốt lửa trại', priceType: 'fixed', priceMin: 500000, priceMax: null, priceLabel: null, unitCapacity: '/ buổi', note: '', roomTypeKey: null, displayOrder: 1, isActive: true, isScheduled: true, termsAndConditions: null }]),
+    }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 23, guestName: 'Trải Nghiệm D', phone: '0900000023', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed', services: [] }]),
+    }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/catalog/9/slot-availability**', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 7, label: 'Suất tối', startTime: '19:00', capacity: 30, booked: 0, remaining: 30 }]),
+    }));
+    await page.route('**/api/bookings/23/services', (route) => route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 6, ok: true }) }));
+
+    await page.goto('/admin/reception.html');
+    await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
+    await page.locator('.add-service-form select').first().selectOption('9');
+    await page.locator('.add-service-form input[type="date"]').fill('2099-03-15');
+    await page.locator('.add-service-form select').nth(1).selectOption('7');
+
+    await expect(page.locator('.add-service-form blockquote')).toBeHidden();
+    await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Trải Nghiệm D');
   });
 
   test('voiding a service line strikes it through and drops it from the total', async ({ page }) => {
