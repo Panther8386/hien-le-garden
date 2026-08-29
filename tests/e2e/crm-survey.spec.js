@@ -40,6 +40,8 @@ test.describe('CRM survey page', () => {
     await expect(page.locator('#giftLine')).toBeVisible();
     await expect(page.locator('#telegramLink')).toBeVisible();
     await expect(page.locator('#telegramLink')).toHaveAttribute('href', 'https://t.me/HienLeGardenbot?start=fb-test-1');
+    await expect(page.locator('#zaloLink')).toBeVisible();
+    await expect(page.locator('#zaloLink')).toHaveAttribute('href', 'https://zalo.me/0968987311');
   });
 
   test('hides the Telegram deep link when the guest did not opt in', async ({ page }) => {
@@ -68,5 +70,8 @@ test.describe('CRM survey page', () => {
 
     await expect(page.locator('#promoCode')).toHaveText('HLG-TEST00');
     await expect(page.locator('#telegramLink')).toBeHidden();
+    // Zalo needs no opt-in and no backend association -- it stays visible regardless
+    await expect(page.locator('#zaloLink')).toBeVisible();
+    await expect(page.locator('#zaloLink')).toHaveAttribute('href', 'https://zalo.me/0968987311');
   });
 });
