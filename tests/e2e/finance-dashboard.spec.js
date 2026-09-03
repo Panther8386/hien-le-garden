@@ -17,6 +17,7 @@ function mockCommonRoutes(page, { role, summary, openingBalance, transactions })
       }
       return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 99, ok: true }) });
     }),
+    page.route('**/api/finance/categories', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(DEFAULT_CATEGORIES) })),
   ]);
 }
 
@@ -25,6 +26,22 @@ const DEFAULT_OPENING = { period: '2026-08', openingBalance: 1000000, setBy: 'qu
 const SAMPLE_TX = [
   { id: 1, type: 'income', category: 'ban_hang', amount: 2000000, note: 'Bán rau', transactionDate: '2026-08-10', status: 'paid', createdBy: 'quan_ly_a', createdAt: '2026-08-10T00:00:00Z', updatedBy: null, updatedAt: null, voidedBy: null, voidedAt: null },
   { id: 2, type: 'expense', category: 'vat_tu', amount: 500000, note: 'Mua phân bón', transactionDate: '2026-08-12', status: 'confirmed', createdBy: 'quan_ly_a', createdAt: '2026-08-12T00:00:00Z', updatedBy: null, updatedAt: null, voidedBy: null, voidedAt: null },
+];
+const DEFAULT_CATEGORIES = [
+  { id: 1, slug: 'cay_giong', label: 'Cây giống', type: 'expense', isActive: true },
+  { id: 2, slug: 'vat_tu', label: 'Vật tư', type: 'expense', isActive: true },
+  { id: 3, slug: 'nhan_cong', label: 'Nhân công', type: 'expense', isActive: true },
+  { id: 4, slug: 'van_chuyen', label: 'Vận chuyển', type: 'expense', isActive: true },
+  { id: 5, slug: 'bao_tri', label: 'Bảo trì', type: 'expense', isActive: true },
+  { id: 6, slug: 'thuc_pham', label: 'Thực phẩm', type: 'expense', isActive: true },
+  { id: 7, slug: 'am_thuc_lien_ket', label: 'Ẩm thực liên kết', type: 'expense', isActive: true },
+  { id: 8, slug: 'khac', label: 'Chi phí khác', type: 'expense', isActive: true },
+  { id: 9, slug: 'ban_hang', label: 'Dịch vụ khác', type: 'income', isActive: true },
+  { id: 10, slug: 'dich_vu', label: 'Lưu trú Hiền Lê', type: 'income', isActive: true },
+  { id: 11, slug: 'bep_hien_le', label: 'Bếp Hiền Lê', type: 'income', isActive: true },
+  { id: 12, slug: 'hien_le_drinks', label: 'Hiền Lê Drinks', type: 'income', isActive: true },
+  { id: 13, slug: 'hh_am_thuc_lien_ket', label: 'HH Ẩm thực liên kết', type: 'income', isActive: true },
+  { id: 14, slug: 'gio_xanh_hien_le', label: 'Giờ xanh Hiền Lê', type: 'income', isActive: true },
 ];
 
 test.describe('Finance dashboard (sổ thu chi)', () => {
@@ -56,6 +73,7 @@ test.describe('Finance dashboard (sổ thu chi)', () => {
     await page.route('**/api/finance/summary**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(observerSummary) }));
     await page.route('**/api/finance/opening-balance**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
     await page.route('**/api/finance/transactions**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(incomeOnlyTx) }));
+    await page.route('**/api/finance/categories', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(DEFAULT_CATEGORIES) }));
 
     await page.goto('/admin/finance.html');
 
@@ -77,6 +95,7 @@ test.describe('Finance dashboard (sổ thu chi)', () => {
     await page.route('**/api/finance/summary**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
     await page.route('**/api/finance/opening-balance**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
     await page.route('**/api/finance/transactions**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
+    await page.route('**/api/finance/categories', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
 
     await page.goto('/admin/finance.html');
     await expect(page).toHaveURL(/\/admin\/finance/);
@@ -254,6 +273,7 @@ test.describe('Finance dashboard (sổ thu chi)', () => {
     await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'quan_sat_a', role: 'observer' }) }));
     await page.route('**/api/finance/summary**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(observerSummary) }));
     await page.route('**/api/finance/transactions**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_TX.filter((t) => t.type === 'income')) }));
+    await page.route('**/api/finance/categories', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(DEFAULT_CATEGORIES) }));
     await page.route('**/api/finance/receipts-usage', (route) => {
       usageRequested = true;
       return route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) });
