@@ -237,4 +237,31 @@ test.describe('Finance dashboard (sổ thu chi)', () => {
     await expect.poll(() => uploadedFilename).toBe('bill.pdf');
     await expect(page.locator('#financeTable tbody tr', { hasText: 'Có chứng từ' })).toContainText('📎');
   });
+
+  test('manager sees the storage warning banner when receipt usage is over 9GB', async ({ page }) => {
+    await mockCommonRoutes(page, { role: 'manager', summary: DEFAULT_SUMMARY, openingBalance: DEFAULT_OPENING, transactions: SAMPLE_TX });
+    await page.route('**/api/finance/receipts-usage', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ totalBytes: 9800000000, thresholdBytes: 9663676416, overThreshold: true }) }));
+
+    await page.goto('/admin/finance.html');
+
+    await expect(page.locator('#financeStorageWarning')).toBeVisible();
+    await expect(page.locator('#financeStorageWarning')).toContainText('9GB');
+  });
+
+  test('observer never triggers a receipts-usage fetch (no banner, no request)', async ({ page }) => {
+    let usageRequested = false;
+    const observerSummary = { month: '2026-08', totalIncome: 2000000 };
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'quan_sat_a', role: 'observer' }) }));
+    await page.route('**/api/finance/summary**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(observerSummary) }));
+    await page.route('**/api/finance/transactions**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_TX.filter((t) => t.type === 'income')) }));
+    await page.route('**/api/finance/receipts-usage', (route) => {
+      usageRequested = true;
+      return route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) });
+    });
+
+    await page.goto('/admin/finance.html');
+
+    await expect(page.locator('#financeStorageWarning')).toBeHidden();
+    expect(usageRequested).toBe(false);
+  });
 });
