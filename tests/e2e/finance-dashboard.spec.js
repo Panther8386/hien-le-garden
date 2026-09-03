@@ -187,4 +187,54 @@ test.describe('Finance dashboard (sổ thu chi)', () => {
     await expect(page.locator('#financeCardList')).toBeVisible();
     await expect(page.locator('#financeCardList')).toContainText('Bán rau');
   });
+
+  test('category dropdown re-filters when the type changes, dropping a now-invalid selection', async ({ page }) => {
+    await mockCommonRoutes(page, { role: 'manager', summary: DEFAULT_SUMMARY, openingBalance: DEFAULT_OPENING, transactions: SAMPLE_TX });
+    await page.goto('/admin/finance.html');
+
+    await page.selectOption('#financeForm select[name="type"]', 'expense');
+    await expect(page.locator('#financeForm select[name="category"] option[value="thuc_pham"]')).toHaveCount(1);
+    await expect(page.locator('#financeForm select[name="category"] option[value="ban_hang"]')).toHaveCount(0);
+
+    await page.selectOption('#financeForm select[name="type"]', 'income');
+    await expect(page.locator('#financeForm select[name="category"] option[value="ban_hang"]')).toHaveCount(1);
+    await expect(page.locator('#financeForm select[name="category"] option[value="thuc_pham"]')).toHaveCount(0);
+  });
+
+  test('the default Thu/Chi toggle persists across a reload via localStorage', async ({ page }) => {
+    await mockCommonRoutes(page, { role: 'manager', summary: DEFAULT_SUMMARY, openingBalance: DEFAULT_OPENING, transactions: SAMPLE_TX });
+    await page.goto('/admin/finance.html');
+
+    await page.click('#defaultTypeToggle button[data-default-type="income"]');
+    await expect(page.locator('#defaultTypeToggle button[data-default-type="income"]')).toHaveClass(/active/);
+
+    await page.reload();
+    await expect(page.locator('#defaultTypeToggle button[data-default-type="income"]')).toHaveClass(/active/);
+    await expect(page.locator('#financeForm select[name="type"]')).toHaveValue('income');
+  });
+
+  test('uploading a receipt file shows the 📎 indicator after the transaction is created', async ({ page }) => {
+    let uploadedFilename = null;
+    await mockCommonRoutes(page, { role: 'manager', summary: DEFAULT_SUMMARY, openingBalance: DEFAULT_OPENING, transactions: SAMPLE_TX });
+    await page.route('**/api/finance/transactions**', (route) => {
+      if (route.request().method() === 'POST') {
+        return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 3, ok: true }) });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([...SAMPLE_TX, { id: 3, type: 'expense', category: 'vat_tu', amount: 100000, note: 'Có chứng từ', transactionDate: '2026-08-21', status: 'draft', createdBy: 'test_user', createdAt: '2026-08-21T00:00:00Z', updatedBy: null, updatedAt: null, voidedBy: null, voidedAt: null, receiptKey: 'finance-receipts/3/x-bill.pdf', receiptFilename: 'bill.pdf', receiptUploadedAt: '2026-08-21T00:00:00Z' }]) });
+    });
+    await page.route('**/api/finance/transactions/3/attachment', (route) => {
+      uploadedFilename = 'bill.pdf';
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, receiptFilename: 'bill.pdf' }) });
+    });
+
+    await page.goto('/admin/finance.html');
+    await page.fill('#financeForm input[name="amount"]', '100000');
+    await page.fill('#financeForm input[name="transactionDate"]', '2026-08-21');
+    await page.fill('#financeForm input[name="note"]', 'Có chứng từ');
+    await page.setInputFiles('#financeForm input[name="receipt"]', { name: 'bill.pdf', mimeType: 'application/pdf', buffer: Buffer.from('%PDF-1.4 test') });
+    await page.click('#financeForm button[type="submit"]');
+
+    await expect.poll(() => uploadedFilename).toBe('bill.pdf');
+    await expect(page.locator('#financeTable tbody tr', { hasText: 'Có chứng từ' })).toContainText('📎');
+  });
 });
