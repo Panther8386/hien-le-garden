@@ -45,6 +45,28 @@ test.describe('Finance dashboard (sổ thu chi)', () => {
     await expect(page.locator('#openingBalanceEditor')).toBeEmpty();
   });
 
+  test('observer sees only income: one "Tổng thu" stat card, no expense rows, no "Chi" filter option', async ({ page }) => {
+    // Matches the real backend contract for this role exactly: GET /api/finance/summary
+    // returns only {month, totalIncome} (every expense-derived field stripped server-side),
+    // GET /api/finance/transactions never returns a type:'expense' row, and
+    // GET /api/finance/opening-balance now 403s outright for observer.
+    const observerSummary = { month: '2026-08', totalIncome: 2000000 };
+    const incomeOnlyTx = SAMPLE_TX.filter((t) => t.type === 'income');
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'quan_sat_a', role: 'observer' }) }));
+    await page.route('**/api/finance/summary**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(observerSummary) }));
+    await page.route('**/api/finance/opening-balance**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
+    await page.route('**/api/finance/transactions**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(incomeOnlyTx) }));
+
+    await page.goto('/admin/finance.html');
+
+    await expect(page.locator('#financeStats')).toContainText('2.000.000');
+    await expect(page.locator('#financeStats .stat-card')).toHaveCount(1);
+    await expect(page.locator('#financeError')).toBeEmpty();
+    await expect(page.locator('#financeTable tbody')).toContainText('Bán rau');
+    await expect(page.locator('#financeTable tbody')).not.toContainText('Mua phân bón');
+    await expect(page.locator('#filterType option[value="expense"]')).toHaveCount(0);
+  });
+
   test('reception stays on the page but the API 403s hide all data and the write form', async ({ page }) => {
     // This codebase's established convention for a role-restricted admin page (confirmed in
     // admin/audit-log.js and admin/manager.js) is: no client-side role redirect — only a truly
