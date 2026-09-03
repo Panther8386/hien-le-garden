@@ -9,7 +9,7 @@ test.describe('Bảng giá reads from the catalog API', () => {
         contentType: 'application/json',
         body: JSON.stringify([
           { id: 1, category: 'luu_tru', subgroup: 'Lưu Trú Theo Đêm', name: 'Triangle House Mock', priceType: 'fixed', priceMin: 300000, priceMax: null, priceLabel: null, unitCapacity: '2–3 người', note: 'note-a', roomTypeKey: 'triangle', displayOrder: 1, isActive: true },
-          { id: 2, category: 'luu_tru', subgroup: 'Thuê Theo Giờ', name: 'Giờ Đầu Mock', priceType: 'fixed', priceMin: 130000, priceMax: null, priceLabel: null, unitCapacity: '1 giờ', note: '', roomTypeKey: null, displayOrder: 1, isActive: true },
+          { id: 2, category: 'luu_tru', subgroup: 'Giờ Xanh Hiền Lê', name: 'Giờ Đầu Mock', priceType: 'fixed', priceMin: 130000, priceMax: null, priceLabel: null, unitCapacity: '1 giờ', note: '', roomTypeKey: null, displayOrder: 1, isActive: true },
           { id: 3, category: 'fnb_hoat_dong', subgroup: null, name: 'Cà phê Mock', priceType: 'range', priceMin: 30000, priceMax: 80000, priceLabel: null, unitCapacity: '/ phần', note: '', roomTypeKey: null, displayOrder: 1, isActive: true },
           { id: 4, category: 'su_kien_team_building', subgroup: null, name: 'Sự kiện Mock', priceType: 'label', priceMin: null, priceMax: null, priceLabel: 'Theo giá thị trường', unitCapacity: '—', note: '', roomTypeKey: null, displayOrder: 1, isActive: true },
         ]),
