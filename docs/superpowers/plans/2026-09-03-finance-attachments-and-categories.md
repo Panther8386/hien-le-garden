@@ -1463,7 +1463,13 @@ git commit -m "test: e2e coverage for the R2 storage warning banner"
 Every step below requires explicit user confirmation before running — standing rule for this project.
 
 1. Create the R2 bucket (R2 is already enabled on the account, confirmed via a successful `wrangler r2 bucket list`): `npx wrangler r2 bucket create hien-le-garden-finance-receipts` (from `v4/`).
-2. Apply migration 0016 to production D1 **before** deploying dependent code: `npx wrangler d1 execute hien_le_garden_crm --remote --file=migrations/0016_finance_transactions_v2.sql`.
-3. Push `v4` branch `feat/finance-round2`, verify Cloudflare Pages deployment.
-4. Push the outer repo (e2e test additions).
-5. Production smoke-test: log in as manager, add a transaction with an attached receipt, confirm the 📎 indicator and file retrieval work, confirm the category dropdown filters correctly by type, confirm the default-type toggle persists.
+2. Apply migration 0016 to production D1 **before** deploying dependent code, using the project's standard migration-tracking command — **not** `d1 execute --file`, which does not record the migration in D1's `d1_migrations` table and would make 0016 silently re-run (and destructively drop the `receipt_*` columns' data) the next time any later migration is applied the standard way: `npx wrangler d1 migrations apply hien_le_garden_crm --remote` (from `v4/`, matching `BACKEND.md` and every prior migration in this project).
+3. Before applying, run this read-only gate against production D1 to confirm no legacy row's existing type/category pairing would be affected by the new PATCH validation (Task 2's grandfathering fix means legacy mismatches are safe to edit as long as the pairing itself isn't changed, but it's worth knowing the count going in):
+   ```sql
+   SELECT id, type, category FROM finance_transactions
+   WHERE (type='income'  AND category NOT IN ('ban_hang','dich_vu','bep_hien_le','hien_le_drinks','hh_am_thuc_lien_ket'))
+      OR (type='expense' AND category NOT IN ('cay_giong','vat_tu','nhan_cong','van_chuyen','bao_tri','thuc_pham','am_thuc_lien_ket','khac'));
+   ```
+4. Push `v4` branch `feat/finance-round2`, verify Cloudflare Pages deployment.
+5. Push the outer repo (e2e test additions).
+6. Production smoke-test: log in as manager, add a transaction with an attached receipt, confirm the 📎 indicator and file retrieval work, confirm the category dropdown filters correctly by type, confirm the default-type toggle persists, and open-then-save (without changing category) at least one of the legacy rows found by step 3's query to confirm the grandfathering fix works against real production data.
