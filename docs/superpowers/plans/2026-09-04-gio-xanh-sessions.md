@@ -31,18 +31,18 @@
 ### Task 1: Migration — 2 bảng mới
 
 **Files:**
-- Create: `v4/migrations/0022_gio_xanh_sessions.sql`
-- Test: `v4/test/migrations.test.js` (thêm `describe('migration 0022', ...)` vào cuối file)
+- Create: `v4/migrations/0023_gio_xanh_sessions.sql`
+- Test: `v4/test/migrations.test.js` (thêm `describe('migration 0023', ...)` vào cuối file)
 
 **Interfaces:**
 - Produces: bảng `gio_xanh_sessions(id, room_id, guest_name, phone, status, opened_by, opened_at, closed_by, closed_at, payment_method, total_amount, finance_transaction_id)`, `gio_xanh_session_items(id, session_id, source, source_id, name, unit_price, quantity, amount, status, created_by, created_at, voided_by, voided_at)`. Mọi task sau dùng đúng tên cột này.
 
 - [ ] **Step 1: Viết migration**
 
-Tạo `v4/migrations/0022_gio_xanh_sessions.sql`:
+Tạo `v4/migrations/0023_gio_xanh_sessions.sql`:
 
 ```sql
--- v4/migrations/0022_gio_xanh_sessions.sql
+-- v4/migrations/0023_gio_xanh_sessions.sql
 
 CREATE TABLE gio_xanh_sessions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,7 +84,7 @@ CREATE INDEX idx_gio_xanh_session_items_session ON gio_xanh_session_items(sessio
 Thêm vào cuối `v4/test/migrations.test.js`. Test này KHÔNG phụ thuộc vào `service_catalog` thật — dùng `source_id` tuỳ ý vì cột này không có FK constraint (không kiểm tra khoá ngoại ở cấp schema):
 
 ```js
-describe('migration 0022', () => {
+describe('migration 0023', () => {
   it('creates gio_xanh_sessions and gio_xanh_session_items with working relationships', async () => {
     const roomRow = await env.DB.prepare(`SELECT id, name FROM rooms WHERE is_active = 1 LIMIT 1`).first();
 
@@ -130,7 +130,7 @@ Expected: PASS (toàn bộ file, bao gồm các describe cũ).
 
 ```bash
 cd v4
-git add migrations/0022_gio_xanh_sessions.sql test/migrations.test.js
+git add migrations/0023_gio_xanh_sessions.sql test/migrations.test.js
 git commit -m "feat: add gio_xanh_sessions schema (hourly room-rental sessions + line items)
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
@@ -1335,19 +1335,32 @@ function populateComboSelect() {
 function populateMenuSelect() {
   const select = document.querySelector('#addMenuItemForm select[name="menuItemId"]');
   select.innerHTML = '<option value="">-- Chọn món --</option>';
-  const groups = { mon_an: 'Món ăn', do_uong: 'Thức uống' };
-  Object.entries(groups).forEach(([category, label]) => {
-    const items = menuItems.filter((m) => m.category === category);
-    if (items.length === 0) return;
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = label;
-    items.forEach((m) => {
-      const option = document.createElement('option');
-      option.value = m.id;
-      option.textContent = `${m.name} — ${m.price.toLocaleString('vi-VN')}đ`;
-      optgroup.appendChild(option);
+
+  ['mon_an', 'do_uong'].forEach((category) => {
+    const groupOrder = [];
+    const groups = {};
+    menuItems.filter((m) => m.category === category).forEach((m) => {
+      const key = m.subgroup || (category === 'mon_an' ? 'Món ăn khác' : 'Thức uống khác');
+      if (!(key in groups)) {
+        groups[key] = [];
+        groupOrder.push(key);
+      }
+      groups[key].push(m);
     });
-    select.appendChild(optgroup);
+
+    groupOrder.forEach((key) => {
+      const optgroup = document.createElement('optgroup');
+      optgroup.label = key;
+      groups[key].forEach((m) => {
+        const option = document.createElement('option');
+        option.value = m.id;
+        const unitSuffix = m.unit ? `/${m.unit}` : '';
+        const preorderSuffix = m.requiresPreorder ? ' ⚠ Đặt trước' : '';
+        option.textContent = `${m.name} — ${m.price.toLocaleString('vi-VN')}đ${unitSuffix}${preorderSuffix}`;
+        optgroup.appendChild(option);
+      });
+      select.appendChild(optgroup);
+    });
   });
 }
 
@@ -1889,7 +1902,7 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>"
 
 Mọi bước dưới đây cần xác nhận rõ ràng từ người dùng trước khi chạy — quy tắc chuẩn của dự án.
 
-1. Áp dụng migration 0022 lên D1 production: `npx wrangler d1 migrations apply hien_le_garden_crm --remote` (từ `v4/`).
+1. Áp dụng migration 0023 lên D1 production: `npx wrangler d1 migrations apply hien_le_garden_crm --remote` (từ `v4/`).
 2. Push `v4` (branch `main`), xác nhận Cloudflare Pages deploy thành công.
 3. Push outer repo (thêm e2e test).
 4. Smoke-test thực tế: đăng nhập reception/manager, vào "Giờ Xanh Hiền Lê", mở 1 phiên test (chọn phòng, nhập tên khách), thêm 1 combo giờ + 1 món ăn, huỷ 1 dòng, chốt (chọn hình thức thanh toán), xác nhận tổng đúng + xuất hiện dòng "Giờ xanh Hiền Lê" trong Sổ thu chi đúng số tiền (gồm cả combo giờ lẫn món ăn), in hoá đơn xem đúng nội dung. Dọn sạch dữ liệu test sau khi xong (xoá bản ghi test qua SQL trực tiếp).
