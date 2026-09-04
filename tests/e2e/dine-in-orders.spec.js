@@ -39,16 +39,7 @@ test.describe('Dine-in order detail page', () => {
     });
     await page.route('**/api/dine-in-orders/42/items/*', (route) => {
       const itemId = Number(route.request().url().split('/').pop());
-      order = { ...order, items: order.items.map((i) => {
-        if (i.id === itemId) {
-          if (i.quantity > 1) {
-            return { ...i, quantity: i.quantity - 1, amount: i.unitPrice * (i.quantity - 1) };
-          } else {
-            return { ...i, status: 'voided' };
-          }
-        }
-        return i;
-      }) };
+      order = { ...order, items: order.items.map((i) => (i.id === itemId ? { ...i, status: 'voided' } : i)) };
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
     });
 
@@ -66,7 +57,7 @@ test.describe('Dine-in order detail page', () => {
     await expect(page.locator('#orderTotal')).toContainText('115.000');
 
     await page.click('#itemsList button:has-text("Huỷ dòng")');
-    await expect(page.locator('#orderTotal')).toContainText('70.000');
+    await expect(page.locator('#orderTotal')).toContainText('25.000');
   });
 
   test('close button stays disabled until a payment method is chosen', async ({ page }) => {
