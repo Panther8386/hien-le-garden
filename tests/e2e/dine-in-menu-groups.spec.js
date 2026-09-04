@@ -86,4 +86,76 @@ test.describe('Menu quán — grouping and reordering', () => {
     await expect(page.locator('#doUongTable')).toContainText('25.000đ/ly');
     await expect(page.locator('#doUongTable')).not.toContainText('Đặt trước');
   });
+
+  test('clicking "Sửa" pre-fills the add form with the item\'s current values, including preorder', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    const items = [menuItem({ id: 1, name: 'Gà nướng', subgroup: 'Món gà', price: 368000, unit: 'con', requiresPreorder: true, displayOrder: 0 })];
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(items) }));
+
+    await page.goto('/admin/dine-in-menu.html');
+    await page.locator('#monAnTable tr', { hasText: 'Gà nướng' }).locator('button', { hasText: 'Sửa' }).click();
+
+    const form = page.locator('#monAnAddForm');
+    await expect(form.locator('[name="name"]')).toHaveValue('Gà nướng');
+    await expect(form.locator('[name="subgroup"]')).toHaveValue('Món gà');
+    await expect(form.locator('[name="price"]')).toHaveValue('368000');
+    await expect(form.locator('[name="unit"]')).toHaveValue('con');
+    await expect(form.locator('[name="requiresPreorder"]')).toBeChecked();
+    await expect(form.locator('button[type="submit"]')).toHaveText('Lưu thay đổi');
+    await expect(form.locator('.cancel-edit-btn')).toBeVisible();
+  });
+
+  test('submitting the edit form PATCHes all fields to the item and returns the form to add-mode', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    const items = [menuItem({ id: 5, name: 'Gỏi hải sản', subgroup: 'Hải sản', price: 179000, unit: 'đĩa', requiresPreorder: false, displayOrder: 0 })];
+    await page.route('**/api/dine-in-menu', (route) => {
+      if (route.request().method() === 'GET') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(items) });
+    });
+    let patchUrl = null;
+    let patchBody = null;
+    await page.route('**/api/dine-in-menu/5', (route) => {
+      patchUrl = route.request().url();
+      patchBody = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/dine-in-menu.html');
+    await page.locator('#monAnTable tr', { hasText: 'Gỏi hải sản' }).locator('button', { hasText: 'Sửa' }).click();
+
+    const form = page.locator('#monAnAddForm');
+    await form.locator('[name="name"]').fill('Gỏi hải sản đặc biệt');
+    await form.locator('[name="price"]').fill('199000');
+    await form.locator('[name="requiresPreorder"]').check();
+    await form.locator('button[type="submit"]').click();
+
+    await expect.poll(() => patchBody).toMatchObject({
+      name: 'Gỏi hải sản đặc biệt', subgroup: 'Hải sản', price: 199000, unit: 'đĩa', requiresPreorder: true,
+    });
+    expect(patchUrl).toContain('/api/dine-in-menu/5');
+    await expect(form.locator('button[type="submit"]')).toHaveText('+ Thêm món');
+    await expect(form.locator('.cancel-edit-btn')).toBeHidden();
+    await expect(form.locator('[name="name"]')).toHaveValue('');
+  });
+
+  test('clicking "Hủy" during an edit discards the pre-filled values without calling the API', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    const items = [menuItem({ id: 1, name: 'Gà nướng', subgroup: 'Món gà', price: 368000, unit: 'con', displayOrder: 0 })];
+    await page.route('**/api/dine-in-menu', (route) => {
+      if (route.request().method() === 'GET') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(items) });
+    });
+    let patchCalled = false;
+    await page.route('**/api/dine-in-menu/1', (route) => { patchCalled = true; return route.fulfill({ status: 200, body: '{}' }); });
+
+    await page.goto('/admin/dine-in-menu.html');
+    await page.locator('#monAnTable tr', { hasText: 'Gà nướng' }).locator('button', { hasText: 'Sửa' }).click();
+
+    const form = page.locator('#monAnAddForm');
+    await expect(form.locator('[name="name"]')).toHaveValue('Gà nướng');
+    await form.locator('.cancel-edit-btn').click();
+
+    await expect(form.locator('[name="name"]')).toHaveValue('');
+    await expect(form.locator('button[type="submit"]')).toHaveText('+ Thêm món');
+    await expect(form.locator('.cancel-edit-btn')).toBeHidden();
+    expect(patchCalled).toBe(false);
+  });
 });
