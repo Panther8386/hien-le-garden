@@ -59,6 +59,33 @@ test.describe('Gio-xanh session detail page', () => {
     await expect(page.locator('#sessionTotal')).toContainText('155.000');
   });
 
+  test('voiding a line item removes it from the total', async ({ page }) => {
+    await mockAuth(page, 'reception');
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CATALOG_ITEMS) }));
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(MENU_ITEMS) }));
+
+    let session = baseSession({
+      items: [
+        { id: 1, source: 'gio_combo', sourceId: 22, name: 'Giờ Đầu Tiên', unitPrice: 130000, quantity: 1, amount: 130000, status: 'posted', createdBy: 'le_tan_a', createdAt: '2026-09-04T08:05:00Z', voidedBy: null, voidedAt: null },
+        { id: 2, source: 'mon_an_uong', sourceId: 1, name: 'Cà phê đen', unitPrice: 25000, quantity: 1, amount: 25000, status: 'posted', createdBy: 'le_tan_a', createdAt: '2026-09-04T08:06:00Z', voidedBy: null, voidedAt: null },
+      ],
+    });
+    await page.route('**/api/gio-xanh-sessions/42', (route) => {
+      if (route.request().method() === 'GET') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(session) });
+    });
+    await page.route('**/api/gio-xanh-sessions/42/items/*', (route) => {
+      const itemId = Number(route.request().url().split('/').pop());
+      session = { ...session, items: session.items.map((i) => (i.id === itemId ? { ...i, status: 'voided' } : i)) };
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/gio-xanh-detail.html?sessionId=42');
+    await expect(page.locator('#sessionTotal')).toContainText('155.000');
+
+    await page.locator('#itemsList button:has-text("Huỷ dòng")').first().click();
+    await expect(page.locator('#sessionTotal')).toContainText('25.000');
+  });
+
   test('close button stays disabled until a payment method is chosen', async ({ page }) => {
     await mockAuth(page, 'reception');
     await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(CATALOG_ITEMS) }));
