@@ -158,4 +158,42 @@ test.describe('Menu quán — grouping and reordering', () => {
     await expect(form.locator('.cancel-edit-btn')).toBeHidden();
     expect(patchCalled).toBe(false);
   });
+
+  test('clicking the group ✎ button prompts for a new name and calls rename-group with it', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    const items = [menuItem({ id: 1, name: 'Gỏi hải sản', subgroup: 'Hải sản', displayOrder: 0 })];
+    await page.route('**/api/dine-in-menu', (route) => {
+      if (route.request().method() === 'GET') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(items) });
+    });
+    let renameBody = null;
+    await page.route('**/api/dine-in-menu/rename-group', (route) => {
+      renameBody = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, updated: 1 }) });
+    });
+    page.on('dialog', (dialog) => dialog.accept('Hải Sản Tươi'));
+
+    await page.goto('/admin/dine-in-menu.html');
+    const groupHeaderRow = page.locator('#monAnTable tr', { hasText: 'Hải sản' }).first();
+    await groupHeaderRow.locator('button[title="Sửa tên nhóm"]').click();
+
+    await expect.poll(() => renameBody).toMatchObject({ category: 'mon_an', subgroup: 'Hải sản', newSubgroup: 'Hải Sản Tươi' });
+  });
+
+  test('dismissing the rename prompt does not call the API', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    const items = [menuItem({ id: 1, name: 'Gỏi hải sản', subgroup: 'Hải sản', displayOrder: 0 })];
+    await page.route('**/api/dine-in-menu', (route) => {
+      if (route.request().method() === 'GET') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(items) });
+    });
+    let renameCalled = false;
+    await page.route('**/api/dine-in-menu/rename-group', (route) => { renameCalled = true; return route.fulfill({ status: 200, body: '{}' }); });
+    page.on('dialog', (dialog) => dialog.dismiss());
+
+    await page.goto('/admin/dine-in-menu.html');
+    const groupHeaderRow = page.locator('#monAnTable tr', { hasText: 'Hải sản' }).first();
+    await groupHeaderRow.locator('button[title="Sửa tên nhóm"]').click();
+
+    await page.waitForTimeout(200);
+    expect(renameCalled).toBe(false);
+  });
 });
