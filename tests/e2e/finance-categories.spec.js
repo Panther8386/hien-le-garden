@@ -97,4 +97,21 @@ test.describe('Finance category management page', () => {
     await expect(page.locator('#incomeAddForm')).toBeHidden();
     await expect(page.locator('#incomeTable tbody tr')).toHaveCount(0);
   });
+
+  test('clicking ▼ on an expense category calls the move endpoint with direction:down', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    await page.route('**/api/finance/categories', (route) => {
+      if (route.request().method() === 'GET') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_CATEGORIES) });
+    });
+    let moveBody = null;
+    await page.route('**/api/finance/categories/1/move', (route) => {
+      moveBody = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/finance-categories.html');
+    await page.locator('#expenseTable tbody tr', { hasText: 'Vật tư' }).locator('button', { hasText: '▼' }).click();
+
+    await expect.poll(() => moveBody).toMatchObject({ direction: 'down' });
+  });
 });
