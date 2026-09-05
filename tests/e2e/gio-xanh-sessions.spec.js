@@ -133,7 +133,7 @@ test.describe('Gio-xanh session detail page', () => {
     await expect(page.locator('#closeSection')).toBeHidden();
   });
 
-  test('admin sees the "Hiển thị các log đã ẩn" checkbox on the board; other roles do not', async ({ page }) => {
+  test('admin sees the "Hiển thị các log đã ẩn" checkbox on the board', async ({ page }) => {
     await mockAuth(page, 'admin');
     await page.route('**/api/gio-xanh-sessions?status=open', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
     await page.route('**/api/gio-xanh-sessions?status=closed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
@@ -142,6 +142,30 @@ test.describe('Gio-xanh session detail page', () => {
 
     await page.goto('/admin/gio-xanh.html');
     await expect(page.locator('#showHiddenSessionsWrap')).toBeVisible();
+  });
+
+  test('non-admin roles do not see the "Hiển thị các log đã ẩn" checkbox', async ({ page }) => {
+    await mockAuth(page, 'reception');
+    await page.route('**/api/gio-xanh-sessions?status=open', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/gio-xanh-sessions?status=closed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/gio-xanh-sessions?status=voided*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/gio-xanh.html');
+    await expect(page.locator('#showHiddenSessionsWrap')).toBeHidden();
+  });
+
+  test('ticking the checkbox re-fetches session history with includeHidden=1', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    await page.route('**/api/gio-xanh-sessions?status=open', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/gio-xanh-sessions?status=closed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/gio-xanh-sessions?status=voided*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/gio-xanh.html');
+    const includeHiddenRequest = page.waitForRequest((req) => req.url().includes('status=closed') && req.url().includes('includeHidden=1'));
+    await page.locator('#showHiddenSessions').check();
+    await includeHiddenRequest;
   });
 
   test('clicking "Ẩn" on a closed session in history calls the hide endpoint', async ({ page }) => {

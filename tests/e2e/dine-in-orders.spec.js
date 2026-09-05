@@ -105,7 +105,7 @@ test.describe('Dine-in order detail page', () => {
     await expect(page.locator('#closeSection')).toBeHidden();
   });
 
-  test('admin sees the "Hiển thị các log đã ẩn" checkbox on the board; other roles do not', async ({ page }) => {
+  test('admin sees the "Hiển thị các log đã ẩn" checkbox on the board', async ({ page }) => {
     await mockAuth(page, 'admin');
     await page.route('**/api/dine-in-orders?status=open', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
     await page.route('**/api/dine-in-orders?status=closed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
@@ -113,6 +113,28 @@ test.describe('Dine-in order detail page', () => {
 
     await page.goto('/admin/dine-in-orders.html');
     await expect(page.locator('#showHiddenOrdersWrap')).toBeVisible();
+  });
+
+  test('non-admin roles do not see the "Hiển thị các log đã ẩn" checkbox', async ({ page }) => {
+    await mockAuth(page, 'reception');
+    await page.route('**/api/dine-in-orders?status=open', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-orders?status=closed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-orders?status=voided*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/dine-in-orders.html');
+    await expect(page.locator('#showHiddenOrdersWrap')).toBeHidden();
+  });
+
+  test('ticking the checkbox re-fetches order history with includeHidden=1', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    await page.route('**/api/dine-in-orders?status=open', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-orders?status=closed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-orders?status=voided*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/dine-in-orders.html');
+    const includeHiddenRequest = page.waitForRequest((req) => req.url().includes('status=closed') && req.url().includes('includeHidden=1'));
+    await page.locator('#showHiddenOrders').check();
+    await includeHiddenRequest;
   });
 
   test('clicking "Ẩn" on a closed order in history calls the hide endpoint', async ({ page }) => {

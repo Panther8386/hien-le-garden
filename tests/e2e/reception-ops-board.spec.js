@@ -500,4 +500,38 @@ test.describe('Reception daily ops board', () => {
 
     await expect.poll(() => hideBody).toMatchObject({ hidden: true });
   });
+
+  test('non-admin roles do not see the booking history "Hiển thị các log đã ẩn" checkbox', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'le_tan_a', role: 'reception' }) }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_out*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=cancelled*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/reception/reminders', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ pendingDeposits: [], cleaningNeeded: [] }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms/layout-log*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#showHiddenBookingsWrap')).toBeHidden();
+  });
+
+  test('ticking the checkbox re-fetches booking history with includeHidden=1', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'admin_a', role: 'admin' }) }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_out*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=cancelled*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/reception/reminders', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ pendingDeposits: [], cleaningNeeded: [] }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms/layout-log*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    const includeHiddenRequest = page.waitForRequest((req) => req.url().includes('status=checked_out') && req.url().includes('includeHidden=1'));
+    await page.locator('#showHiddenBookings').check();
+    await includeHiddenRequest;
+  });
 });
