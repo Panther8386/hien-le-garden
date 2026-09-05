@@ -11,7 +11,7 @@ Cho phép admin ẩn một bản ghi đã ở trạng thái kết thúc (phiên 
 - **Không xoá cứng** — "ẩn" chỉ là 1 cột trạng thái hiển thị (`is_hidden`), dữ liệu vẫn còn nguyên trong D1, đúng quy ước đã dùng xuyên suốt dự án.
 - **Không cho ẩn bản ghi đang hoạt động** — chỉ được ẩn khi bản ghi đã ở trạng thái kết thúc (xem §4). Ẩn 1 phiên/bàn/đặt phòng đang xử lý dở có thể khiến lễ tân mất dấu công việc chưa xong — không cho phép.
 - **Không đổi quyền xem dữ liệu hiện có** — reception/manager vẫn thấy đầy đủ như hiện tại (trừ phần bị ẩn theo mặc định); chỉ admin có thêm quyền ẩn/hiện + xem lại bản ghi đã ẩn.
-- **Không xây trang lịch sử chung cho cả 3 hệ thống** — mỗi hệ thống giữ nguyên vị trí hiển thị hiện có của nó (xem §6), chỉ bổ sung khả năng ẩn/hiện.
+- **Không xây trang lịch sử chung cho cả 3 hệ thống** — mỗi hệ thống có khu vực lịch sử riêng, đặt ngay trên trang quản lý hiện có của nó (xem §6), không tạo 1 trang tổng hợp chung.
 
 ## 3. Architecture fit
 
@@ -58,7 +58,11 @@ Thêm khu vực mới "Lịch sử phiên" bên dưới danh sách phiên đang 
 Y hệt cấu trúc 6.1 — thêm khu vực "Lịch sử" cho bàn `status=closed`/`voided`.
 
 ### 6.3 `admin/reception.js`/`.html`
-Không thêm khu vực mới. Thêm 1 checkbox "Hiển thị các log đã ẩn" (admin-only) ở đầu trang — khi đổi trạng thái, tải lại toàn bộ các danh sách đang hiển thị (chờ duyệt, đến hôm nay, đã xác nhận, trả phòng hôm nay, đang ở) kèm `includeHidden=1`. Nút Ẩn/Hiện (admin-only) chỉ xuất hiện trên thẻ đặt phòng có `status IN ('checked_out','cancelled')`.
+**Sửa lại so với bản đầu (khi viết plan, xác nhận qua code thật):** hiện tại `reception.html` KHÔNG có bất kỳ danh sách nào hiển thị đặt phòng `checked_out`/`cancelled` — 5 danh sách hiện có (`loadPending`, `loadArrivals`, `loadUpcomingConfirmed`, `loadDepartures`, `loadInhouse`) chỉ lọc `pending`/`confirmed`/`checked_in`. Vì vậy cần thêm mới 1 khu vực "Lịch sử đặt phòng" (giống 6.1/6.2), liệt kê `status=checked_out` và `status=cancelled` (gộp, mới nhất trước), thay vì chỉ thêm checkbox vào danh sách có sẵn như dự kiến ban đầu.
+
+Checkbox "Hiển thị các log đã ẩn" (admin-only) đặt trong khu vực "Lịch sử đặt phòng" này — khi tick, tải lại khu vực này kèm `includeHidden=1` (không ảnh hưởng 5 danh sách hoạt động hiện có, vì chúng chỉ lọc trạng thái đang hoạt động, không bao giờ chứa bản ghi có thể ẩn). Nút Ẩn/Hiện (admin-only) xuất hiện trên mỗi dòng trong khu vực lịch sử này.
+
+**Hệ quả về quy trình:** không thể ẩn trực tiếp 1 đặt phòng đang `pending`/`confirmed` — phải Từ chối/Huỷ trước (hành động đã có sẵn, không đổi) để chuyển sang `cancelled`, khi đó mới xuất hiện ở khu vực lịch sử và ẩn được. Đúng theo nguyên tắc không ẩn bản ghi đang hoạt động (§2).
 
 ## 7. Audit log
 
