@@ -132,6 +132,38 @@ test.describe('Gio-xanh session detail page', () => {
     await expect(page.locator('#addMenuItemForm')).toBeHidden();
     await expect(page.locator('#closeSection')).toBeHidden();
   });
+
+  test('admin sees the "Hiển thị các log đã ẩn" checkbox on the board; other roles do not', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    await page.route('**/api/gio-xanh-sessions?status=open', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/gio-xanh-sessions?status=closed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/gio-xanh-sessions?status=voided*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/gio-xanh.html');
+    await expect(page.locator('#showHiddenSessionsWrap')).toBeVisible();
+  });
+
+  test('clicking "Ẩn" on a closed session in history calls the hide endpoint', async ({ page }) => {
+    await mockAuth(page, 'admin');
+    await page.route('**/api/gio-xanh-sessions?status=open', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/gio-xanh-sessions?status=closed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 9, roomName: 'Circle House 1', guestName: 'Khách Cũ', status: 'closed', openedAt: '2026-09-01T08:00:00Z', currentTotal: 130000, isHidden: false }]) })
+    );
+    await page.route('**/api/gio-xanh-sessions?status=voided*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    let hideBody = null;
+    await page.route('**/api/gio-xanh-sessions/9/hide', (route) => {
+      hideBody = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/gio-xanh.html');
+    await page.locator('#sessionHistoryGrid .gio-xanh-card', { hasText: 'Khách Cũ' }).locator('button', { hasText: 'Ẩn' }).click();
+
+    await expect.poll(() => hideBody).toMatchObject({ hidden: true });
+  });
 });
 
 test.describe('Gio-xanh invoice print page', () => {

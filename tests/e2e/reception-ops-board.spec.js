@@ -473,4 +473,31 @@ test.describe('Reception daily ops board', () => {
     await page.goto('/admin/reception.html');
     await expect(page.locator('#upcomingConfirmedList .service-line')).toContainText('15/03 19:00 (Suất tối)');
   });
+
+  test('admin sees a booking history section with a hide button; clicking it calls the hide endpoint', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'admin_a', role: 'admin' }) }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_out*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=cancelled*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 5, guestName: 'Khách Đã Huỷ', phone: '0900000001', roomType: 'circle', checkIn: '2026-09-01', checkOut: '2026-09-02', status: 'cancelled', createdAt: '2026-09-01T00:00:00Z', isHidden: false }]) })
+    );
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/reception/reminders', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ pendingDeposits: [], cleaningNeeded: [] }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms/layout-log*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    let hideBody = null;
+    await page.route('**/api/bookings/5/hide', (route) => {
+      hideBody = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#showHiddenBookingsWrap')).toBeVisible();
+    await page.locator('#bookingHistoryList .booking-card', { hasText: 'Khách Đã Huỷ' }).locator('button', { hasText: 'Ẩn' }).click();
+
+    await expect.poll(() => hideBody).toMatchObject({ hidden: true });
+  });
 });
