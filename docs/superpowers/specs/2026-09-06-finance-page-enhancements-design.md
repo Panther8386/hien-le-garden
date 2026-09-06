@@ -55,7 +55,7 @@ Response `200`:
 }
 ```
 - `total`/`sumIncome`/`sumExpense`/`categoryTotals`/`chartRows` tính trên **toàn bộ tập đã lọc** (cùng WHERE clause với `transactions`, không có LIMIT/OFFSET) — `transactions` là 1 trang cắt theo `page`/`pageSize`.
-- `chartRows` chỉ giữ 3 field tối thiểu (không kèm note/người tạo/chứng từ...) — dùng để vẽ lại đúng biểu đồ theo thời gian hiện có (client tự bucket theo ngày/tuần/tháng như code cũ), tách khỏi `transactions` để không nhân đôi payload.
+- `chartRows` chỉ giữ 5 field (`transactionDate`, `type`, `amount`, `status`, `voidedAt`) — không kèm note/người tạo/chứng từ... Dùng để vẽ lại đúng biểu đồ theo thời gian hiện có, client tự bucket theo ngày/tuần/tháng như code cũ; những 2 field bổ sung (`status`, `voidedAt`) là cần thiết vì biểu đồ thời gian hiện hữu dùng chúng để lọc: chỉ ghi nhận giao dịch có `status IN ('confirmed','paid') AND voided_at IS NULL` (replicate logic server-side), tách khỏi `transactions` để không nhân đôi payload.
 - Toàn bộ 5 field tổng hợp đều tôn trọng bộ lọc `is_hidden` giống `transactions` (ẩn thì không tính vào tổng, trừ khi admin bật `includeHidden=1`).
 
 ### `PATCH /api/finance/transactions/:id/hide` (mới)
