@@ -534,4 +534,95 @@ test.describe('Reception daily ops board', () => {
     await page.locator('#showHiddenBookings').check();
     await includeHiddenRequest;
   });
+
+  test('booking history search filters by guest name and phone, client-side', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'le_tan_a', role: 'reception' }) }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_out*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 1, guestName: 'Nguyễn Văn A', phone: '0900000001', roomType: 'circle', checkIn: '2026-08-01', checkOut: '2026-08-02', status: 'checked_out', createdAt: '2026-08-02T00:00:00Z' },
+      ]) })
+    );
+    await page.route('**/api/bookings?status=cancelled*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([
+        { id: 2, guestName: 'Trần Thị B', phone: '0900000002', roomType: 'triangle', checkIn: '2026-08-05', checkOut: '2026-08-06', status: 'cancelled', createdAt: '2026-08-06T00:00:00Z' },
+      ]) })
+    );
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/reception/reminders', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ pendingDeposits: [], cleaningNeeded: [] }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms/layout-log*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#bookingHistoryList')).toContainText('Nguyễn Văn A');
+    await expect(page.locator('#bookingHistoryList')).toContainText('Trần Thị B');
+
+    await page.fill('#bookingHistorySearch', '0900000002');
+    await expect(page.locator('#bookingHistoryList')).toContainText('Trần Thị B');
+    await expect(page.locator('#bookingHistoryList')).not.toContainText('Nguyễn Văn A');
+
+    await page.fill('#bookingHistorySearch', 'nguyễn');
+    await expect(page.locator('#bookingHistoryList')).toContainText('Nguyễn Văn A');
+    await expect(page.locator('#bookingHistoryList')).not.toContainText('Trần Thị B');
+
+    await page.fill('#bookingHistorySearch', 'không tồn tại');
+    await expect(page.locator('#bookingHistoryList')).toContainText('Không tìm thấy kết quả phù hợp.');
+  });
+
+  test('booking history paginates at 10 per page', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'le_tan_a', role: 'reception' }) }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    const fifteen = Array.from({ length: 15 }, (_, i) => ({
+      id: i + 1, guestName: `Khách ${i + 1}`, phone: `090000${String(i + 1).padStart(4, '0')}`, roomType: 'circle',
+      checkIn: '2026-08-01', checkOut: '2026-08-02', status: 'checked_out', createdAt: `2026-08-${String(15 - i).padStart(2, '0')}T00:00:00Z`,
+    }));
+    await page.route('**/api/bookings?status=checked_out*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(fifteen) }));
+    await page.route('**/api/bookings?status=cancelled*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/reception/reminders', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ pendingDeposits: [], cleaningNeeded: [] }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms/layout-log*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#bookingHistoryList .booking-card')).toHaveCount(10);
+    await expect(page.locator('#bookingHistoryPageInfo')).toContainText('Trang 1/2');
+    await expect(page.locator('#bookingHistoryPrevBtn')).toBeDisabled();
+    await expect(page.locator('#bookingHistoryNextBtn')).toBeEnabled();
+
+    await page.click('#bookingHistoryNextBtn');
+    await expect(page.locator('#bookingHistoryList .booking-card')).toHaveCount(5);
+    await expect(page.locator('#bookingHistoryPageInfo')).toContainText('Trang 2/2');
+    await expect(page.locator('#bookingHistoryNextBtn')).toBeDisabled();
+
+    await page.click('#bookingHistoryPrevBtn');
+    await expect(page.locator('#bookingHistoryList .booking-card')).toHaveCount(10);
+    await expect(page.locator('#bookingHistoryPageInfo')).toContainText('Trang 1/2');
+  });
+
+  test('room status legend shows all 5 statuses plus the cleaning-needed note, with swatches matching the card classes', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'le_tan_a', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/bookings?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 1, name: 'Triangle 1', roomType: 'triangle', status: 'empty', needsCleaning: false }]) }));
+    await page.route('**/api/rooms/layout-log**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/reception/reminders', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ pendingDeposits: [], cleaningNeeded: [] }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    const legend = page.locator('#roomStatusLegend');
+    await expect(legend).toContainText('Trống');
+    await expect(legend).toContainText('Đã có khách đặt');
+    await expect(legend).toContainText('Đã đặt & có cọc');
+    await expect(legend).toContainText('Đang có khách');
+    await expect(legend).toContainText('Đã sử dụng');
+    await expect(legend).toContainText('Cần dọn phòng');
+    await expect(legend.locator('.legend-swatch.room-empty')).toHaveCount(1);
+    await expect(legend.locator('.legend-swatch.room-booked')).toHaveCount(1);
+    await expect(legend.locator('.legend-swatch.room-booked_deposited')).toHaveCount(1);
+    await expect(legend.locator('.legend-swatch.room-occupied')).toHaveCount(1);
+    await expect(legend.locator('.legend-swatch.room-used')).toHaveCount(1);
+  });
 });
