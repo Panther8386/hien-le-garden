@@ -88,4 +88,41 @@ test.describe('CRM user management', () => {
     await page.goto('/admin/users.html');
     await expect(page.locator('#userTable tbody tr button', { hasText: 'Đặt lại mật khẩu' })).toHaveCount(0);
   });
+
+  test('toggling "Thêm giao dịch" PATCHes finance-transaction-access and reverts on failure', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'Panther', role: 'manager' }) }));
+    await page.route('**/api/users', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, username: 'Panther', role: 'manager', canManageRoomLayout: false, canAddFinanceTransaction: false, createdAt: '2026-08-01T00:00:00Z' },
+          { id: 2, username: 'hienle', role: 'reception', canManageRoomLayout: false, canAddFinanceTransaction: false, createdAt: '2026-08-20T00:00:00Z' },
+        ]),
+      })
+    );
+
+    let lastPayload = null;
+    let shouldFail = false;
+    await page.route('**/api/users/2/finance-transaction-access', (route) => {
+      lastPayload = route.request().postDataJSON();
+      if (shouldFail) return route.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ error: 'Không thể cấp quyền' }) });
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/users.html');
+    const targetRow = page.locator('#userTable tbody tr', { hasText: 'hienle' });
+    const checkbox = targetRow.locator('input[title="Thêm giao dịch trong Sổ thu chi"]');
+    await expect(checkbox).not.toBeChecked();
+
+    await checkbox.check();
+    await expect.poll(() => lastPayload).toEqual({ canAddFinanceTransaction: true });
+    await expect(checkbox).toBeChecked();
+
+    shouldFail = true;
+    await checkbox.uncheck();
+    await expect.poll(() => lastPayload).toEqual({ canAddFinanceTransaction: false });
+    await expect(checkbox).toBeChecked();
+    await expect(page.locator('#listError')).toContainText('Không thể cấp quyền');
+  });
 });

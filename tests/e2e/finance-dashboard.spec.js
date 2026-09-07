@@ -66,23 +66,6 @@ test.describe('Finance dashboard (sổ thu chi)', () => {
     await expect(page.locator('#financeStats')).toContainText('1.000.000');
   });
 
-  test('observer stays on the page but the API 403s hide all data and the write form', async ({ page }) => {
-    // Revenue/expense figures are off-limits to this role entirely — every finance/*
-    // endpoint 403s, mirroring the established reception-on-this-page pattern exactly.
-    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'quan_sat_a', role: 'observer' }) }));
-    await page.route('**/api/finance/summary**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
-    await page.route('**/api/finance/opening-balance**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
-    await page.route('**/api/finance/transactions**', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
-    await page.route('**/api/finance/categories', (route) => route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ error: 'Không đủ quyền' }) }));
-
-    await page.goto('/admin/finance.html');
-    await expect(page).toHaveURL(/\/admin\/finance/);
-    await expect(page.locator('#openAddTransactionBtn')).toBeHidden();
-    await expect(page.locator('#openingBalanceEditor')).toBeEmpty();
-    await expect(page.locator('#listError')).toContainText('Không đủ quyền');
-    await expect(page.locator('#financeError')).toContainText('Không đủ quyền');
-  });
-
   test('reception stays on the page but the API 403s hide all data and the write form', async ({ page }) => {
     // This codebase's established convention for a role-restricted admin page: no
     // client-side role redirect — only a truly unauthenticated visit (401 from
@@ -381,5 +364,32 @@ test.describe('Finance dashboard (sổ thu chi)', () => {
     await page.click('#chartTypeToggle button[data-chart-type="time"]');
     await expect(page.locator('#chartGranularity')).toBeVisible();
     await expect(page.locator('#financeChart svg')).toBeVisible();
+  });
+
+  test('observer sees only "Thu" data: balance section and type filter hidden, no add-transaction trigger', async ({ page }) => {
+    const incomeOnlyTx = [SAMPLE_TX[0]]; // server would only ever send observer the income row
+    await mockCommonRoutes(page, { role: 'observer', summary: DEFAULT_SUMMARY, openingBalance: DEFAULT_OPENING, transactions: incomeOnlyTx });
+    await page.goto('/admin/finance.html');
+
+    await expect(page.locator('#openAddTransactionBtn')).toBeHidden();
+    await expect(page.locator('#financeBalanceSection')).toBeHidden();
+    await expect(page.locator('#filterType')).toBeHidden();
+    await expect(page.locator('#financeTable tbody')).toContainText('Bán rau');
+    await expect(page.locator('#financeTable tbody')).not.toContainText('Mua phân bón');
+  });
+
+  test('a reception account with canAddFinanceTransaction=true sees the add-transaction trigger', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'le_tan_a', role: 'reception', canAddFinanceTransaction: true }) }));
+    await page.route('**/api/finance/summary**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(DEFAULT_SUMMARY) }));
+    await page.route('**/api/finance/transactions**', (route) => {
+      if (route.request().method() === 'GET') return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(toEnvelope(SAMPLE_TX)) });
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 99, ok: true }) });
+    });
+    await page.route('**/api/finance/categories', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(DEFAULT_CATEGORIES) }));
+
+    await page.goto('/admin/finance.html');
+    await expect(page.locator('#openAddTransactionBtn')).toBeVisible();
+    // The monthly balance editor stays manager/admin-only regardless of this flag.
+    await expect(page.locator('#openingBalanceEditor')).toBeHidden();
   });
 });
