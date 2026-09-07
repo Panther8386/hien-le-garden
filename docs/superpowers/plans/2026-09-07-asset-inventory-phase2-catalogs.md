@@ -1671,7 +1671,8 @@ function renderLocations() {
     card.appendChild(p);
     if (l.locationType === 'room' && roomsById[l.roomId]) {
       const roomNameP = document.createElement('p');
-      roomNameP.className = 'booking-meta';
+      roomNameP.style.opacity = '0.75';
+      roomNameP.style.fontStyle = 'italic';
       roomNameP.textContent = `Tên phòng gốc (dùng cho đặt phòng): ${roomsById[l.roomId].name}`;
       card.appendChild(roomNameP);
     }
@@ -2002,6 +2003,16 @@ const NAV_GROUPS = [
   {
     label: 'Vận hành',
 ```
+
+`NAV_GROUPS` alone is not enough to make the new links work — `buildDrawer()` in the same file also builds each item's URL through a separate `pageSlug` lookup map, and any page missing from it produces a broken `/manager/undefined`-style link. Find:
+```js
+  const pageSlug = { 'dashboard.html': 'dashboard', 'dine-in-orders.html': 'dine-in-orders', 'gio-xanh.html': 'gio-xanh', 'finance.html': 'finance', 'finance-categories.html': 'finance-categories', 'dine-in-menu.html': 'dine-in-menu', 'customers.html': 'customers', 'templates.html': 'templates', 'manager.html': 'config', 'catalog.html': 'catalog', 'audit-log.html': 'audit-log', 'cancellation-policy.html': 'cancellation-policy', 'users.html': 'users', 'change-password.html': 'change-password' };
+```
+Replace with:
+```js
+  const pageSlug = { 'dashboard.html': 'dashboard', 'dine-in-orders.html': 'dine-in-orders', 'gio-xanh.html': 'gio-xanh', 'finance.html': 'finance', 'finance-categories.html': 'finance-categories', 'dine-in-menu.html': 'dine-in-menu', 'customers.html': 'customers', 'templates.html': 'templates', 'manager.html': 'config', 'catalog.html': 'catalog', 'audit-log.html': 'audit-log', 'cancellation-policy.html': 'cancellation-policy', 'users.html': 'users', 'change-password.html': 'change-password', 'asset-config.html': 'asset-config', 'asset-source-data.html': 'asset-source-data' };
+```
+The 2 new slugs (`asset-config`, `asset-source-data`) must match the `_redirects` paths added in the next step exactly — `urlFor()` builds each link as `${prefix}/${pageSlug[pageFile]}`.
 
 - [ ] **Step 4: Add clean-URL redirects for both new pages**
 
