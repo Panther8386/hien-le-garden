@@ -823,3 +823,134 @@ test.describe('Reception daily ops board', () => {
     await expect(page.locator('#upcomingConfirmedList .add-deposit-form')).toHaveCount(0);
   });
 });
+
+test.describe('Checkout settlement (Phase 2)', () => {
+  function mockReceptionShell(page, { username = 'hienle', role = 'reception' } = {}) {
+    return Promise.all([
+      page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username, role }) })),
+      page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })),
+      page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })),
+      page.route('**/api/bookings?status=checked_out*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })),
+      page.route('**/api/bookings?status=cancelled*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })),
+      page.route('**/api/rooms?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })),
+      page.route('**/api/rooms/layout-log*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })),
+      page.route('**/api/reception/reminders', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ pendingDeposits: [], cleaningNeeded: [] }) })),
+      page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })),
+    ]);
+  }
+
+  function mockDeparturesBooking(page, booking) {
+    return page.route('**/api/bookings?status=checked_in*', (route) => {
+      const isDepartures = route.request().url().includes('view=departures');
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(isDepartures ? [booking] : []) });
+    });
+  }
+
+  test('checking out a booking with an unpaid balance shows the breakdown and requires a payment method', async ({ page }) => {
+    await mockReceptionShell(page);
+    await mockDeparturesBooking(page, {
+      id: 50, guestName: 'Khách Checkout A', phone: '0900000050', roomType: 'circle',
+      checkIn: '2099-06-01', checkOut: '2099-06-02', status: 'checked_in', depositAmount: 0, services: [],
+    });
+    let posted = null;
+    await page.route('**/api/bookings/50/check-out', (route) => {
+      posted = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, roomDue: 600000, servicesDue: 0, refundAmount: 0, checkoutPaymentMethod: 'cash' }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#departuresList')).toContainText('Khách Checkout A');
+    await page.locator('#departuresList button', { hasText: 'Check-out' }).click();
+
+    await expect(page.locator('#checkoutOverlay')).toBeVisible();
+    await expect(page.locator('#checkoutSummary')).toContainText('Cần thu thêm: 600.000');
+    await expect(page.locator('#checkoutPaymentFields')).toBeVisible();
+
+    await page.click('#checkoutSubmitBtn');
+    await expect(page.locator('#checkoutError')).toHaveText('Vui lòng chọn hình thức thanh toán');
+    expect(posted).toBeNull();
+
+    await page.check('#checkoutCash');
+    await page.click('#checkoutSubmitBtn');
+    await expect(page.locator('#checkoutOverlay')).toBeHidden();
+    expect(posted).toEqual({ paymentMethod: 'cash' });
+  });
+
+  test('checking out a booking whose deposit exceeds the total shows the refund amount', async ({ page }) => {
+    await mockReceptionShell(page);
+    await mockDeparturesBooking(page, {
+      id: 51, guestName: 'Khách Checkout B', phone: '0900000051', roomType: 'circle',
+      checkIn: '2099-06-01', checkOut: '2099-06-02', status: 'checked_in', depositAmount: 900000, services: [],
+    });
+    await page.route('**/api/bookings/51/check-out', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, roomDue: 0, servicesDue: 0, refundAmount: 300000, checkoutPaymentMethod: 'cash' }) })
+    );
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#departuresList')).toContainText('Khách Checkout B');
+    await page.locator('#departuresList button', { hasText: 'Check-out' }).click();
+
+    await expect(page.locator('#checkoutSummary')).toContainText('Cần hoàn khách: 300.000');
+    await expect(page.locator('#checkoutPaymentFields')).toBeVisible();
+  });
+
+  test('checking out a booking whose deposit exactly matches the total submits directly, no payment method needed', async ({ page }) => {
+    await mockReceptionShell(page);
+    await mockDeparturesBooking(page, {
+      id: 52, guestName: 'Khách Checkout C', phone: '0900000052', roomType: 'circle',
+      checkIn: '2099-06-01', checkOut: '2099-06-02', status: 'checked_in', depositAmount: 600000, services: [],
+    });
+    let posted = null;
+    await page.route('**/api/bookings/52/check-out', (route) => {
+      posted = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, roomDue: 0, servicesDue: 0, refundAmount: 0, checkoutPaymentMethod: null }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#departuresList')).toContainText('Khách Checkout C');
+    await page.locator('#departuresList button', { hasText: 'Check-out' }).click();
+
+    await expect(page.locator('#checkoutSummary')).toContainText('Cọc đã khớp đủ');
+    await expect(page.locator('#checkoutPaymentFields')).toBeHidden();
+
+    await page.click('#checkoutSubmitBtn');
+    await expect(page.locator('#checkoutOverlay')).toBeHidden();
+    expect(posted).toEqual({ paymentMethod: null });
+  });
+
+  test('a paid service item hides "Huỷ" for reception', async ({ page }) => {
+    await mockReceptionShell(page, { username: 'hienle', role: 'reception' });
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify([{
+          id: 60, guestName: 'Khách Dịch Vụ Paid', phone: '0900000060', roomType: 'circle', checkIn: '2099-06-01', checkOut: '2099-06-03', status: 'confirmed',
+          services: [{ id: 70, bookingId: 60, name: 'Cà phê', unitPrice: 30000, quantity: 1, amount: 30000, status: 'posted', paymentStatus: 'paid', paymentMethod: 'cash', createdBy: 'hienle', createdAt: '2026-08-28T00:00:00Z', voidedBy: null, voidedAt: null }],
+        }]),
+      })
+    );
+    await mockDeparturesBooking(page, { id: 999, guestName: 'unused', phone: '0', roomType: 'circle', checkIn: '2099-01-01', checkOut: '2099-01-02', status: 'checked_in', depositAmount: 0, services: [] });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Khách Dịch Vụ Paid');
+    await expect(page.locator('#upcomingConfirmedList .service-line button', { hasText: 'Huỷ' })).toHaveCount(0);
+  });
+
+  test('a paid service item still shows "Huỷ" for admin', async ({ page }) => {
+    await mockReceptionShell(page, { username: 'admin_a', role: 'admin' });
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify([{
+          id: 61, guestName: 'Khách Dịch Vụ Paid Admin', phone: '0900000061', roomType: 'circle', checkIn: '2099-06-01', checkOut: '2099-06-03', status: 'confirmed',
+          services: [{ id: 71, bookingId: 61, name: 'Cà phê', unitPrice: 30000, quantity: 1, amount: 30000, status: 'posted', paymentStatus: 'paid', paymentMethod: 'cash', createdBy: 'hienle', createdAt: '2026-08-28T00:00:00Z', voidedBy: null, voidedAt: null }],
+        }]),
+      })
+    );
+    await mockDeparturesBooking(page, { id: 999, guestName: 'unused', phone: '0', roomType: 'circle', checkIn: '2099-01-01', checkOut: '2099-01-02', status: 'checked_in', depositAmount: 0, services: [] });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Khách Dịch Vụ Paid Admin');
+    await expect(page.locator('#upcomingConfirmedList .service-line button', { hasText: 'Huỷ' })).toHaveCount(1);
+  });
+});
