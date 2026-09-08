@@ -24,7 +24,7 @@ const SAMPLE_BATCH_DETAIL = {
 function mockCommonRoutes(page, { role }) {
   return Promise.all([
     mockAuth(page, role),
-    page.route('**/api/asset-locations', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_LOCATIONS) })),
+    page.route('**/api/asset-locations**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_LOCATIONS) })),
     page.route('**/api/asset-inventory-batches?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_BATCHES) })),
     page.route('**/api/asset-inventory-lines/missing-devices', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })),
   ]);
@@ -66,7 +66,7 @@ test.describe('Kiểm kê tài sản (admin/asset-inventory.html)', () => {
   test('batch list paginates at 10 per page', async ({ page }) => {
     const manyBatches = Array.from({ length: 23 }, (_, i) => ({ id: i + 1, locationId: 1, label: `Đợt ${i + 1}`, status: 'draft', note: null, createdBy: 'admin_x', createdAt: '2026-09-08T00:00:00Z', closedBy: null, closedAt: null }));
     await mockAuth(page, 'admin');
-    await page.route('**/api/asset-locations', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_LOCATIONS) }));
+    await page.route('**/api/asset-locations**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_LOCATIONS) }));
     await page.route('**/api/asset-inventory-batches?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(manyBatches) }));
     await page.route('**/api/asset-inventory-lines/missing-devices', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
 
@@ -130,7 +130,7 @@ test.describe('Kiểm kê tài sản (admin/asset-inventory.html)', () => {
 
   test('"Thiết bị không tìm thấy" tab lists closed-batch individual lines with actual_quantity 0', async ({ page }) => {
     await mockAuth(page, 'observer');
-    await page.route('**/api/asset-locations', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_LOCATIONS) }));
+    await page.route('**/api/asset-locations**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_LOCATIONS) }));
     await page.route('**/api/asset-inventory-batches?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
     await page.route('**/api/asset-inventory-lines/missing-devices', (route) =>
       route.fulfill({
