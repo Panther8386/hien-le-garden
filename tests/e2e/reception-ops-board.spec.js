@@ -181,7 +181,8 @@ test.describe('Reception daily ops board', () => {
     await page.goto('/admin/reception.html');
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Lê Thị C');
     await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
-    await page.locator('.add-service-form select').first().selectOption('5');
+    await page.locator('.add-service-form select').nth(0).selectOption({ label: 'F&B & Hoạt động' });
+    await page.locator('.add-service-form select').nth(1).selectOption('catalog:5');
     await page.locator('.add-service-form input[type="number"]').nth(1).fill('2');
     await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
 
@@ -189,7 +190,7 @@ test.describe('Reception daily ops board', () => {
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Tổng dịch vụ: 60.000 đ');
   });
 
-  test('the paid checkbox toggles the payment-method checkbox and is sent on submit', async ({ page }) => {
+  test('the TM/CK payment checkboxes are mutually exclusive and the checked one is sent on submit', async ({ page }) => {
     await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
     await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 5, category: 'fnb_hoat_dong', subgroup: null, name: 'Cà phê', priceType: 'fixed', priceMin: 30000, priceMax: null, priceLabel: null, unitCapacity: '/ phần', note: '', roomTypeKey: null, displayOrder: 1, isActive: true }]) }));
     await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
@@ -217,17 +218,17 @@ test.describe('Reception daily ops board', () => {
     await page.goto('/admin/reception.html');
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Ngô Thị F');
     await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
-    await page.locator('.add-service-form select').first().selectOption('5');
+    await page.locator('.add-service-form select').nth(0).selectOption({ label: 'F&B & Hoạt động' });
+    await page.locator('.add-service-form select').nth(1).selectOption('catalog:5');
 
-    const paidCheckbox = page.locator('.add-service-form .checkbox-label', { hasText: 'Đã thanh toán' }).locator('input[type="checkbox"]');
-    const methodLabel = page.locator('.add-service-form .checkbox-label', { hasText: 'Tiền mặt' });
-    const methodCheckbox = methodLabel.locator('input[type="checkbox"]');
+    const tmCheckbox = page.locator('.add-service-form .checkbox-label', { hasText: 'Đã thanh toán TM' }).locator('input[type="checkbox"]');
+    const ckCheckbox = page.locator('.add-service-form .checkbox-label', { hasText: 'Đã thanh toán CK' }).locator('input[type="checkbox"]');
 
-    await expect(methodLabel).toBeHidden();
-    await paidCheckbox.check();
-    await expect(methodLabel).toBeVisible();
-    await expect(methodCheckbox).toBeChecked();
-    await methodCheckbox.uncheck();
+    await tmCheckbox.check();
+    await expect(tmCheckbox).toBeChecked();
+    await ckCheckbox.check();
+    await expect(ckCheckbox).toBeChecked();
+    await expect(tmCheckbox).not.toBeChecked();
 
     await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
 
@@ -259,13 +260,14 @@ test.describe('Reception daily ops board', () => {
     await page.goto('/admin/reception.html');
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Trải Nghiệm A');
     await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
-    await page.locator('.add-service-form select').first().selectOption('9');
+    await page.locator('.add-service-form select').nth(0).selectOption({ label: 'F&B & Hoạt động' });
+    await page.locator('.add-service-form select').nth(1).selectOption('catalog:9');
 
     const dateInput = page.locator('.add-service-form input[type="date"]');
     await expect(dateInput).toBeVisible();
     await dateInput.fill('2099-03-15');
 
-    const slotSelect = page.locator('.add-service-form select').nth(1);
+    const slotSelect = page.locator('.add-service-form select').nth(2);
     await expect(slotSelect).toContainText('19:00 — còn 12/30 chỗ');
   });
 
@@ -300,9 +302,10 @@ test.describe('Reception daily ops board', () => {
 
     await page.goto('/admin/reception.html');
     await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
-    await page.locator('.add-service-form select').first().selectOption('9');
+    await page.locator('.add-service-form select').nth(0).selectOption({ label: 'F&B & Hoạt động' });
+    await page.locator('.add-service-form select').nth(1).selectOption('catalog:9');
     await page.locator('.add-service-form input[type="date"]').fill('2099-03-15');
-    await page.locator('.add-service-form select').nth(1).selectOption('7');
+    await page.locator('.add-service-form select').nth(2).selectOption('7');
     await page.locator('.add-service-form input[type="number"]').nth(1).fill('10');
     await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
 
@@ -339,9 +342,10 @@ test.describe('Reception daily ops board', () => {
 
     await page.goto('/admin/reception.html');
     await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
-    await page.locator('.add-service-form select').first().selectOption('10');
+    await page.locator('.add-service-form select').nth(0).selectOption({ label: 'F&B & Hoạt động' });
+    await page.locator('.add-service-form select').nth(1).selectOption('catalog:10');
     await page.locator('.add-service-form input[type="date"]').fill('2099-03-15');
-    await page.locator('.add-service-form select').nth(1).selectOption('12');
+    await page.locator('.add-service-form select').nth(2).selectOption('12');
 
     await expect(page.locator('.add-service-form blockquote')).toContainText('Trẻ em dưới 12 tuổi cần người lớn đi kèm.');
 
@@ -379,13 +383,115 @@ test.describe('Reception daily ops board', () => {
 
     await page.goto('/admin/reception.html');
     await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
-    await page.locator('.add-service-form select').first().selectOption('9');
+    await page.locator('.add-service-form select').nth(0).selectOption({ label: 'F&B & Hoạt động' });
+    await page.locator('.add-service-form select').nth(1).selectOption('catalog:9');
     await page.locator('.add-service-form input[type="date"]').fill('2099-03-15');
-    await page.locator('.add-service-form select').nth(1).selectOption('7');
+    await page.locator('.add-service-form select').nth(2).selectOption('7');
 
     await expect(page.locator('.add-service-form blockquote')).toBeHidden();
     await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Trải Nghiệm D');
+  });
+
+  test('the Nhóm dropdown offers Menu Quán subgroups alongside the catalog categories, and picking a menu item auto-fills its fixed price with no scheduling fields', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 5, category: 'fnb_hoat_dong', subgroup: null, name: 'Cà phê', priceType: 'fixed', priceMin: 30000, priceMax: null, priceLabel: null, unitCapacity: '/ phần', note: '', roomTypeKey: null, displayOrder: 1, isActive: true }]),
+    }));
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        { id: 101, name: 'Gà nướng', category: 'mon_an', price: 368000, subgroup: 'MÓN GÀ & CÁ', unit: 'con', requiresPreorder: false, displayOrder: 0, isActive: true },
+        { id: 102, name: 'Mực hấp', category: 'mon_an', price: 220000, subgroup: 'HẢI SẢN', unit: 'kg', requiresPreorder: false, displayOrder: 1, isActive: true },
+        { id: 103, name: 'Món ngừng bán', category: 'mon_an', price: 50000, subgroup: 'MÓN GÀ & CÁ', unit: null, requiresPreorder: false, displayOrder: 2, isActive: false },
+      ]),
+    }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    let posted = null;
+    let serviceAdded = false;
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{
+          id: 40, guestName: 'Khách Menu Quán', phone: '0900000040', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed',
+          services: serviceAdded ? [{ id: 50, bookingId: 40, name: 'Gà nướng', unitPrice: 368000, quantity: 1, amount: 368000, status: 'posted', createdBy: 'hienle', createdAt: '2026-08-28T00:00:00Z', voidedBy: null, voidedAt: null }] : [],
+        }]),
+      })
+    );
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings/40/services', (route) => {
+      posted = route.request().postDataJSON();
+      serviceAdded = true;
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ id: 50, ok: true }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Khách Menu Quán');
+    await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
+
+    const groupSelect = page.locator('.add-service-form select').nth(0);
+    await expect(groupSelect).toContainText('F&B & Hoạt động');
+    await expect(groupSelect).toContainText('MÓN GÀ & CÁ');
+    await expect(groupSelect).toContainText('HẢI SẢN');
+
+    await groupSelect.selectOption({ label: 'MÓN GÀ & CÁ' });
+    const itemSelect = page.locator('.add-service-form select').nth(1);
+    await expect(itemSelect).toContainText('Gà nướng');
+    await expect(itemSelect).not.toContainText('Món ngừng bán'); // inactive item never listed
+    await itemSelect.selectOption('menu:101');
+
+    await expect(page.locator('.add-service-form input[type="number"]').nth(0)).toHaveValue('368000');
+    await expect(page.locator('.add-service-form input[type="date"]')).toBeHidden();
+
+    await page.locator('.add-service-form button', { hasText: 'Thêm' }).click();
+    expect(posted).toMatchObject({ dineInMenuItemId: 101, unitPrice: 368000, quantity: 1 });
+    expect(posted.serviceCatalogId).toBeUndefined();
+
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Gà nướng ×1');
+  });
+
+  test('changing the Nhóm back to a catalog category after picking a Menu Quán item resets the Món/Dịch vụ choice', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 5, category: 'fnb_hoat_dong', subgroup: null, name: 'Cà phê', priceType: 'fixed', priceMin: 30000, priceMax: null, priceLabel: null, unitCapacity: '/ phần', note: '', roomTypeKey: null, displayOrder: 1, isActive: true }]),
+    }));
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 101, name: 'Gà nướng', category: 'mon_an', price: 368000, subgroup: 'MÓN GÀ & CÁ', unit: 'con', requiresPreorder: false, displayOrder: 0, isActive: true }]),
+    }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([{ id: 41, guestName: 'Khách Đổi Nhóm', phone: '0900000041', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed', services: [] }]),
+    }));
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    await page.locator('#upcomingConfirmedList button', { hasText: '+ Thêm dịch vụ' }).click();
+
+    const groupSelect = page.locator('.add-service-form select').nth(0);
+    const itemSelect = page.locator('.add-service-form select').nth(1);
+    const priceInput = page.locator('.add-service-form input[type="number"]').nth(0);
+
+    await groupSelect.selectOption({ label: 'MÓN GÀ & CÁ' });
+    await itemSelect.selectOption('menu:101');
+    await expect(priceInput).toHaveValue('368000');
+
+    await groupSelect.selectOption({ label: 'F&B & Hoạt động' });
+    await expect(itemSelect).toContainText('Cà phê');
+    await expect(itemSelect).not.toContainText('Gà nướng');
+    await expect(priceInput).toHaveValue('');
   });
 
   test('voiding a service line strikes it through and drops it from the total', async ({ page }) => {
