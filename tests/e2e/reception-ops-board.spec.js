@@ -731,4 +731,95 @@ test.describe('Reception daily ops board', () => {
     await expect(legend.locator('.legend-swatch.room-occupied')).toHaveCount(1);
     await expect(legend.locator('.legend-swatch.room-used')).toHaveCount(1);
   });
+
+  test('adding a deposit renders it in the history list and updates the running total', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    let depositAdded = false;
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{
+          id: 50, guestName: 'Khách Cọc A', phone: '0900000050', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed',
+          depositAmount: depositAdded ? 200000 : 0,
+          deposits: depositAdded ? [{ id: 1, bookingId: 50, amount: 200000, paymentMethod: 'transfer', note: null, createdBy: 'hienle', createdAt: '2026-09-08T00:00:00Z' }] : [],
+          services: [],
+        }]),
+      })
+    );
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    let posted = null;
+    await page.route('**/api/bookings/50/deposits', (route) => {
+      posted = route.request().postDataJSON();
+      depositAdded = true;
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ ok: true, depositId: 1, financeTransactionId: 9, newTotal: 200000 }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Khách Cọc A');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Cọc: 0 đ');
+
+    await page.locator('#upcomingConfirmedList .add-deposit-form input[type="number"]').fill('200000');
+    await page.locator('#upcomingConfirmedList .add-deposit-form input[value="transfer"]').check();
+    await page.locator('#upcomingConfirmedList .add-deposit-form button', { hasText: 'Lưu cọc' }).click();
+
+    await expect.poll(() => posted).toMatchObject({ amount: 200000, paymentMethod: 'transfer' });
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Cọc: 200.000 đ');
+    await expect(page.locator('#upcomingConfirmedList .deposit-history')).toContainText('200.000 đ · Chuyển khoản');
+  });
+
+  test('the "Lưu cọc" button requires a payment method before submitting', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ id: 51, guestName: 'Khách Cọc B', phone: '0900000051', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed', depositAmount: 0, deposits: [], services: [] }]),
+      })
+    );
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    let postCalled = false;
+    await page.route('**/api/bookings/51/deposits', (route) => {
+      postCalled = true;
+      return route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ ok: true, depositId: 1, financeTransactionId: 9, newTotal: 100000 }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await page.locator('#upcomingConfirmedList .add-deposit-form input[type="number"]').fill('100000');
+    await page.locator('#upcomingConfirmedList .add-deposit-form button', { hasText: 'Lưu cọc' }).click();
+
+    await expect(page.locator('#opsError')).toContainText('Vui lòng chọn hình thức thanh toán');
+    expect(postCalled).toBe(false);
+  });
+
+  test('observer never sees the deposit history or the add-deposit form', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'quan_sat', role: 'observer' }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{ id: 52, guestName: 'Khách Cọc C', phone: '0900000052', roomType: 'circle', checkIn: '2099-05-01', checkOut: '2099-05-03', status: 'confirmed', depositAmount: 100000, deposits: [{ id: 1, bookingId: 52, amount: 100000, paymentMethod: 'cash', note: null, createdBy: 'hienle', createdAt: '2026-09-08T00:00:00Z' }], services: [] }]),
+      })
+    );
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Khách Cọc C');
+    await expect(page.locator('#upcomingConfirmedList .deposit-history')).toHaveCount(0);
+    await expect(page.locator('#upcomingConfirmedList .add-deposit-form')).toHaveCount(0);
+  });
 });
