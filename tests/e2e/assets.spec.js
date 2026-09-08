@@ -118,4 +118,33 @@ test.describe('Danh mục tài sản (admin/assets.html)', () => {
     await page.selectOption('#filterCategory', '1');
     await expect.poll(() => requestedUrl).toContain('categoryId=1');
   });
+
+  test('the Xoá button appears only with canDeleteAsset, independent of role, and DELETEs on confirm', async ({ page }) => {
+    await mockAuth(page, 'reception');
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'le_tan_a', role: 'reception', canDeleteAsset: true }) }));
+    await page.route('**/api/asset-categories', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_CATEGORIES) }));
+    await page.route('**/api/asset-locations', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_LOCATIONS) }));
+    await page.route('**/api/assets**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_ASSETS) }));
+
+    let deletedId = null;
+    await page.route('**/api/assets/1', (route) => {
+      if (route.request().method() === 'DELETE') {
+        deletedId = 1;
+        return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+      }
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(SAMPLE_ASSETS) });
+    });
+
+    await page.goto('/admin/assets.html');
+    const card = page.locator('.booking-card', { hasText: 'Điều hoà Daikin' });
+    await expect(card.locator('button', { hasText: 'Sửa' })).toHaveCount(0); // reception, no edit rights
+    await card.locator('button', { hasText: 'Xoá' }).click();
+
+    await expect(page.locator('#assetDeleteOverlay')).toBeVisible();
+    await expect(page.locator('#assetDeleteSummary')).toContainText('TS000001');
+    await page.click('#assetDeleteConfirmBtn');
+
+    await expect.poll(() => deletedId).toBe(1);
+    await expect(page.locator('#assetDeleteOverlay')).toBeHidden();
+  });
 });

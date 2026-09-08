@@ -125,4 +125,51 @@ test.describe('CRM user management', () => {
     await expect(checkbox).toBeChecked();
     await expect(page.locator('#listError')).toContainText('Không thể cấp quyền');
   });
+
+  test('the "Xoá tài sản" checkbox column exists only for an admin viewer', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'admin_a', role: 'admin' }) }));
+    await page.route('**/api/users', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, username: 'admin_a', role: 'admin', canManageRoomLayout: false, canAddFinanceTransaction: false, canDeleteAsset: false, createdAt: '2026-08-01T00:00:00Z' },
+          { id: 2, username: 'hienle', role: 'reception', canManageRoomLayout: false, canAddFinanceTransaction: false, canDeleteAsset: false, createdAt: '2026-08-20T00:00:00Z' },
+        ]),
+      })
+    );
+
+    await page.goto('/admin/users.html');
+    await expect(page.locator('#deleteAssetColumnHeader')).toBeVisible();
+    const targetRow = page.locator('#userTable tbody tr', { hasText: 'hienle' });
+    await expect(targetRow.locator('input[title="Xoá tài sản trong Danh mục tài sản"]')).toBeVisible();
+
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'quan_ly_a', role: 'manager' }) }));
+    await page.reload();
+    await expect(page.locator('#deleteAssetColumnHeader')).toBeHidden();
+  });
+
+  test('toggling "Xoá tài sản" PATCHes asset-delete-access', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'admin_a', role: 'admin' }) }));
+    await page.route('**/api/users', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, username: 'admin_a', role: 'admin', canManageRoomLayout: false, canAddFinanceTransaction: false, canDeleteAsset: false, createdAt: '2026-08-01T00:00:00Z' },
+          { id: 2, username: 'hienle', role: 'reception', canManageRoomLayout: false, canAddFinanceTransaction: false, canDeleteAsset: false, createdAt: '2026-08-20T00:00:00Z' },
+        ]),
+      })
+    );
+    let lastPayload = null;
+    await page.route('**/api/users/2/asset-delete-access', (route) => {
+      lastPayload = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/users.html');
+    const targetRow = page.locator('#userTable tbody tr', { hasText: 'hienle' });
+    await targetRow.locator('input[title="Xoá tài sản trong Danh mục tài sản"]').check();
+    await expect.poll(() => lastPayload).toEqual({ canDeleteAsset: true });
+  });
 });
