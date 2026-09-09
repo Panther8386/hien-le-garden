@@ -141,18 +141,68 @@ test.describe('Reception daily ops board', () => {
     await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
     await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
     await page.route('**/api/bookings?status=confirmed*', (route) =>
-      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 9, guestName: 'Trần Thị B', phone: '0900000009', roomType: 'circle', checkIn: '2099-02-01', checkOut: '2099-02-03', status: 'confirmed' }]) })
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 9, guestName: 'Trần Thị B', phone: '0900000009', roomType: 'circle', checkIn: '2099-02-01', checkOut: '2099-02-03', status: 'confirmed', depositAmount: 300000 }]) })
     );
     await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
     await page.route('**/api/rooms?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
-    await page.route('**/api/bookings/9/cancel', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, refundPercentApplied: 50, refundAmount: 150000 }) }));
+    await page.route('**/api/cancellation-policy', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 1, minDaysBeforeCheckin: 7, refundPercent: 100, label: null, displayOrder: 0 }, { id: 2, minDaysBeforeCheckin: 0, refundPercent: 0, label: null, displayOrder: 1 }]) })
+    );
+    let posted = null;
+    await page.route('**/api/bookings/9/cancel', (route) => {
+      posted = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, refundPercentApplied: 100, refundAmount: 300000 }) });
+    });
 
     await page.goto('/admin/reception.html');
     await expect(page.locator('#upcomingConfirmedList')).toContainText('Trần Thị B');
     await page.click('#upcomingConfirmedList >> text=Hủy đặt phòng');
 
-    await expect(page.locator('#opsError')).toContainText('50%');
-    await expect(page.locator('#opsError')).toContainText('150.000');
+    await expect(page.locator('#cancelOverlay')).toBeVisible();
+    await expect(page.locator('#cancelSummary')).toContainText('Hoàn cọc: 100%');
+    await expect(page.locator('#cancelPaymentFields')).toBeVisible();
+
+    await page.click('#cancelSubmitBtn');
+    await expect(page.locator('#cancelError')).toHaveText('Vui lòng chọn hình thức thanh toán');
+    expect(posted).toBeNull();
+
+    await page.check('#cancelCash');
+    await page.click('#cancelSubmitBtn');
+    await expect(page.locator('#cancelOverlay')).toBeHidden();
+    expect(posted).toEqual({ paymentMethod: 'cash' });
+  });
+
+  test('cancelling a booking under the 0%-refund tier submits directly, no payment method needed', async ({ page }) => {
+    const nearCheckIn = new Date();
+    nearCheckIn.setUTCDate(nearCheckIn.getUTCDate() + 1);
+    const checkInStr = nearCheckIn.toISOString().slice(0, 10);
+
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false }) }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 10, guestName: 'Lê Văn C', phone: '0900000010', roomType: 'circle', checkIn: checkInStr, checkOut: '2099-02-03', status: 'confirmed', depositAmount: 200000 }]) })
+    );
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms?**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/cancellation-policy', (route) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 1, minDaysBeforeCheckin: 7, refundPercent: 100, label: null, displayOrder: 0 }, { id: 2, minDaysBeforeCheckin: 0, refundPercent: 0, label: null, displayOrder: 1 }]) })
+    );
+    let posted = null;
+    await page.route('**/api/bookings/10/cancel', (route) => {
+      posted = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, refundPercentApplied: 0, refundAmount: 0 }) });
+    });
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Lê Văn C');
+    await page.click('#upcomingConfirmedList >> text=Hủy đặt phòng');
+
+    await expect(page.locator('#cancelSummary')).toContainText('Không hoàn cọc');
+    await expect(page.locator('#cancelPaymentFields')).toBeHidden();
+
+    await page.click('#cancelSubmitBtn');
+    await expect(page.locator('#cancelOverlay')).toBeHidden();
+    expect(posted).toEqual({ paymentMethod: null });
   });
 
   test('adding a service line updates the card total and item list', async ({ page }) => {
