@@ -172,4 +172,51 @@ test.describe('CRM user management', () => {
     await targetRow.locator('input[title="Xoá tài sản trong Danh mục tài sản"]').check();
     await expect.poll(() => lastPayload).toEqual({ canDeleteAsset: true });
   });
+
+  test('the "Xoá cọc" checkbox column exists only for an admin viewer', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'admin_a', role: 'admin' }) }));
+    await page.route('**/api/users', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, username: 'admin_a', role: 'admin', canManageRoomLayout: false, canAddFinanceTransaction: false, canDeleteAsset: false, canDeleteDeposit: false, createdAt: '2026-08-01T00:00:00Z' },
+          { id: 2, username: 'hienle', role: 'reception', canManageRoomLayout: false, canAddFinanceTransaction: false, canDeleteAsset: false, canDeleteDeposit: false, createdAt: '2026-08-20T00:00:00Z' },
+        ]),
+      })
+    );
+
+    await page.goto('/admin/users.html');
+    await expect(page.locator('#deleteDepositColumnHeader')).toBeVisible();
+    const targetRow = page.locator('#userTable tbody tr', { hasText: 'hienle' });
+    await expect(targetRow.locator('input[title="Xoá cọc trong lịch sử cọc của đặt phòng"]')).toBeVisible();
+
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'quan_ly_a', role: 'manager' }) }));
+    await page.reload();
+    await expect(page.locator('#deleteDepositColumnHeader')).toBeHidden();
+  });
+
+  test('toggling "Xoá cọc" PATCHes deposit-delete-access', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'admin_a', role: 'admin' }) }));
+    await page.route('**/api/users', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          { id: 1, username: 'admin_a', role: 'admin', canManageRoomLayout: false, canAddFinanceTransaction: false, canDeleteAsset: false, canDeleteDeposit: false, createdAt: '2026-08-01T00:00:00Z' },
+          { id: 2, username: 'hienle', role: 'reception', canManageRoomLayout: false, canAddFinanceTransaction: false, canDeleteAsset: false, canDeleteDeposit: false, createdAt: '2026-08-20T00:00:00Z' },
+        ]),
+      })
+    );
+    let lastPayload = null;
+    await page.route('**/api/users/2/deposit-delete-access', (route) => {
+      lastPayload = route.request().postDataJSON();
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    await page.goto('/admin/users.html');
+    const targetRow = page.locator('#userTable tbody tr', { hasText: 'hienle' });
+    await targetRow.locator('input[title="Xoá cọc trong lịch sử cọc của đặt phòng"]').check();
+    await expect.poll(() => lastPayload).toEqual({ canDeleteDeposit: true });
+  });
 });

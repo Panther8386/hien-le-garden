@@ -872,6 +872,67 @@ test.describe('Reception daily ops board', () => {
     await expect(page.locator('#upcomingConfirmedList .deposit-history')).toHaveCount(0);
     await expect(page.locator('#upcomingConfirmedList .add-deposit-form')).toHaveCount(0);
   });
+
+  test('deleting a deposit removes it from the history and reduces the total', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false, canDeleteDeposit: true }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    let deleted = false;
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{
+          id: 55, guestName: 'Khách Cọc D', phone: '0900000055', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed',
+          depositAmount: deleted ? 0 : 200000,
+          deposits: deleted ? [] : [{ id: 7, bookingId: 55, amount: 200000, paymentMethod: 'cash', note: null, createdBy: 'hienle', createdAt: '2026-09-09T00:00:00Z' }],
+          services: [],
+        }]),
+      })
+    );
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings/55/deposits/7', (route) => {
+      deleted = true;
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true }) });
+    });
+
+    page.on('dialog', (dialog) => dialog.accept());
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Cọc: 200.000 đ');
+    await page.locator('#upcomingConfirmedList .deposit-history button', { hasText: 'Xoá' }).click();
+
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Cọc: 0 đ');
+    await expect(page.locator('#upcomingConfirmedList .deposit-history')).toHaveCount(0);
+  });
+
+  test('the deposit delete button is hidden without the permission flag', async ({ page }) => {
+    await page.route('**/api/auth/me', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ username: 'hienle', role: 'reception', canManageRoomLayout: false, canDeleteDeposit: false }) }));
+    await page.route('**/api/catalog', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/dine-in-menu', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=pending', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/bookings?status=confirmed*', (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([{
+          id: 56, guestName: 'Khách Cọc E', phone: '0900000056', roomType: 'circle', checkIn: '2099-03-01', checkOut: '2099-03-03', status: 'confirmed',
+          depositAmount: 200000,
+          deposits: [{ id: 8, bookingId: 56, amount: 200000, paymentMethod: 'cash', note: null, createdBy: 'hienle', createdAt: '2026-09-09T00:00:00Z' }],
+          services: [],
+        }]),
+      })
+    );
+    await page.route('**/api/bookings?status=checked_in*', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+    await page.route('**/api/rooms', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+    await page.goto('/admin/reception.html');
+    await expect(page.locator('#upcomingConfirmedList')).toContainText('Cọc: 200.000 đ');
+    await expect(page.locator('#upcomingConfirmedList .deposit-history button', { hasText: 'Xoá' })).toHaveCount(0);
+  });
 });
 
 test.describe('Checkout settlement (Phase 2)', () => {
